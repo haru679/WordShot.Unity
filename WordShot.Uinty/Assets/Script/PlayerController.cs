@@ -1,75 +1,146 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
-    [Header("ˆÚ“®")]
-    [SerializeField] private float speed = 5.0f;// ˆÚ“®‘¬“xiƒ[ƒ‹ƒh’PˆÊ/•bj
+    [Header("ç§»å‹•")]
+    [SerializeField] private float speed = 5f;
 
-    [Header("ƒWƒƒƒ“ƒv")]
-    [Tooltip("ƒWƒƒƒ“ƒv‚Ì‚‚³iƒ[ƒ‹ƒh’PˆÊjB‰Ÿ‚·ƒ^ƒCƒ~ƒ“ƒO‚ÉŠÖŒW‚È‚­‚±‚Ì‚‚³‚Ü‚Å’µ‚Ô")]
-    [SerializeField] private float jumpHeight = 3.0f;// ƒWƒƒƒ“ƒv‚Ì‚‚³iƒ[ƒ‹ƒh’PˆÊj
+    [Header("é‡åŠ›")]
+    [Tooltip("é‡åŠ›ã®å¼·ã•ï¼ˆå˜ä½/ç§’Â²ï¼‰ã€‚å¤§ãã„ã»ã©é€Ÿãè½ä¸‹ã™ã‚‹")]
+    [SerializeField] private float gravity = 30f;
 
-    [Tooltip("Ú’n”»’è‚ÌˆÊ’uBƒvƒŒƒCƒ„[‚Ì‘«Œ³‚É‹ó‚ÌƒIƒuƒWƒFƒNƒg‚ğ’u‚¢‚ÄŠ„‚è“–‚Ä‚é")]
-    [SerializeField] private Transform groundCheck;// Ú’n”»’è‚ÌˆÊ’u
+    [Tooltip("è½ä¸‹é€Ÿåº¦ã®ä¸Šé™ï¼ˆå˜ä½/ç§’ï¼‰")]
+    [SerializeField] private float maxFallSpeed = 20f;
 
-    [Tooltip("Ú’n”»’è‚Ì‰~‚Ì”¼Œa")]
-    [SerializeField] private float groundCheckRadius = 0.1f;// Ú’n”»’è‚Ì‰~‚Ì”¼Œa
+    [Header("ã‚¸ãƒ£ãƒ³ãƒ—")]
+    [Tooltip("æœ€å¤§ã‚¸ãƒ£ãƒ³ãƒ—é«˜åº¦ï¼ˆé•·æŠ¼ã—ã—ãŸã¨ãã®é«˜ã•ï¼‰")]
+    [SerializeField] private float jumpHeight = 3f;
 
-    [Tooltip("’n–Ê‚Æ‚µ‚Äˆµ‚¤ƒŒƒCƒ„[")]
-    [SerializeField] private LayerMask groundLayer;// ’n–Ê‚Æ‚µ‚Äˆµ‚¤ƒŒƒCƒ„[
+    [Tooltip("æœ€ä½ã‚¸ãƒ£ãƒ³ãƒ—é«˜åº¦ï¼ˆã™ãé›¢ã—ã¦ã‚‚åˆ°é”ã™ã‚‹é«˜ã•ï¼‰ã€‚jumpHeight ä»¥ä¸‹ã«ã™ã‚‹ã“ã¨")]
+    [SerializeField] private float minJumpHeight = 1f;
 
-    [Tooltip("‰½‰ñ˜A‘±‚ÅƒWƒƒƒ“ƒv‚Å‚«‚é‚©")]
-    [SerializeField] private int maxJumpCount = 2;// Å‘åƒWƒƒƒ“ƒv‰ñ”
-    private int jumpCount = 0;// Œ»İ‚ÌƒWƒƒƒ“ƒv‰ñ”
+    [Tooltip("ä¸Šæ˜‡ä¸­ã®é€Ÿåº¦ï¼ˆå˜ä½/ç§’ï¼‰ã€‚ä¸Šæ˜‡ä¸­ã¯é‡åŠ›ãŒã‹ã‹ã‚‰ãªã„")]
+    [SerializeField] private float riseSpeed = 10f;
+
+    [Tooltip("ç©ºä¸­ã‚¸ãƒ£ãƒ³ãƒ—ã‚’å«ã‚ãŸæœ€å¤§ã‚¸ãƒ£ãƒ³ãƒ—å›æ•°ï¼ˆ2 ãªã‚‰ 2 æ®µã‚¸ãƒ£ãƒ³ãƒ—ï¼‰")]
+    [SerializeField] private int maxJumpCount = 2;
+
+    [Header("æ¥åœ°åˆ¤å®š")]
+    [Tooltip("æ¥åœ°åˆ¤å®šã®ä½ç½®ã€‚ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®è¶³å…ƒã«ç©ºã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ç½®ã„ã¦å‰²ã‚Šå½“ã¦ã‚‹")]
+    [SerializeField] private Transform groundCheck;
+
+    [Tooltip("æ¥åœ°åˆ¤å®šã®å††ã®åŠå¾„")]
+    [SerializeField] private float groundCheckRadius = 0.1f;
+
+    [Tooltip("åœ°é¢ã¨ã—ã¦æ‰±ã†ãƒ¬ã‚¤ãƒ¤ãƒ¼")]
+    [SerializeField] private LayerMask groundLayer;
 
     private Rigidbody2D rb;
+
+    private float moveInput;      
+    private bool jumpRequested;   // ã‚¸ãƒ£ãƒ³ãƒ—ã‚­ãƒ¼ãŒæŠ¼ã•ã‚ŒãŸï¼ˆFixedUpdate ã§æ¶ˆè²»ï¼‰
+    private bool jumpHeld;        // ã‚¸ãƒ£ãƒ³ãƒ—ã‚­ãƒ¼ã‚’æŠ¼ã—ç¶šã‘ã¦ã„ã‚‹
+    private int jumpCount;
+    private bool isRising;        // ä¸Šæ˜‡ä¸­ã‹
+    private bool leftGround;      // ã‚¸ãƒ£ãƒ³ãƒ—å¾Œã«ä¸€åº¦ã§ã‚‚åœ°é¢ã‚’é›¢ã‚ŒãŸã‹
+    private float jumpStartY;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+
+        // é‡åŠ›ã¯ Rigidbody2D ã§ã¯ãªãã“ã®ã‚¹ã‚¯ãƒªãƒ—ãƒˆã§ç®¡ç†ã™ã‚‹
+        rb.gravityScale = 0f;
+        rb.freezeRotation = true;
+    }
+
+    void OnValidate()
+    {
+        if (minJumpHeight > jumpHeight) minJumpHeight = jumpHeight;
+        if (minJumpHeight < 0f) minJumpHeight = 0f;
+        if (riseSpeed < 0.01f) riseSpeed = 0.01f;
     }
 
     void Update()
     {
-        // ¶‰EˆÚ“®iAD ƒL[j
-        if (Keyboard.current.aKey.isPressed)
+        // å…¥åŠ›ã®å–å¾—
+        moveInput = 0f;
+        if (Keyboard.current.aKey.isPressed) moveInput -= 1f;
+        if (Keyboard.current.dKey.isPressed) moveInput += 1f;
+
+        if (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.wKey.wasPressedThisFrame)
         {
-            transform.Translate(Vector3.left * speed * Time.deltaTime);
-        }
-        else if (Keyboard.current.dKey.isPressed)
-        {
-            transform.Translate(Vector3.right * speed * Time.deltaTime);
+            jumpRequested = true;
         }
 
-        // ƒWƒƒƒ“ƒviSpace ‚Ü‚½‚Í W ƒL[AÚ’n‚µ‚Ä‚¢‚é‚¾‚¯j
-        bool jumpPressed = Keyboard.current.spaceKey.wasPressedThisFrame
-                        || Keyboard.current.wKey.wasPressedThisFrame;
-
-        // ’n–Ê‚©‚çƒWƒƒƒ“ƒv‚µ‚Ä‚¢‚éê‡‰ñ”‚ğƒŠƒZƒbƒg
-        if ( IsGrounded())
-        {
-            jumpCount = 0;
-        }
-        // ‹ó’†ƒWƒƒƒ“ƒv
-        if (jumpPressed && jumpCount < maxJumpCount)
-        {
-            Jump();
-            jumpCount++;
-        }
-        //¡‚ÌƒWƒƒƒ“ƒv‚Ì‰ñ”‚ğƒfƒoƒbƒO•\¦
-        Debug.Log($"Jump Count: {jumpCount}");
+        jumpHeld = Keyboard.current.spaceKey.isPressed || Keyboard.current.wKey.isPressed;
     }
 
-    void Jump()
+    void FixedUpdate()
     {
-        // ‚‚³ h ‚É“’B‚·‚é‰‘¬“x: v = ã(2gh)
-        float gravity = Mathf.Abs(Physics2D.gravity.y * rb.gravityScale);
-        float jumpVelocity = Mathf.Sqrt(2f * gravity * jumpHeight);
+        float dt = Time.fixedDeltaTime;
+        bool grounded = IsGrounded();
 
-        // AddForce(Impulse) ‚ÍŒ»İ‚Ì‘¬“x‚Éãæ‚¹‚³‚ê‚é‚½‚ßA—‰º’†‚É‰Ÿ‚·‚Æ‚‚³‚ª‚¸‚ê‚éB
-        // ‘¬“x‚ğ’¼ÚƒZƒbƒg‚·‚é‚±‚Æ‚ÅA‰Ÿ‚·ƒ^ƒCƒ~ƒ“ƒO‚ÉŠÖŒW‚È‚­‚‚³‚ªˆê’è‚É‚È‚éB
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpVelocity);
+        // åœ°é¢ã‚’é›¢ã‚ŒãŸã“ã¨ã‚’è¨˜éŒ²
+        if (!grounded)
+        {
+            leftGround = true;
+        }
+
+        // åœ°é¢ã«ç€åœ°ã—ãŸã‚‰ã‚¸ãƒ£ãƒ³ãƒ—å›æ•°ã‚’ãƒªã‚»ãƒƒãƒˆï¼ˆã‚¸ãƒ£ãƒ³ãƒ—ç›´å¾Œã®èª¤ãƒªã‚»ãƒƒãƒˆã‚’é˜²ããŸã‚ leftGround ã‚’ç¢ºèªï¼‰
+        if (grounded && !isRising && leftGround && rb.linearVelocity.y <= 0.01f)
+        {
+            jumpCount = 0;
+            leftGround = false;
+        }
+
+        // ã‚¸ãƒ£ãƒ³ãƒ—é–‹å§‹
+        if (jumpRequested && jumpCount < maxJumpCount)
+        {
+            StartJump();
+        }
+        jumpRequested = false;
+
+        float vy = rb.linearVelocity.y;
+
+        if (isRising)
+        {
+            float height = rb.position.y - jumpStartY;
+
+            bool reachedMax = height >= jumpHeight;
+            bool releasedAfterMin = !jumpHeld && height >= minJumpHeight;
+
+            if (reachedMax || releasedAfterMin)
+            {
+                // ä¸Šæ˜‡çµ‚äº†ã€‚ã“ã®æ™‚ç‚¹ã‹ã‚‰é‡åŠ›ãŒã‹ã‹ã‚‹
+                isRising = false;
+                vy = 0f;
+            }
+            else
+            {
+                // ä¸Šæ˜‡ä¸­ã¯é‡åŠ›ãªã—ã§ä¸€å®šé€Ÿåº¦
+                vy = riseSpeed;
+            }
+        }
+
+        if (!isRising)
+        {
+            // é‡åŠ›ã‚’åŠ ãˆã‚‹ï¼ˆè½ä¸‹é€Ÿåº¦ã«ä¸Šé™ã‚ã‚Šï¼‰
+            vy -= gravity * dt;
+            vy = Mathf.Max(vy, -maxFallSpeed);
+        }
+
+        rb.linearVelocity = new Vector2(moveInput * speed, vy);
+    }
+
+    void StartJump()
+    {
+        jumpCount++;
+        jumpStartY = rb.position.y;
+        isRising = true;
+        leftGround = false;
     }
 
     bool IsGrounded()
@@ -79,7 +150,7 @@ public class PlayerController : MonoBehaviour
         return Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer) != null;
     }
 
-    // Scene ƒrƒ…[‚ÅÚ’n”»’è‚Ì”ÍˆÍ‚ğŠm”F‚Å‚«‚é‚æ‚¤‚É•\¦
+    // Scene ãƒ“ãƒ¥ãƒ¼ã§æ¥åœ°åˆ¤å®šã®ç¯„å›²ã‚’ç¢ºèªã§ãã‚‹ã‚ˆã†ã«è¡¨ç¤º
     void OnDrawGizmosSelected()
     {
         if (groundCheck == null) return;
