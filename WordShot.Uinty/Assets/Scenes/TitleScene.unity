@@ -634,7 +634,7 @@ GameObject:
   - component: {fileID: 1151580712}
   - component: {fileID: 1151580714}
   m_Layer: 0
-  m_Name: StageButtonTemplate
+  m_Name: StartButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -936,7 +936,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Stage
+  m_text: Start
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1271,8 +1271,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 501e344173b3eae4ead305b3bed2ab48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WordShot.Flow.TitleScreen
-  stageButtonTemplate: {fileID: 1151580714}
-  stageButtonParent: {fileID: 2083395961}
+  startButton: {fileID: 1151580714}
   quitButton: {fileID: 1531569939}
   optionsButton: {fileID: 1407972541}
   soundSettings: {fileID: 156899559}
@@ -1516,7 +1515,7 @@ GameObject:
   - component: {fileID: 2083395963}
   - component: {fileID: 2083395962}
   m_Layer: 0
-  m_Name: StageButtons
+  m_Name: Buttons
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1535,8 +1534,8 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1151580711}
-  - {fileID: 1531569942}
   - {fileID: 1407972544}
+  - {fileID: 1531569942}
   m_Father: {fileID: 1378151253}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}

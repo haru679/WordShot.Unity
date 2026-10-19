@@ -135,8 +135,11 @@ namespace WordShot.Sounds.EditorTools
                 return;
             }
 
-            var list = (Transform)serialized.FindProperty("stageButtonParent").objectReferenceValue;
+            // Quit ボタンと同じ並びの、Quit のすぐ上に置く
+            var quit = (Button)serialized.FindProperty("quitButton").objectReferenceValue;
+            Transform list = quit.transform.parent;
             Button options = EditorUIFactory.CreateButton(list, "OptionsButton", "Options");
+            options.transform.SetSiblingIndex(quit.transform.GetSiblingIndex());
 
             // 一番手前に描くため、Canvas の最後の子にする。最初は閉じておく
             Transform canvas = list.GetComponentInParent<Canvas>().transform;

@@ -1,13 +1,12 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using WordShot.Sounds;
+using WordShot.Stages;
 
 namespace WordShot.Flow
 {
@@ -45,6 +44,12 @@ namespace WordShot.Flow
         /// <summary>今遊んでいる（最後に遊んだ）ステージのシーン名</summary>
         public string CurrentStage { get; private set; }
 
+        /// <summary>
+        /// 今遊んでいるステージのデータ。ステージセレクトから入ったときだけ入る
+        /// （ステージのシーンを直接再生したときは null で、クリアしても解放は記録されない）
+        /// </summary>
+        public StageData CurrentStageData { get; private set; }
+
         /// <summary>直前のステージの結果。まだ遊んでいなければ null</summary>
         public StageResult LastResult { get; private set; }
 
@@ -64,7 +69,7 @@ namespace WordShot.Flow
 
         /// <summary>
         /// ステージをクリアしたとき（引数はステージのシーン名）。
-        /// 次のステージの解放は、ステージセレクトを作るときにここにつなぐ。
+        /// 解放の記録（StageProgress）は GameFlow が行うので、ここは演出などを足したいとき用。
         /// </summary>
         public event Action<string> StageCleared;
 
@@ -104,7 +109,18 @@ namespace WordShot.Flow
             LoadScene(hasStageSelect ? SceneNames.StageSelect : SceneNames.Title, FadeDuration);
         }
 
-        public void StartStage(string stageScene) => LoadScene(stageScene, FadeDuration);
+        /// <summary>ステージセレクトの扉から呼ぶ。クリアしたときに、このステージの解放が記録される</summary>
+        public void StartStage(StageData stage)
+        {
+            if (stage == null) return;
+            if (LoadScene(stage.SceneName, FadeDuration)) CurrentStageData = stage;
+        }
+
+        /// <summary>シーン名を指定してステージへ（開発用。クリアしても解放は記録されない）</summary>
+        public void StartStage(string stageScene)
+        {
+            if (LoadScene(stageScene, FadeDuration)) CurrentStageData = null;
+        }
 
         /// <summary>今のステージを最初からやり直す</summary>
         public void RetryStage()
@@ -145,6 +161,7 @@ namespace WordShot.Flow
             if (isCleared)
             {
                 SetState(PlayState.Cleared);
+                StageProgress.MarkCleared(CurrentStageData);   // これで次のステージが解放される
                 StageCleared?.Invoke(CurrentStage);
                 clearWait = StartCoroutine(GoToStageSelectAfter(ClearWaitTime));
             }
@@ -213,37 +230,23 @@ namespace WordShot.Flow
 #endif
         }
 
-        // ---- ステージの一覧 ----
-
-        /// <summary>
-        /// ビルド設定に登録されているシーンのうち、ステージとして遊べるものの一覧。
-        /// 新しいステージは、ビルド設定のシーン一覧に追加するだけでここに出てくる。
-        /// </summary>
-        public static List<string> GetStageScenes()
-        {
-            var stages = new List<string>();
-            for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
-            {
-                string sceneName = Path.GetFileNameWithoutExtension(SceneUtility.GetScenePathByBuildIndex(i));
-                if (IsStage(sceneName)) stages.Add(sceneName);
-            }
-            return stages;
-        }
-
+        /// <summary>ステージとして扱うシーンか（タイトル・リザルト・ステージセレクト以外）</summary>
         public static bool IsStage(string sceneName) => !SceneNames.NonStageScenes.Contains(sceneName);
 
         // ---- 切り替えの中身 ----
 
-        void LoadScene(string sceneName, float fadeDuration)
+        // 切り替えを始められたら true
+        bool LoadScene(string sceneName, float fadeDuration)
         {
-            if (IsTransitioning) return;
+            if (IsTransitioning) return false;
 
             if (!Application.CanStreamedLevelBeLoaded(sceneName))
             {
                 Debug.LogError($"[GameFlow] シーン「{sceneName}」がビルド設定に登録されていません");
-                return;
+                return false;
             }
             StartCoroutine(Transition(sceneName, fadeDuration));
+            return true;
         }
 
         IEnumerator Transition(string sceneName, float fadeDuration)
@@ -289,6 +292,9 @@ namespace WordShot.Flow
             {
                 CurrentStage = scene.name;
                 stageStartTime = Time.time;
+
+                // 扉から入ったステージと違うシーンなら（直接再生・開発用キーなど）、ステージのデータは持たない
+                if (CurrentStageData != null && CurrentStageData.SceneName != scene.name) CurrentStageData = null;
             }
         }
 

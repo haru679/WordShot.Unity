@@ -26,6 +26,7 @@ namespace WordShot.Flow.EditorTools
         const string SceneFolder = "Assets/Scenes";
         public static readonly string TitlePath = $"{SceneFolder}/{SceneNames.Title}.unity";
         static readonly string ResultPath = $"{SceneFolder}/{SceneNames.Result}.unity";
+        public static readonly string StageSelectPath = $"{SceneFolder}/{SceneNames.StageSelect}.unity";
 
         // 今あるステージ。新しいステージはビルド設定のシーン一覧に追加すればよい
         static readonly string[] StagePaths =
@@ -71,14 +72,13 @@ namespace WordShot.Flow.EditorTools
             Transform canvas = EditorUIFactory.CreateCanvas();
 
             EditorUIFactory.CreateText(canvas, "TitleText", "WordShot", 120, new Vector2(0, 280), new Vector2(1200, 160));
-            Transform list = EditorUIFactory.CreateVerticalList(canvas, "StageButtons", new Vector2(0, 120));
-            Button template = EditorUIFactory.CreateButton(list, "StageButtonTemplate", "Stage");
+            Transform list = EditorUIFactory.CreateVerticalList(canvas, "Buttons", new Vector2(0, 120));
+            Button start = EditorUIFactory.CreateButton(list, "StartButton", "Start");
             Button quit = EditorUIFactory.CreateButton(list, "QuitButton", "Quit");
 
             var screen = new GameObject(nameof(TitleScreen)).AddComponent<TitleScreen>();
             EditorUIFactory.SetReferences(screen,
-                ("stageButtonTemplate", template),
-                ("stageButtonParent", list),
+                ("startButton", start),
                 ("quitButton", quit));
 
             EditorSceneManager.SaveScene(scene, TitlePath);
@@ -108,7 +108,7 @@ namespace WordShot.Flow.EditorTools
         }
 
         // タイトルを先頭にする（ゲーム起動時は先頭のシーンから始まる）。今ある登録は消さない
-        static void RegisterBuildScenes()
+        public static void RegisterBuildScenes()
         {
             var scenes = new List<EditorBuildSettingsScene>();
 
@@ -120,6 +120,7 @@ namespace WordShot.Flow.EditorTools
 
             Add(TitlePath);
             Add(ResultPath);
+            Add(StageSelectPath);
             foreach (EditorBuildSettingsScene existing in EditorBuildSettings.scenes)
             {
                 if (scenes.All(s => s.path != existing.path)) scenes.Add(existing);
