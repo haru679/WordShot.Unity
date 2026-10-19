@@ -56,8 +56,10 @@ public class PlayerController : MonoBehaviour
         rb.freezeRotation = true;
     }
 
+    // インスペクターで値を変更したときに呼ばれる
     void OnValidate()
     {
+        // 値の制約をかける(最低高度が最大高度を超えないようにする)
         if (minJumpHeight > jumpHeight) minJumpHeight = jumpHeight;
         if (minJumpHeight < 0f) minJumpHeight = 0f;
         if (riseSpeed < 0.01f) riseSpeed = 0.01f;
@@ -70,14 +72,16 @@ public class PlayerController : MonoBehaviour
         if (Keyboard.current.aKey.isPressed) moveInput -= 1f;
         if (Keyboard.current.dKey.isPressed) moveInput += 1f;
 
+        // ジャンプ入力の取得
         if (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.wKey.wasPressedThisFrame)
         {
             jumpRequested = true;
         }
-
+        // ジャンプキーを押し続けているかどうか
         jumpHeld = Keyboard.current.spaceKey.isPressed || Keyboard.current.wKey.isPressed;
     }
 
+    // FixedUpdate は物理演算の更新タイミングで呼ばれる
     void FixedUpdate()
     {
         float dt = Time.fixedDeltaTime;
@@ -105,6 +109,7 @@ public class PlayerController : MonoBehaviour
 
         float vy = rb.linearVelocity.y;
 
+        // 上昇中の処理
         if (isRising)
         {
             float height = rb.position.y - jumpStartY;
@@ -125,6 +130,7 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+        // 上昇中でない場合は重力を加える
         if (!isRising)
         {
             // 重力を加える（落下速度に上限あり）
@@ -135,6 +141,7 @@ public class PlayerController : MonoBehaviour
         rb.linearVelocity = new Vector2(moveInput * speed, vy);
     }
 
+    // ジャンプ開始処理
     void StartJump()
     {
         jumpCount++;
@@ -143,6 +150,7 @@ public class PlayerController : MonoBehaviour
         leftGround = false;
     }
 
+    // 接地判定
     bool IsGrounded()
     {
         if (groundCheck == null) return false;
