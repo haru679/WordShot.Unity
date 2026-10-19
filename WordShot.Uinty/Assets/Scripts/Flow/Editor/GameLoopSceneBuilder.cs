@@ -27,6 +27,7 @@ namespace WordShot.Flow.EditorTools
         public static readonly string TitlePath = $"{SceneFolder}/{SceneNames.Title}.unity";
         static readonly string ResultPath = $"{SceneFolder}/{SceneNames.Result}.unity";
         public static readonly string StageSelectPath = $"{SceneFolder}/{SceneNames.StageSelect}.unity";
+        public static readonly string LoadingPath = $"{SceneFolder}/{SceneNames.Loading}.unity";
 
         // 今あるステージ。新しいステージはビルド設定のシーン一覧に追加すればよい
         static readonly string[] StagePaths =
@@ -121,6 +122,7 @@ namespace WordShot.Flow.EditorTools
             Add(TitlePath);
             Add(ResultPath);
             Add(StageSelectPath);
+            Add(LoadingPath);
             foreach (EditorBuildSettingsScene existing in EditorBuildSettings.scenes)
             {
                 if (scenes.All(s => s.path != existing.path)) scenes.Add(existing);

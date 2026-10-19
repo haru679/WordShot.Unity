@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -36,8 +37,12 @@ namespace WordShot.Flow
     public class GameFlow : MonoBehaviour
     {
         const float FadeDuration = 0.3f;
-        const float RetryFadeDuration = 0.15f;   // やり直しは素早く
+        const float RetryFadeDuration = 0.15f;   // やり直しは素早く（ロード画面も出さない）
         const float ClearWaitTime = 2.5f;        // クリア表示を見せてから戻るまでの時間
+
+        const float MinLoadingTime = 1f;          // 読み込みが速くても、ロード画面はこの秒数は見せる
+        const float LoadingFadeDuration = 0.2f;   // ロード画面の出入りの暗転
+        const float FullGaugeHoldTime = 0.15f;    // ゲージが満タンになったところを少し見せる
 
         public static GameFlow Instance { get; private set; }
 
@@ -76,6 +81,7 @@ namespace WordShot.Flow
         CanvasGroup fade;
         float stageStartTime;
         Coroutine clearWait;
+        readonly List<ILoadingTask> pendingTasks = new List<ILoadingTask>();
 
         // 最初のシーンが読み込まれる前に、自動で1つ作る。
         // このプロジェクトはドメインのリロードが無効なので、static の値は再生ごとに必ず上書きする。
@@ -100,29 +106,29 @@ namespace WordShot.Flow
 
         // ---- シーンの切り替え ----
 
-        public void GoToTitle() => LoadScene(SceneNames.Title, FadeDuration);
+        public void GoToTitle() => LoadScene(SceneNames.Title, FadeDuration, useLoadingScreen: true);
 
         /// <summary>ステージセレクトへ。まだステージセレクトのシーンがなければタイトルへ</summary>
         public void GoToStageSelect()
         {
             bool hasStageSelect = Application.CanStreamedLevelBeLoaded(SceneNames.StageSelect);
-            LoadScene(hasStageSelect ? SceneNames.StageSelect : SceneNames.Title, FadeDuration);
+            LoadScene(hasStageSelect ? SceneNames.StageSelect : SceneNames.Title, FadeDuration, useLoadingScreen: true);
         }
 
         /// <summary>ステージセレクトの扉から呼ぶ。クリアしたときに、このステージの解放が記録される</summary>
         public void StartStage(StageData stage)
         {
             if (stage == null) return;
-            if (LoadScene(stage.SceneName, FadeDuration)) CurrentStageData = stage;
+            if (LoadScene(stage.SceneName, FadeDuration, useLoadingScreen: true)) CurrentStageData = stage;
         }
 
         /// <summary>シーン名を指定してステージへ（開発用。クリアしても解放は記録されない）</summary>
         public void StartStage(string stageScene)
         {
-            if (LoadScene(stageScene, FadeDuration)) CurrentStageData = null;
+            if (LoadScene(stageScene, FadeDuration, useLoadingScreen: true)) CurrentStageData = null;
         }
 
-        /// <summary>今のステージを最初からやり直す</summary>
+        /// <summary>今のステージを最初からやり直す。テンポを崩さないよう、ロード画面は出さない</summary>
         public void RetryStage()
         {
             if (string.IsNullOrEmpty(CurrentStage))
@@ -130,7 +136,16 @@ namespace WordShot.Flow
                 Debug.LogWarning("[GameFlow] まだステージを遊んでいないので、やり直せません");
                 return;
             }
-            LoadScene(CurrentStage, RetryFadeDuration);
+            LoadScene(CurrentStage, RetryFadeDuration, useLoadingScreen: false);
+        }
+
+        /// <summary>
+        /// 次のシーン切り替えのロード画面で、一緒に読み込むものを登録する（切り替えを始める前に呼ぶ）。
+        /// ロード画面を出さない切り替え（やり直し）のときは、ロード画面なしで読み込みを待つ。
+        /// </summary>
+        public void AddLoadingTask(ILoadingTask task)
+        {
+            if (task != null) pendingTasks.Add(task);
         }
 
         public void QuitGame()
@@ -236,7 +251,7 @@ namespace WordShot.Flow
         // ---- 切り替えの中身 ----
 
         // 切り替えを始められたら true
-        bool LoadScene(string sceneName, float fadeDuration)
+        bool LoadScene(string sceneName, float fadeDuration, bool useLoadingScreen)
         {
             if (IsTransitioning) return false;
 
@@ -245,21 +260,100 @@ namespace WordShot.Flow
                 Debug.LogError($"[GameFlow] シーン「{sceneName}」がビルド設定に登録されていません");
                 return false;
             }
-            StartCoroutine(Transition(sceneName, fadeDuration));
+            // ロード画面のシーンがまだなければ、ロード画面なしで切り替える
+            bool hasLoadingScene = Application.CanStreamedLevelBeLoaded(SceneNames.Loading);
+            StartCoroutine(useLoadingScreen && hasLoadingScene
+                ? TransitionWithLoadingScreen(sceneName, fadeDuration)
+                : Transition(sceneName, fadeDuration));
             return true;
         }
 
+        // ロード画面を出さない切り替え（やり直し）
         IEnumerator Transition(string sceneName, float fadeDuration)
         {
             IsTransitioning = true;
             fade.blocksRaycasts = true;   // 暗転中はボタンを押せないようにする
 
             yield return Fade(0f, 1f, fadeDuration);
+            List<ILoadingTask> tasks = TakePendingTasks();
+            foreach (ILoadingTask task in tasks) task.Begin();
+            yield return new WaitUntil(() => tasks.All(task => task.IsDone));
             yield return SceneManager.LoadSceneAsync(sceneName);
             yield return Fade(1f, 0f, fadeDuration);
 
             fade.blocksRaycasts = false;
             IsTransitioning = false;
+        }
+
+        // 暗転 → ロード画面（ゲージ）→ 暗転 → 次のシーン
+        IEnumerator TransitionWithLoadingScreen(string sceneName, float fadeDuration)
+        {
+            IsTransitioning = true;
+            fade.blocksRaycasts = true;
+
+            yield return Fade(0f, 1f, fadeDuration);
+            yield return SceneManager.LoadSceneAsync(SceneNames.Loading);   // 軽いシーンなので一瞬で終わる
+            var screen = FindAnyObjectByType<LoadingScreen>();
+            yield return Fade(1f, 0f, LoadingFadeDuration);
+
+            float startTime = Time.unscaledTime;
+            float shown = 0f;   // ゲージに表示している値（減らない）
+            List<ILoadingTask> tasks = TakePendingTasks();
+            int stepCount = tasks.Count + 1;   // 登録された読み込み＋シーンの読み込み
+
+            void UpdateGauge(float realProgress)
+            {
+                // 実際の進み具合と「経過時間 ÷ 最低時間」の小さいほうを出す。速く読めても1秒かけて溜まる
+                float timeProgress = (Time.unscaledTime - startTime) / MinLoadingTime;
+                shown = Mathf.Max(shown, Mathf.Min(realProgress, timeProgress));
+                if (screen != null) screen.SetProgress(shown);
+            }
+
+            // 先に、登録された読み込みを終わらせる
+            // （シーンの読み込みを止めて待っている間は、ほかの読み込みが進まないことがあるため）
+            for (int i = 0; i < tasks.Count; i++)
+            {
+                ILoadingTask task = tasks[i];
+                task.Begin();
+                while (!task.IsDone)
+                {
+                    UpdateGauge((i + task.Progress) / stepCount);
+                    yield return null;
+                }
+            }
+
+            // シーンを裏で読み込む。読み終わっても、こちらが許可するまで切り替わらない
+            AsyncOperation operation = SceneManager.LoadSceneAsync(sceneName);
+            operation.allowSceneActivation = false;
+
+            while (true)
+            {
+                // allowSceneActivation が false の間、progress は 0.9 で止まる（＝読み込み完了）
+                float sceneProgress = Mathf.Clamp01(operation.progress / 0.9f);
+                UpdateGauge((tasks.Count + sceneProgress) / stepCount);
+
+                bool loaded = operation.progress >= 0.9f;
+                bool shownLongEnough = Time.unscaledTime - startTime >= MinLoadingTime;
+                if (loaded && shownLongEnough && shown >= 1f) break;
+                yield return null;
+            }
+
+            yield return new WaitForSecondsRealtime(FullGaugeHoldTime);
+            yield return Fade(0f, 1f, LoadingFadeDuration);
+            operation.allowSceneActivation = true;
+            yield return operation;
+            yield return Fade(1f, 0f, fadeDuration);
+
+            fade.blocksRaycasts = false;
+            IsTransitioning = false;
+        }
+
+        // 登録された読み込みを取り出す（同じものを2回読まないよう、登録は空にする）
+        List<ILoadingTask> TakePendingTasks()
+        {
+            var tasks = new List<ILoadingTask>(pendingTasks);
+            pendingTasks.Clear();
+            return tasks;
         }
 
         IEnumerator Fade(float from, float to, float duration)

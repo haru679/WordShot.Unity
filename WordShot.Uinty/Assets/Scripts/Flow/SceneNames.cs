@@ -9,15 +9,20 @@ namespace WordShot.Flow
         public const string Result = "ResultScene";
 
         /// <summary>
-        /// フィールドを歩いてドアからステージを選ぶシーン（これから作る）。
-        /// ビルド設定に入るまでは、代わりにタイトルへ戻る。
+        /// フィールドを歩いてドアからステージを選ぶシーン。
+        /// ビルド設定に入っていなければ、代わりにタイトルへ戻る。
         /// </summary>
         public const string StageSelect = "StageSelectScene";
 
         /// <summary>
-        /// ステージとして扱わないシーン。
-        /// ビルド設定に入っていても、タイトル画面のステージ一覧には出さない。
+        /// シーンを切り替える間に挟むロード画面。
+        /// ビルド設定に入っていなければ、ロード画面なしで切り替える。
         /// </summary>
-        public static readonly string[] NonStageScenes = { Title, Result, StageSelect, "SampleScene" };
+        public const string Loading = "LoadingScene";
+
+        /// <summary>
+        /// ステージとして扱わないシーン。
+        /// </summary>
+        public static readonly string[] NonStageScenes = { Title, Result, StageSelect, Loading, "SampleScene" };
     }
 }
