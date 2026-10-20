@@ -37,15 +37,28 @@ public class PlayerController : MonoBehaviour
     [Tooltip("地面として扱うレイヤー")]
     [SerializeField] private LayerMask groundLayer;
 
+    [Header("ダメージ")]
+    [Tooltip("最大HP（現在はデバッグ表示のみ）")]
+    [SerializeField] private int maxHp = 3;
+
+    [Tooltip("敵に当たったときに受けるダメージ量")]
+    [SerializeField] private int contactDamage = 1;
+
+    [Tooltip("ダメージを受けた後の無敵時間（秒）")]
+    [SerializeField] private float invincibleDuration = 1f;
+
     private Rigidbody2D rb;
 
-    private float moveInput;      
+    private float moveInput;
     private bool jumpRequested;   // ジャンプキーが押された（FixedUpdate で消費）
     private bool jumpHeld;        // ジャンプキーを押し続けている
     private int jumpCount;
     private bool isRising;        // 上昇中か
     private bool leftGround;      // ジャンプ後に一度でも地面を離れたか
     private float jumpStartY;
+
+    private int currentHp;
+    private float invincibleEndTime = -1f;   // この時刻までは無敵
 
     void Awake()
     {
@@ -54,6 +67,8 @@ public class PlayerController : MonoBehaviour
         // 重力は Rigidbody2D ではなくこのスクリプトで管理する
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
+
+        currentHp = maxHp;
     }
 
     // インスペクターで値を変更したときに呼ばれる
@@ -63,6 +78,11 @@ public class PlayerController : MonoBehaviour
         if (minJumpHeight > jumpHeight) minJumpHeight = jumpHeight;
         if (minJumpHeight < 0f) minJumpHeight = 0f;
         if (riseSpeed < 0.01f) riseSpeed = 0.01f;
+
+        // ダメージ関連の制約
+        if (maxHp < 1) maxHp = 1;
+        if (contactDamage < 0) contactDamage = 0;
+        if (invincibleDuration < 0f) invincibleDuration = 0f;
     }
 
     void Update()
@@ -156,6 +176,35 @@ public class PlayerController : MonoBehaviour
         if (groundCheck == null) return false;
 
         return Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer) != null;
+    }
+
+    // ==================================================================== 敵との当たり判定 ============================================================//
+
+    // 物理コリジョン（Collider 同士の衝突）
+    void OnCollisionEnter2D(Collision2D collision) => TryTakeDamage(collision.gameObject);
+    void OnCollisionStay2D(Collision2D collision) => TryTakeDamage(collision.gameObject);
+
+    // トリガー（Is Trigger にした Collider との接触）
+    void OnTriggerEnter2D(Collider2D other) => TryTakeDamage(other.gameObject);
+    void OnTriggerStay2D(Collider2D other) => TryTakeDamage(other.gameObject);
+
+    // Enemy タグのオブジェクトに触れていて、無敵中でなければダメージを受ける
+    void TryTakeDamage(GameObject other)
+    {
+        if (!other.CompareTag("Enemy")) return;
+        if (Time.time < invincibleEndTime) return;   // 無敵中
+        if (currentHp <= 0) return;                  // 既にHPが0
+
+        currentHp -= contactDamage;
+        invincibleEndTime = Time.time + invincibleDuration;
+
+        // HP表示はUI実装までデバッグログのみ
+        Debug.Log($"敵に当たった！ ダメージ: {contactDamage} / HP: {currentHp}/{maxHp}");//todo:ここにUIの更新処理を追加
+
+        if (currentHp <= 0)
+        {
+            Debug.Log("HPが0になった");
+        }
     }
 
     // Scene ビューで接地判定の範囲を確認できるように表示
