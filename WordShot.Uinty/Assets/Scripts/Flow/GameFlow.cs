@@ -66,8 +66,11 @@ namespace WordShot.Flow
 
         public PlayState State { get; private set; }
 
-        /// <summary>操作を受け付けてよいか（ポーズ・ゲームオーバー・クリア・切り替え中は false）</summary>
-        public bool IsPlaying => State == PlayState.Playing && !IsTransitioning;
+        /// <summary>
+        /// 操作を受け付けてよいか（ポーズ・ゲームオーバー・クリア・切り替え中は false）。
+        /// 状態が変わったフレームも false にする（ポーズ画面の Resume を押した Enter で、そのまま扉に入ったりしないように）
+        /// </summary>
+        public bool IsPlaying => State == PlayState.Playing && !IsTransitioning && Time.frameCount != stateChangedFrame;
 
         /// <summary>状態が変わったとき。ゲームオーバー表示やポーズ画面が使う</summary>
         public event Action<PlayState> StateChanged;
@@ -80,6 +83,7 @@ namespace WordShot.Flow
 
         CanvasGroup fade;
         float stageStartTime;
+        int stateChangedFrame = -1;
         Coroutine clearWait;
         readonly List<ILoadingTask> pendingTasks = new List<ILoadingTask>();
 
@@ -219,6 +223,7 @@ namespace WordShot.Flow
         {
             if (State == state) return;
             State = state;
+            stateChangedFrame = Time.frameCount;
             StateChanged?.Invoke(state);
         }
 

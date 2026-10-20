@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -27,6 +28,10 @@ namespace WordShot.Stages.EditorTools
         const string PauseMenuPath = "Assets/Prefabs/UI/PauseMenu.prefab";
         const string StageAFile = "Stage_A";
         const string StageBFile = "Stage_B";
+
+        const string PlayerPrefabPath = "Assets/Prefabs/GameObject/Player.prefab";
+        const string GroundLayerName = "ground";
+        const string HelpText = "A / D: Move    W / Space: Jump    Enter: Select    Esc: Pause";
 
         const float GroundTop = -3.5f;
         const int TextSortingOrder = 10;
@@ -73,16 +78,17 @@ namespace WordShot.Stages.EditorTools
             cameraObject.AddComponent<AudioListener>();
 
             CreateWorldText(null, "Title", "STAGE SELECT", 9f, new Vector3(0f, 3.6f, 0f));
-            CreateWorldText(null, "Help", "Arrow keys: Move / Jump    Enter: Select    Esc: Pause", 3f, new Vector3(0f, 2.6f, 0f))
+            CreateWorldText(null, "Help", HelpText, 3f, new Vector3(0f, 2.6f, 0f))
                 .color = new Color(1f, 1f, 1f, 0.6f);
 
             // 地面と、画面の外へ出ないための見えない壁
-            CreateBlock("Ground", square, new Vector2(0f, GroundTop - 0.5f), new Vector2(20f, 1f), new Color(0.35f, 0.3f, 0.26f), 0);
+            GameObject ground = CreateBlock("Ground", square, new Vector2(0f, GroundTop - 0.5f), new Vector2(20f, 1f), new Color(0.35f, 0.3f, 0.26f), 0);
+            SetGroundLayer(ground);
             CreateWall("LeftWall", new Vector2(-9f, 0f));
             CreateWall("RightWall", new Vector2(9f, 0f));
 
             // 真ん中にプレイヤー、左右にステージの扉
-            CreatePlayer(square);
+            PlacePlayer(scene);
             CreateDoor("Door_StageA", stageA, square, new Vector2(-5f, GroundTop));
             CreateDoor("Door_StageB", stageB, square, new Vector2(5f, GroundTop));
 
@@ -100,17 +106,53 @@ namespace WordShot.Stages.EditorTools
             EditorSceneManager.SaveScene(scene, GameLoopSceneBuilder.StageSelectPath);
         }
 
-        static void CreatePlayer(Sprite square)
+        // プレイヤーのプレハブ（田場さん作）を真ん中に置く。少し上に置いて、地面に落ちて着地させる
+        static void PlacePlayer(Scene scene)
         {
-            GameObject player = CreateBlock("Player", square, new Vector2(0f, GroundTop + 0.4f), new Vector2(0.8f, 0.8f), new Color(0.3f, 0.8f, 1f), 5);
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PlayerPrefabPath);
+            if (prefab == null)
+            {
+                Debug.LogError($"[StageSelectBuilder] {PlayerPrefabPath} がありません。プレイヤーのプレハブを置いてから実行してください");
+                return;
+            }
 
-            var body = player.AddComponent<Rigidbody2D>();
-            body.gravityScale = 3f;
-            body.freezeRotation = true;
-            body.interpolation = RigidbodyInterpolation2D.Interpolate;
-            body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            var player = (GameObject)PrefabUtility.InstantiatePrefab(prefab, scene);
+            player.transform.position = new Vector3(0f, GroundTop + 0.5f, 0f);
+        }
 
-            player.AddComponent<StageSelectPlayer>();
+        // プレイヤーは「ground」レイヤーのものだけを地面として扱う（着地するとジャンプの回数が戻る）
+        static void SetGroundLayer(GameObject ground)
+        {
+            int layer = LayerMask.NameToLayer(GroundLayerName);
+            if (layer < 0)
+            {
+                Debug.LogError($"[StageSelectBuilder] 「{GroundLayerName}」レイヤーがありません（Project Settings > Tags and Layers）");
+                return;
+            }
+            ground.layer = layer;
+        }
+
+        /// <summary>
+        /// 作ってあるステージセレクトを、今のプレイヤーに合わせて直す。
+        /// プレイヤーを置く（なければ）・地面を ground レイヤーにする・操作説明を今のキーにする。
+        /// </summary>
+        [MenuItem("WordShot/ステージセレクトを今のプレイヤーに合わせる")]
+        public static void UpdateForPlayer()
+        {
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+
+            Scene scene = EditorSceneManager.OpenScene(GameLoopSceneBuilder.StageSelectPath);
+            bool hasPlayer = scene.GetRootGameObjects().Any(root => root.CompareTag("Player"));
+            if (!hasPlayer) PlacePlayer(scene);
+
+            GameObject ground = scene.GetRootGameObjects().FirstOrDefault(root => root.name == "Ground");
+            if (ground != null) SetGroundLayer(ground);
+
+            GameObject help = scene.GetRootGameObjects().FirstOrDefault(root => root.name == "Help");
+            if (help != null) help.GetComponent<TMP_Text>().text = HelpText;
+
+            EditorSceneManager.SaveScene(scene);
+            Debug.Log("[StageSelectBuilder] ステージセレクトを今のプレイヤーに合わせました");
         }
 
         // 扉：本体の見た目（Body）は子にして、拡大しても文字や当たり判定がつぶれないようにする
