@@ -34,6 +34,9 @@ namespace WordShot.Stages.EditorTools
         const string HelpText = "A / D: Move    W / Space: Jump    Enter: Select    Esc: Pause";
 
         const float GroundTop = -3.5f;
+        // 重なり順（Order in Layer）。数字が大きいほど手前。プレイヤーのプレハブは 0
+        const int GroundSortingOrder = -2;
+        const int DoorSortingOrder = -1;   // 扉は背景なので、プレイヤーより奥にする
         const int TextSortingOrder = 10;
 
         [MenuItem("WordShot/ステージセレクトを作成")]
@@ -82,7 +85,7 @@ namespace WordShot.Stages.EditorTools
                 .color = new Color(1f, 1f, 1f, 0.6f);
 
             // 地面と、画面の外へ出ないための見えない壁
-            GameObject ground = CreateBlock("Ground", square, new Vector2(0f, GroundTop - 0.5f), new Vector2(20f, 1f), new Color(0.35f, 0.3f, 0.26f), 0);
+            GameObject ground = CreateBlock("Ground", square, new Vector2(0f, GroundTop - 0.5f), new Vector2(20f, 1f), new Color(0.35f, 0.3f, 0.26f), GroundSortingOrder);
             SetGroundLayer(ground);
             CreateWall("LeftWall", new Vector2(-9f, 0f));
             CreateWall("RightWall", new Vector2(9f, 0f));
@@ -134,7 +137,8 @@ namespace WordShot.Stages.EditorTools
 
         /// <summary>
         /// 作ってあるステージセレクトを、今のプレイヤーに合わせて直す。
-        /// プレイヤーを置く（なければ）・地面を ground レイヤーにする・操作説明を今のキーにする。
+        /// プレイヤーを置く（なければ）・地面を ground レイヤーにする・操作説明を今のキーにする・
+        /// 扉と地面をプレイヤーより奥に描く。
         /// </summary>
         [MenuItem("WordShot/ステージセレクトを今のプレイヤーに合わせる")]
         public static void UpdateForPlayer()
@@ -146,7 +150,17 @@ namespace WordShot.Stages.EditorTools
             if (!hasPlayer) PlacePlayer(scene);
 
             GameObject ground = scene.GetRootGameObjects().FirstOrDefault(root => root.name == "Ground");
-            if (ground != null) SetGroundLayer(ground);
+            if (ground != null)
+            {
+                SetGroundLayer(ground);
+                ground.GetComponent<SpriteRenderer>().sortingOrder = GroundSortingOrder;
+            }
+
+            foreach (StageDoor door in scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<StageDoor>(true)))
+            {
+                Transform body = door.transform.Find("Body");
+                if (body != null) body.GetComponent<SpriteRenderer>().sortingOrder = DoorSortingOrder;
+            }
 
             GameObject help = scene.GetRootGameObjects().FirstOrDefault(root => root.name == "Help");
             if (help != null) help.GetComponent<TMP_Text>().text = HelpText;
@@ -162,7 +176,7 @@ namespace WordShot.Stages.EditorTools
             var door = new GameObject(name);
             door.transform.position = bottomCenter;
 
-            GameObject body = CreateBlock("Body", square, Vector2.zero, size, Color.white, 1, door.transform, addCollider: false);
+            GameObject body = CreateBlock("Body", square, Vector2.zero, size, Color.white, DoorSortingOrder, door.transform, addCollider: false);
             body.transform.localPosition = new Vector3(0f, size.y / 2f, 0f);
 
             // プレイヤーが触れたかを調べる範囲（通り抜けられる）。少しだけ大きくして、触れやすくする
