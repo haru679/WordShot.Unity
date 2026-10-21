@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
@@ -44,8 +45,15 @@ public class PlayerController : MonoBehaviour
     [Tooltip("敵に当たったときに受けるダメージ量")]
     [SerializeField] private int contactDamage = 1;
 
-    [Tooltip("ダメージを受けた後の無敵時間（秒）")]
+    [Tooltip("ダメージを受けた後の無敵時間（秒）。点滅の長さもこの値になる")]
     [SerializeField] private float invincibleDuration = 1f;
+
+    [Header("点滅")]
+    [Tooltip("被弾時の点滅のON/OFF")]
+    [SerializeField] private bool enableBlink = true;
+
+    [Tooltip("表示/非表示を切り替える間隔（秒）。小さいほど速く点滅する")]
+    [SerializeField] private float blinkInterval = 0.1f;
 
     private Rigidbody2D rb;
 
@@ -60,6 +68,9 @@ public class PlayerController : MonoBehaviour
     private int currentHp;
     private float invincibleEndTime = -1f;   // この時刻までは無敵
 
+    private Renderer[] renderers;
+    private Coroutine blinkRoutine;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -69,6 +80,9 @@ public class PlayerController : MonoBehaviour
         rb.freezeRotation = true;
 
         currentHp = maxHp;
+
+        // 点滅対象（子オブジェクトを含むすべての Renderer）
+        renderers = GetComponentsInChildren<Renderer>();
     }
 
     // インスペクターで値を変更したときに呼ばれる
@@ -79,10 +93,22 @@ public class PlayerController : MonoBehaviour
         if (minJumpHeight < 0f) minJumpHeight = 0f;
         if (riseSpeed < 0.01f) riseSpeed = 0.01f;
 
-        // ダメージ関連の制約
+        // ダメージ・点滅関連の制約
         if (maxHp < 1) maxHp = 1;
         if (contactDamage < 0) contactDamage = 0;
         if (invincibleDuration < 0f) invincibleDuration = 0f;
+        if (blinkInterval < 0.01f) blinkInterval = 0.01f;
+    }
+
+    void OnDisable()
+    {
+        // 点滅中に非活性になった場合も、表示状態に戻しておく
+        if (blinkRoutine != null)
+        {
+            StopCoroutine(blinkRoutine);
+            blinkRoutine = null;
+        }
+        SetVisible(true);
     }
 
     void Update()
@@ -178,7 +204,7 @@ public class PlayerController : MonoBehaviour
         return Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer) != null;
     }
 
-    // ==================================================================== 敵との当たり判定 ============================================================//
+    // =========================================================== 敵との当たり判定 ======================================================//
 
     // 物理コリジョン（Collider 同士の衝突）
     void OnCollisionEnter2D(Collision2D collision) => TryTakeDamage(collision.gameObject);
@@ -198,12 +224,61 @@ public class PlayerController : MonoBehaviour
         currentHp -= contactDamage;
         invincibleEndTime = Time.time + invincibleDuration;
 
+        // 無敵時間と同じ長さで点滅させる
+        StartBlink();
+
         // HP表示はUI実装までデバッグログのみ
-        Debug.Log($"敵に当たった！ ダメージ: {contactDamage} / HP: {currentHp}/{maxHp}");//todo:ここにUIの更新処理を追加
+        Debug.Log($"敵に当たった！ ダメージ: {contactDamage} / HP: {currentHp}/{maxHp}");//todo: ここにUI実装
 
         if (currentHp <= 0)
         {
             Debug.Log("HPが0になった");
+        }
+    }
+
+    // ================================================================ 点滅 ==============================================================//
+
+    void StartBlink()
+    {
+        if (!enableBlink) return;
+
+        // 念のため既存の点滅を止めてから開始する
+        if (blinkRoutine != null)
+        {
+            StopCoroutine(blinkRoutine);
+        }
+        blinkRoutine = StartCoroutine(BlinkRoutine(invincibleDuration));
+    }
+
+    IEnumerator BlinkRoutine(float duration)
+    {
+        float interval = Mathf.Max(blinkInterval, 0.01f);
+        float elapsed = 0f;
+        bool visible = false;
+
+        while (elapsed < duration)
+        {
+            visible = !visible;
+            SetVisible(visible);
+
+            // 残り時間を超えないように待機時間を切り詰める
+            float wait = Mathf.Min(interval, duration - elapsed);
+            yield return new WaitForSeconds(wait);
+            elapsed += wait;
+        }
+
+        // 点滅終了後は必ず表示に戻す
+        SetVisible(true);
+        blinkRoutine = null;
+    }
+
+    void SetVisible(bool visible)
+    {
+        if (renderers == null) return;
+
+        foreach (var r in renderers)
+        {
+            if (r != null) r.enabled = visible;
         }
     }
 

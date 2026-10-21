@@ -380,6 +380,8 @@ MonoBehaviour:
   maxHp: 3
   contactDamage: 1
   invincibleDuration: 1
+  enableBlink: 1
+  blinkInterval: 0.1
 --- !u!61 &465112332
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -603,7 +605,7 @@ GameObject:
   - component: {fileID: 1018608014}
   - component: {fileID: 1018608013}
   - component: {fileID: 1018608012}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Square
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -640,7 +642,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
