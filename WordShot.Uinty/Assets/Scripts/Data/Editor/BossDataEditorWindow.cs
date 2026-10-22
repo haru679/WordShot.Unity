@@ -19,21 +19,29 @@ namespace WordShot.Data.EditorTools
     public class BossDataEditorWindow : EditorWindow
     {
         static readonly string[] KnownAttackTypes = { "bullet", "rush", "drop" };
-        const string TranslationLanguage = GameLanguage.English;
 
         const float TextWidth = 150f;
         const float ReadingWidth = 160f;
-        const float EnglishWidth = 160f;
+        const float TranslationWidth = 160f;
         const float RomajiWidth = 170f;
 
         [SerializeField] string selectedPath;
         [SerializeField] BossData boss;
         [SerializeField] int selectedWord;
-        [SerializeField] bool previewEnglish;
+        [SerializeField] bool previewTranslated;
+        [SerializeField] string translationLanguage;   // 今、翻訳を入力している言語（例：en）
         [SerializeField] string newBossId = "";
+        [SerializeField] string newLanguageCode = "";
+        [SerializeField] string newLanguageName = "";
+        [SerializeField] int tab;   // 0：ボス　1：画面の文字
+        [SerializeField] List<string> uiTexts = new List<string>();
+        [SerializeField] string newUiText = "";
+        Vector2 uiScroll;
 
         string[] bossPaths = Array.Empty<string>();
-        List<LocalizationEntry> translations = new List<LocalizationEntry>();
+        LanguageInfo[] languages = Array.Empty<LanguageInfo>();
+        // 言語ごとの翻訳ファイル。編集した言語のぶんだけ読み、保存のときに全部書き出す
+        readonly Dictionary<string, LocalizationFile> translationFiles = new Dictionary<string, LocalizationFile>();
         DataReport report = new DataReport();
         string loadError;
         Vector2 listScroll;
@@ -71,8 +79,34 @@ namespace WordShot.Data.EditorTools
         void Refresh()
         {
             bossPaths = BossDataFiles.ListBossPaths();
-            translations = BossDataFiles.LoadTranslations(TranslationLanguage);
+            RefreshLanguages();
+            RefreshUiTexts();
+            translationFiles.Clear();
             if (boss != null) Validate();
+        }
+
+        // 画面の文字：シーン・プレハブ・スクリプトから集めたものと、翻訳ファイルにある（ボス以外の）ものを並べる
+        void RefreshUiTexts()
+        {
+            HashSet<string> bossTexts = BossDataFiles.CollectBossTexts();
+            var collected = BossDataFiles.CollectUiTexts();
+            foreach (LanguageInfo language in languages)
+            {
+                foreach (LocalizationEntry entry in BossDataFiles.LoadTranslations(language.Code).entries)
+                {
+                    if (!bossTexts.Contains(entry.ja) && !collected.Contains(entry.ja)) collected.Add(entry.ja);
+                }
+            }
+            foreach (string added in uiTexts.Where(text => !collected.Contains(text) && !bossTexts.Contains(text)).ToList())
+                collected.Add(added);   // 手で足したものも残す
+            uiTexts = collected;
+        }
+
+        void RefreshLanguages()
+        {
+            languages = BossDataFiles.ListTranslationLanguages();
+            if (languages.All(l => l.Code != translationLanguage))
+                translationLanguage = languages.Length > 0 ? languages[0].Code : null;
         }
 
         // ---- 選ぶ・作る・保存 ----
@@ -97,9 +131,21 @@ namespace WordShot.Data.EditorTools
             report = new DataReport();
             boss = BossDataFiles.Load(path, report);
             loadError = boss == null ? string.Join("\n", report.Errors) : null;
-            translations = BossDataFiles.LoadTranslations(TranslationLanguage);
+            translationFiles.Clear();
             hasUnsavedChanges = false;
             GUI.FocusControl(null);
+        }
+
+        void CreateLanguage()
+        {
+            string code = newLanguageCode.Trim();
+            string displayName = string.IsNullOrWhiteSpace(newLanguageName) ? code : newLanguageName.Trim();
+            BossDataFiles.CreateLanguage(code, displayName);
+            newLanguageCode = "";
+            newLanguageName = "";
+            RefreshLanguages();
+            translationLanguage = code;
+            Debug.Log($"[ボスデータ編集] 言語「{displayName}」（{code}.json）を作りました");
         }
 
         void CreateBoss()
@@ -112,18 +158,29 @@ namespace WordShot.Data.EditorTools
             TrySelect(path);
         }
 
+        // 開いているボスと、編集した言語の翻訳ファイルを保存する
         void Save()
         {
-            if (boss == null) return;
-            Validate();
-            if (report.HasErrors && !EditorUtility.DisplayDialog("エラーがあります",
-                    "エラーがあるままだと、このボスはゲームで読み込まれません。\nそれでも保存しますか？", "保存する", "やめる"))
-                return;
+            if (boss != null && !string.IsNullOrEmpty(selectedPath))
+            {
+                Validate();
+                if (report.HasErrors && !EditorUtility.DisplayDialog("エラーがあります",
+                        "エラーがあるままだと、このボスはゲームで読み込まれません。\nそれでも保存しますか？", "保存する", "やめる"))
+                    return;
+                BossDataFiles.Save(selectedPath, boss);
+            }
 
-            BossDataFiles.Save(selectedPath, boss);
-            BossDataFiles.SaveTranslations(TranslationLanguage, translations);
+            foreach (LocalizationFile file in translationFiles.Values) BossDataFiles.SaveTranslations(file);
             hasUnsavedChanges = false;
-            Debug.Log($"[ボスデータ編集] {Path.GetFileName(selectedPath)} を保存しました");
+            Debug.Log("[ボスデータ編集] 保存しました");
+        }
+
+        void Revert()
+        {
+            if (boss != null && !string.IsNullOrEmpty(selectedPath)) Load(selectedPath);
+            translationFiles.Clear();
+            hasUnsavedChanges = false;
+            GUI.FocusControl(null);
         }
 
         public override void SaveChanges()
@@ -136,15 +193,39 @@ namespace WordShot.Data.EditorTools
 
         // ---- 翻訳（日本語の文字をキーにして引く）----
 
-        string GetTranslation(string japanese) =>
-            string.IsNullOrEmpty(japanese) ? "" : translations.FirstOrDefault(e => e.ja == japanese)?.text ?? "";
+        bool HasTranslationLanguage => !string.IsNullOrEmpty(translationLanguage);
+
+        string TranslationLanguageName =>
+            languages.FirstOrDefault(l => l.Code == translationLanguage)?.DisplayName ?? translationLanguage;
+
+        // 今選んでいる言語の翻訳ファイル
+        LocalizationFile CurrentTranslations => TranslationsFor(translationLanguage);
+
+        // その言語の翻訳ファイル（初めて使うときに読む）
+        LocalizationFile TranslationsFor(string language)
+        {
+            if (!translationFiles.TryGetValue(language, out LocalizationFile file))
+            {
+                file = BossDataFiles.LoadTranslations(language);
+                translationFiles.Add(language, file);
+            }
+            return file;
+        }
+
+        string GetTranslation(string japanese)
+        {
+            if (!HasTranslationLanguage || string.IsNullOrEmpty(japanese)) return "";
+            return CurrentTranslations.entries.FirstOrDefault(e => e.ja == japanese)?.text ?? "";
+        }
 
         void SetTranslation(string japanese, string translated)
         {
-            if (string.IsNullOrEmpty(japanese)) return;
-            LocalizationEntry entry = translations.FirstOrDefault(e => e.ja == japanese);
+            if (!HasTranslationLanguage || string.IsNullOrEmpty(japanese)) return;
+
+            LocalizationFile file = CurrentTranslations;
+            LocalizationEntry entry = file.entries.FirstOrDefault(e => e.ja == japanese);
             if (entry != null) entry.text = translated;
-            else translations.Add(new LocalizationEntry { ja = japanese, text = translated });
+            else file.entries = file.entries.Append(new LocalizationEntry { ja = japanese, text = translated }).ToArray();
         }
 
         // ---- 画面 ----
@@ -157,8 +238,75 @@ namespace WordShot.Data.EditorTools
             using (new EditorGUILayout.HorizontalScope())
             {
                 DrawBossList();
-                DrawEditor();
+                using (new EditorGUILayout.VerticalScope())
+                {
+                    tab = GUILayout.Toolbar(tab, new[] { "ボス", "画面の文字" }, GUILayout.Height(24f));
+                    if (tab == 0) DrawEditor();
+                    else DrawUiTexts();
+                    DrawSaveButtons();
+                }
             }
+        }
+
+        // 画面の文字（ボタンや見出し）の翻訳を、言語ごとに入力する
+        void DrawUiTexts()
+        {
+            DrawLanguageSelector();
+            if (!HasTranslationLanguage) return;
+
+            LocalizationFile file = CurrentTranslations;
+            EditorGUI.BeginChangeCheck();
+
+            string fonts = string.Join(", ", file.fallbackFonts ?? Array.Empty<string>());
+            string newFonts = EditorGUILayout.TextField(new GUIContent("表示に使うPCのフォント",
+                "この言語の文字（ハングル・簡体字など）を出すフォントの名前。カンマで区切ると、前から順に探す。例：Malgun Gothic"), fonts);
+            if (newFonts != fonts)
+                file.fallbackFonts = newFonts.Split(',').Select(name => name.Trim()).Where(name => name.Length > 0).ToArray();
+
+            EditorGUILayout.Space(6f);
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                GUILayout.Label("日本語（画面に書いた文字）", EditorStyles.miniBoldLabel, GUILayout.Width(300f));
+                GUILayout.Label(TranslationLanguageName, EditorStyles.miniBoldLabel);
+            }
+
+            int missing = 0;
+            uiScroll = EditorGUILayout.BeginScrollView(uiScroll);
+            foreach (string japanese in uiTexts)
+            {
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.SelectableLabel(japanese, GUILayout.Width(300f), GUILayout.Height(EditorGUIUtility.singleLineHeight));
+                    string translated = GetTranslation(japanese);
+                    if (string.IsNullOrEmpty(translated)) missing++;
+                    string newTranslated = EditorGUILayout.TextField(translated);
+                    if (newTranslated != translated) SetTranslation(japanese, newTranslated);
+                }
+            }
+            EditorGUILayout.EndScrollView();
+
+            if (EditorGUI.EndChangeCheck()) hasUnsavedChanges = true;
+
+            if (missing > 0)
+                EditorGUILayout.HelpBox($"{TranslationLanguageName}がまだない文字が {missing} 個あります（その文字は日本語のまま出ます）。", MessageType.Warning);
+            else
+                EditorGUILayout.HelpBox("すべての文字に翻訳があります。", MessageType.Info);
+
+            // 一覧にない文字を手で足す（スクリプトの中で組み立てる文字など）
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                newUiText = EditorGUILayout.TextField("文字を足す（日本語）", newUiText);
+                using (new EditorGUI.DisabledScope(string.IsNullOrWhiteSpace(newUiText) || uiTexts.Contains(newUiText.Trim())))
+                {
+                    if (GUILayout.Button("＋ 追加", GUILayout.Width(80f)))
+                    {
+                        uiTexts.Add(newUiText.Trim());
+                        newUiText = "";
+                        GUI.FocusControl(null);
+                    }
+                }
+            }
+            EditorGUILayout.HelpBox("画面に LocalizedText を付けた文字と、スクリプトの Localization.TranslateOrSame(\"…\") の文字は、「一覧を読み直す」で自動で並びます。", MessageType.None);
         }
 
         void HandleShortcuts()
@@ -191,6 +339,18 @@ namespace WordShot.Data.EditorTools
                 using (new EditorGUI.DisabledScope(!BossDataFiles.IsNewValidId(newBossId.Trim())))
                 {
                     if (GUILayout.Button("＋ 作成")) CreateBoss();
+                }
+
+                EditorGUILayout.Space();
+                EditorGUILayout.LabelField("新しい言語（例：ko / 한국어）", EditorStyles.miniLabel);
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    newLanguageCode = EditorGUILayout.TextField(newLanguageCode, GUILayout.Width(70f));
+                    newLanguageName = EditorGUILayout.TextField(newLanguageName);
+                }
+                using (new EditorGUI.DisabledScope(!BossDataFiles.IsNewValidLanguage(newLanguageCode.Trim())))
+                {
+                    if (GUILayout.Button("＋ 言語を追加")) CreateLanguage();
                 }
 
                 EditorGUILayout.Space();
@@ -235,23 +395,47 @@ namespace WordShot.Data.EditorTools
                 EditorGUILayout.Space(8f);
                 DrawReport();
                 EditorGUILayout.EndScrollView();
+            }
+        }
 
-                DrawSaveButtons();
+        // 翻訳を入力する言語を選ぶ。言語を変えると、名前とルビの欄がその言語に切り替わる
+        void DrawLanguageSelector()
+        {
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField("翻訳する言語", GUILayout.Width(EditorGUIUtility.labelWidth - 4f));
+                if (!HasTranslationLanguage)
+                {
+                    EditorGUILayout.LabelField("翻訳ファイルがありません（左下の「＋ 言語を追加」で作れます）", EditorStyles.miniLabel);
+                    return;
+                }
+
+                int index = Mathf.Max(0, Array.FindIndex(languages, l => l.Code == translationLanguage));
+                string[] labels = languages.Select(l => $"{l.DisplayName}（{l.Code}）").ToArray();
+                // 言語の切り替えは「変更」ではないので、保存していない印を付けない
+                bool changed = GUI.changed;
+                translationLanguage = languages[EditorGUILayout.Popup(index, labels)].Code;
+                GUI.changed = changed;
             }
         }
 
         void DrawBasics()
         {
             EditorGUILayout.LabelField($"{boss.id}.json", EditorStyles.boldLabel);
+            DrawLanguageSelector();
             using (new EditorGUI.DisabledScope(true))
             {
                 EditorGUILayout.TextField(new GUIContent("id", "ファイル名と同じ。変えるときはファイル名を変える"), boss.id);
             }
             boss.name = EditorGUILayout.TextField(new GUIContent("名前", "画面に出すボスの名前（日本語）"), boss.name);
 
-            string englishName = GetTranslation(boss.name);
-            string newEnglishName = EditorGUILayout.TextField(new GUIContent("名前（英語）", "英語版で出す名前"), englishName);
-            if (newEnglishName != englishName) SetTranslation(boss.name, newEnglishName);
+            if (HasTranslationLanguage)
+            {
+                string translatedName = GetTranslation(boss.name);
+                string newTranslatedName = EditorGUILayout.TextField(
+                    new GUIContent($"名前（{TranslationLanguageName}）", $"{TranslationLanguageName}版で出す名前"), translatedName);
+                if (newTranslatedName != translatedName) SetTranslation(boss.name, newTranslatedName);
+            }
 
             boss.hp = EditorGUILayout.IntField("HP", boss.hp);
             boss.attackInterval = EditorGUILayout.FloatField(new GUIContent("攻撃の間隔（秒）"), boss.attackInterval);
@@ -267,7 +451,8 @@ namespace WordShot.Data.EditorTools
                 GUILayout.Space(32f);
                 GUILayout.Label("表記", EditorStyles.miniBoldLabel, GUILayout.Width(TextWidth));
                 GUILayout.Label("読み（ひらがな）", EditorStyles.miniBoldLabel, GUILayout.Width(ReadingWidth));
-                GUILayout.Label("英語のルビ", EditorStyles.miniBoldLabel, GUILayout.Width(EnglishWidth));
+                if (HasTranslationLanguage)
+                    GUILayout.Label($"ルビ（{TranslationLanguageName}）", EditorStyles.miniBoldLabel, GUILayout.Width(TranslationWidth));
                 GUILayout.Label("打ち方の例", EditorStyles.miniBoldLabel, GUILayout.Width(RomajiWidth));
             }
 
@@ -283,11 +468,14 @@ namespace WordShot.Data.EditorTools
                     word.text = EditorGUILayout.TextField(word.text, GUILayout.Width(TextWidth));
                     word.reading = EditorGUILayout.TextField(word.reading, GUILayout.Width(ReadingWidth));
 
-                    using (new EditorGUI.DisabledScope(string.IsNullOrEmpty(word.text)))
+                    if (HasTranslationLanguage)
                     {
-                        string english = GetTranslation(word.text);
-                        string newEnglish = EditorGUILayout.TextField(english, GUILayout.Width(EnglishWidth));
-                        if (newEnglish != english) SetTranslation(word.text, newEnglish);
+                        using (new EditorGUI.DisabledScope(string.IsNullOrEmpty(word.text)))
+                        {
+                            string translated = GetTranslation(word.text);
+                            string newTranslated = EditorGUILayout.TextField(translated, GUILayout.Width(TranslationWidth));
+                            if (newTranslated != translated) SetTranslation(word.text, newTranslated);
+                        }
                     }
 
                     (string example, bool ok) = RomajiExample(word.reading);
@@ -355,19 +543,24 @@ namespace WordShot.Data.EditorTools
             }
         }
 
-        // 画面の3段表示（ルビ／表記／ローマ字）を、日本語版と英語版で見比べる
+        // 画面の3段表示（ルビ／表記／ローマ字）を、日本語版と、選んでいる言語の版で見比べる
         void DrawPreview()
         {
             using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.LabelField("プレビュー（番号を押したお題）", EditorStyles.boldLabel, GUILayout.Width(200f));
-                previewEnglish = GUILayout.Toolbar(previewEnglish ? 1 : 0, new[] { "日本語版", "英語版" }, GUILayout.Width(180f)) == 1;
+                if (HasTranslationLanguage)
+                {
+                    string[] tabs = { "日本語版", $"{TranslationLanguageName}版" };
+                    previewTranslated = GUILayout.Toolbar(previewTranslated ? 1 : 0, tabs, GUILayout.Width(220f)) == 1;
+                }
             }
             if (boss.words.Length == 0) return;
 
+            bool translatedView = previewTranslated && HasTranslationLanguage;
             WordData word = boss.words[Mathf.Clamp(selectedWord, 0, boss.words.Length - 1)];
-            string english = GetTranslation(word.text);
-            string ruby = previewEnglish && !string.IsNullOrEmpty(english) ? english : word.reading;
+            string translated = GetTranslation(word.text);
+            string ruby = translatedView && !string.IsNullOrEmpty(translated) ? translated : word.reading;
             (string romaji, _) = RomajiExample(word.reading);
 
             using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
@@ -376,8 +569,8 @@ namespace WordShot.Data.EditorTools
                 GUILayout.Label(word.text, textStyle);
                 GUILayout.Label(romaji, romajiStyle);
             }
-            if (previewEnglish && string.IsNullOrEmpty(english))
-                EditorGUILayout.HelpBox("英語のルビがないので、英語版でも読み（ひらがな）が出ます。", MessageType.None);
+            if (translatedView && string.IsNullOrEmpty(translated))
+                EditorGUILayout.HelpBox($"{TranslationLanguageName}のルビがないので、{TranslationLanguageName}版でも読み（ひらがな）が出ます。", MessageType.None);
         }
 
         void DrawReport()
@@ -386,13 +579,21 @@ namespace WordShot.Data.EditorTools
             foreach (string error in report.Errors) EditorGUILayout.HelpBox(StripFileName(error), MessageType.Error);
             foreach (string warning in report.Warnings) EditorGUILayout.HelpBox(StripFileName(warning), MessageType.Warning);
 
-            string[] missing = new[] { boss.name }.Concat(boss.words.Select(w => w.text))
-                .Where(text => !string.IsNullOrEmpty(text) && string.IsNullOrEmpty(GetTranslation(text)))
-                .Distinct().ToArray();
-            if (missing.Length > 0)
-                EditorGUILayout.HelpBox($"英語がまだありません：{string.Join("、", missing)}", MessageType.Warning);
+            // 翻訳の書き忘れは、言語ごとに知らせる（選んでいない言語のぶんも）
+            string[] needed = new[] { boss.name }.Concat(boss.words.Select(w => w.text))
+                .Where(text => !string.IsNullOrEmpty(text)).Distinct().ToArray();
+            bool anyMissing = false;
+            foreach (LanguageInfo language in languages)
+            {
+                LocalizationEntry[] entries = TranslationsFor(language.Code).entries;
+                string[] missing = needed.Where(text => entries.All(e => e.ja != text || string.IsNullOrEmpty(e.text))).ToArray();
+                if (missing.Length == 0) continue;
 
-            if (!report.HasErrors && report.Warnings.Count == 0 && missing.Length == 0)
+                anyMissing = true;
+                EditorGUILayout.HelpBox($"{language.DisplayName}がまだありません：{string.Join("、", missing)}", MessageType.Warning);
+            }
+
+            if (!report.HasErrors && report.Warnings.Count == 0 && !anyMissing)
                 EditorGUILayout.HelpBox("問題はありません。", MessageType.Info);
         }
 
@@ -404,7 +605,7 @@ namespace WordShot.Data.EditorTools
                 GUILayout.FlexibleSpace();
                 using (new EditorGUI.DisabledScope(!hasUnsavedChanges))
                 {
-                    if (GUILayout.Button("元に戻す", GUILayout.Width(100f))) Load(selectedPath);
+                    if (GUILayout.Button("元に戻す", GUILayout.Width(100f))) Revert();
                     if (GUILayout.Button("保存（Ctrl+S）", GUILayout.Width(140f))) Save();
                 }
             }

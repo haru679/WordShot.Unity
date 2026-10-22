@@ -630,6 +630,7 @@ GameObject:
   - component: {fileID: 1355195996}
   - component: {fileID: 1355195998}
   - component: {fileID: 1355195997}
+  - component: {fileID: 1355195999}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -676,7 +677,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Retry
+  m_text: "\u30EA\u30C8\u30E9\u30A4"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -756,6 +757,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1355195995}
   m_CullTransparentMesh: 1
+--- !u!114 &1355195999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1355195995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c81ae3a83a9294469a71813a7c6a15d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WordShot.Data.LocalizedText
+  japanese: "\u30EA\u30C8\u30E9\u30A4"
 --- !u!1 &1378151252
 GameObject:
   m_ObjectHideFlags: 0
@@ -767,6 +781,7 @@ GameObject:
   - component: {fileID: 1378151253}
   - component: {fileID: 1378151255}
   - component: {fileID: 1378151254}
+  - component: {fileID: 1378151256}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -813,7 +828,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Title
+  m_text: "\u30BF\u30A4\u30C8\u30EB\u3078"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -893,6 +908,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1378151252}
   m_CullTransparentMesh: 1
+--- !u!114 &1378151256
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1378151252}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c81ae3a83a9294469a71813a7c6a15d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WordShot.Data.LocalizedText
+  japanese: "\u30BF\u30A4\u30C8\u30EB\u3078"
 --- !u!1 &1422564474
 GameObject:
   m_ObjectHideFlags: 0

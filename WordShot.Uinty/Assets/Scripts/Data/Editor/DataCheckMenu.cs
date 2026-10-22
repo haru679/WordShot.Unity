@@ -11,13 +11,10 @@ namespace WordShot.Data.EditorTools
     /// </summary>
     /// <remarks>
     /// 調べること：ボスの JSON の書き間違い・お題の読みからローマ字が作れるか・
-    /// 英語などの翻訳が足りているか・ステージの bossId に合うボスがあるか。
+    /// 翻訳ファイルがある全部の言語で翻訳が足りているか・ステージの bossId に合うボスがあるか。
     /// </remarks>
     public static class DataCheckMenu
     {
-        // 翻訳を調べる言語（日本語以外）。言語を足したらここにも足す
-        static readonly string[] TranslatedLanguages = { GameLanguage.English };
-
         [MenuItem("WordShot/データをチェック")]
         public static void Run() => Check(logResult: true);
 
@@ -27,9 +24,10 @@ namespace WordShot.Data.EditorTools
             var report = new DataReport();
             var bosses = BossDatabase.LoadAll(report);
 
-            // 翻訳：ボスの名前とお題の表記に、それぞれの言語の翻訳があるか
-            foreach (string language in TranslatedLanguages)
+            // 翻訳：翻訳ファイルがある言語ごとに、ボスの名前とお題の表記の翻訳があるか
+            foreach (LanguageInfo languageInfo in BossDataFiles.ListTranslationLanguages())
             {
+                string language = languageInfo.Code;
                 var table = Localization.LoadTable(language, report);
                 string fileName = $"{Localization.Folder}/{language}.json";
                 foreach (BossData boss in bosses.Values)
