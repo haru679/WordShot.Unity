@@ -42,7 +42,7 @@ public class Footing : MonoBehaviour
     void Update()
     {
         if (Keyboard.current == null) return;// キーボードが接続されていない場合は処理しない
-        var sKey = Keyboard.current.sKey;    // すり抜けキー(S)の状態を取得
+        var sKey = Keyboard.current.downArrowKey;    // すり抜けキー(S)の状態を取得
 
         if (dropMode == DropMode.Tap)
         {

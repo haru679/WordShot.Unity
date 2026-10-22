@@ -113,18 +113,19 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        // 入力の取得
+        // 入力の取得（左右移動：← →）
         moveInput = 0f;
-        if (Keyboard.current.aKey.isPressed) moveInput -= 1f;
-        if (Keyboard.current.dKey.isPressed) moveInput += 1f;
+        if (Keyboard.current.leftArrowKey.isPressed) moveInput -= 1f;
+        if (Keyboard.current.rightArrowKey.isPressed) moveInput += 1f;
+
 
         // ジャンプ入力の取得
-        if (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.wKey.wasPressedThisFrame)
+        if (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current. upArrowKey.wasPressedThisFrame)
         {
             jumpRequested = true;
         }
         // ジャンプキーを押し続けているかどうか
-        jumpHeld = Keyboard.current.spaceKey.isPressed || Keyboard.current.wKey.isPressed;
+        jumpHeld = Keyboard.current.spaceKey.isPressed || Keyboard.current.upArrowKey.isPressed;
     }
 
     // FixedUpdate は物理演算の更新タイミングで呼ばれる
