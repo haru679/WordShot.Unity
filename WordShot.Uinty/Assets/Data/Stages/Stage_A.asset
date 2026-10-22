@@ -16,3 +16,4 @@ MonoBehaviour:
   displayName: Stage A
   sceneName: GameScene
   requiredClears: []
+  bossId: shamoji_neko
