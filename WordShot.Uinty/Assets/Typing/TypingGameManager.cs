@@ -13,6 +13,8 @@ public class TypingData
 public class TypingGameManager : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI mistakeCountTextUI;
+    [SerializeField] private SpriteCountDisplay typingMissDisplay;
+    [SerializeField] private SpriteCountDisplay bossHPDisplay;
 
     [Header("UI References")]
     [SerializeField] private TextMeshProUGUI rubyTextUI;
@@ -41,7 +43,7 @@ public class TypingGameManager : MonoBehaviour
     {
         if (typingList.Count > 0)
         {
-            LoadQuestion(0);
+            LoadRandomQuestion();
         }
     }
 
@@ -107,6 +109,20 @@ public class TypingGameManager : MonoBehaviour
 
         UpdateMistakeCountDisplay();
 
+        // ミス用アイコンを右端から1個減らす
+        if (typingMissDisplay != null)
+        {
+            typingMissDisplay.DecreaseCount();
+
+            // アイコンがすべてなくなったら次のお題へ
+            if (typingMissDisplay.GetCount() <= 0)
+            {
+                // 現在のお題の次のお題へ進む
+                int nextIndex = (currentQuestionIndex + 1) % typingList.Count;
+                LoadRandomQuestion();
+            }
+        }
+
         Debug.Log($"今回のお題：{currentMistakeCount}回");
     }
 
@@ -152,26 +168,30 @@ public class TypingGameManager : MonoBehaviour
             }
         }
 
-        if (isValidPrefix)
+        if (isCompleteMatch)
+        {
+            // 正解したらボスHPを1減らす
+            if (bossHPDisplay != null)
+            {
+                bossHPDisplay.DecreaseCount();
+
+                // ボスHPが0になったらゲームクリア
+                if (bossHPDisplay.GetCount() <= 0)
+                {
+                    rubyTextUI.text = "";
+                    targetTextUI.text = $"クリア！\n合計タイプミス：{totalMistakeCount}回";
+                    inputTextUI.text = "";
+                    return;
+                }
+            }
+
+            // ボスHPが残っていれば、次のお題をランダムに表示
+            LoadRandomQuestion();
+        }
+        else if (isValidPrefix)
         {
             currentInput = nextInput;
             UpdateInputDisplay();
-
-            if (isCompleteMatch)
-            {
-                currentQuestionIndex++;
-                if (currentQuestionIndex < typingList.Count)
-                {
-                    LoadQuestion(currentQuestionIndex);
-                }
-                else
-                {
-                    rubyTextUI.text = "";
-                    // ここは文字列補間が必要だったため $ を追加
-                    targetTextUI.text = $"クリア！\n合計タイプミス：{totalMistakeCount}回";
-                    inputTextUI.text = "";
-                }
-            }
         }
         else
         {
@@ -223,8 +243,35 @@ public class TypingGameManager : MonoBehaviour
         }
     }
 
+    private void LoadRandomQuestion()
+    {
+        if (typingList.Count == 0)
+        {
+            return;
+        }
+
+        // お題が一つ足かない場合は、そのお題を表示する
+        if (typingList.Count == 1)
+        {
+            LoadQuestion(0);
+            return;
+        }
+
+        int randomIndex = Random.Range(0, typingList.Count);
+
+        // 前回と同じお題が選ばれた場合は、もう一度抽選
+        do
+        {
+            randomIndex = Random.Range(0, typingList.Count);
+        }
+        while(randomIndex == currentQuestionIndex);
+
+        LoadQuestion(randomIndex);
+    }
+
     private void LoadQuestion(int index)
     {
+        currentQuestionIndex = index;
         currentData = typingList[index];
 
         // 入力状態をリセット
@@ -235,6 +282,11 @@ public class TypingGameManager : MonoBehaviour
 
         // 表示も0回に戻す
         UpdateMistakeCountDisplay();
+
+        if(typingMissDisplay != null)
+        {
+            typingMissDisplay.ResetCount();
+        }
 
         rubyTextUI.text = currentData.ruby;
         targetTextUI.text = currentData.targetText;

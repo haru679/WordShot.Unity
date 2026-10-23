@@ -148,15 +148,15 @@ public static class RomajiEngine
 
             // Ç≥çs
             case "Ç≥": list.AddRange(new[] { "sa" }); break;
-            case "Çµ": list.AddRange(new[] { "shi", "si", "ci" }); break;
+            case "Çµ": list.AddRange(new[] { "si", "shi", "ci" }); break;
             case "Ç∑": list.AddRange(new[] { "su" }); break;
             case "Çπ": list.AddRange(new[] { "se", "ce" }); break;
             case "Çª": list.AddRange(new[] { "so" }); break;
 
             // ÇΩçs
             case "ÇΩ": list.AddRange(new[] { "ta" }); break;
-            case "Çø": list.AddRange(new[] { "chi", "ti" }); break;
-            case "Ç¬": list.AddRange(new[] { "tsu", "tu" }); break;
+            case "Çø": list.AddRange(new[] { "ti", "chi" }); break;
+            case "Ç¬": list.AddRange(new[] { "tu", "tsu" }); break;
             case "Çƒ": list.AddRange(new[] { "te" }); break;
             case "Ç∆": list.AddRange(new[] { "to" }); break;
 
@@ -241,9 +241,9 @@ public static class RomajiEngine
             case "Ç¨Ç„": list.AddRange(new[] { "gyu", "gilyu", "gixyu" }); break;
             case "Ç¨ÇÂ": list.AddRange(new[] { "gyo", "gilyo", "gixyo" }); break;
 
-            case "ÇµÇ·": list.AddRange(new[] { "sha", "sya", "silya", "sixya" }); break;
-            case "ÇµÇ„": list.AddRange(new[] { "shu", "syu", "silyu", "sixyu" }); break;
-            case "ÇµÇÂ": list.AddRange(new[] { "sho", "syo", "silyo", "sixyo" }); break;
+            case "ÇµÇ·": list.AddRange(new[] { "sya", "sha", "silya", "sixya" }); break;
+            case "ÇµÇ„": list.AddRange(new[] { "syu", "shu", "silyu", "sixyu" }); break;
+            case "ÇµÇÂ": list.AddRange(new[] { "syo", "sho", "silyo", "sixyo" }); break;
             case "Ç∂Ç·": list.AddRange(new[] { "ja", "jya", "jilya", "jixya" }); break;
             case "Ç∂Ç„": list.AddRange(new[] { "ju", "jyu", "jilyu", "jixyu" }); break;
             case "Ç∂ÇÂ": list.AddRange(new[] { "jo", "jyo", "jilyo", "jixyo" }); break;
