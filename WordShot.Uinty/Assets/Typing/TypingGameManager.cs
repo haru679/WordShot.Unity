@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -6,8 +6,8 @@ using UnityEngine.InputSystem;
 [System.Serializable]
 public class TypingData
 {
-    public string ruby;          // ƒ‹ƒr
-    public string targetText;    // •\¦ƒeƒLƒXƒg
+    public string ruby;          // ãƒ«ãƒ“
+    public string targetText;    // è¡¨ç¤ºãƒ†ã‚­ã‚¹ãƒˆ
 }
 
 public class TypingGameManager : MonoBehaviour
@@ -27,16 +27,16 @@ public class TypingGameManager : MonoBehaviour
     private int currentQuestionIndex = 0;
     private TypingData currentData;
 
-    private List<string> activePatterns = new List<string>(); // ‚±‚Ì‚¨‘è‚Å‰Â”\‚È‘Sƒ[ƒ}šƒpƒ^[ƒ“
-    private string currentInput = ""; // ƒvƒŒƒCƒ„[‚ª¡‚Ü‚Å‚É‘Å‚Á‚½•¶š—ñ
+    private List<string> activePatterns = new List<string>(); // ã“ã®ãŠé¡Œã§å¯èƒ½ãªå…¨ãƒ­ãƒ¼ãƒå­—ãƒ‘ã‚¿ãƒ¼ãƒ³
+    private string currentInput = ""; // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒä»Šã¾ã§ã«æ‰“ã£ãŸæ–‡å­—åˆ—
 
-    // Œ»İ‚Ì‚¨‘è‚Ìƒ^ƒCƒvƒ~ƒX”
+    // ç¾åœ¨ã®ãŠé¡Œã®ã‚¿ã‚¤ãƒ—ãƒŸã‚¹æ•°
     private int currentMistakeCount = 0;
 
-    // ‘S‚Ä‚Ì‚¨‘è‚Ì‡Œvƒ^ƒCƒvƒ~ƒX”
+    // å…¨ã¦ã®ãŠé¡Œã®åˆè¨ˆã‚¿ã‚¤ãƒ—ãƒŸã‚¹æ•°
     private int totalMistakeCount = 0;
 
-    // ‰ğ‚­‘S‚Ä‚ÌƒtƒŒ[ƒ€‚Å•¶š“ü—ÍƒCƒxƒ“ƒg‚ª”­¶‚µ‚½‚©
+    // è§£ãå…¨ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã§æ–‡å­—å…¥åŠ›å±…ãƒãƒ³ãƒˆãŒç™ºç”Ÿã—ãŸã‹
     private bool receivedTextInput = false;
 
     void Start()
@@ -54,7 +54,7 @@ public class TypingGameManager : MonoBehaviour
             return;
         }
 
-        // ‰pšƒL[‚ÆL‚Î‚µ–_‚ğ‰Ÿ‚µ‚½uŠÔ‚¾‚¯Šm”F
+        // è‹±å­—ã‚­ãƒ¼ã¨ä¼¸ã°ã—æ£’ã‚’æŠ¼ã—ãŸç¬é–“ã ã‘ç¢ºèª
         bool keyPressed = Keyboard.current.aKey.wasPressedThisFrame ||
                           Keyboard.current.bKey.wasPressedThisFrame ||
                           Keyboard.current.cKey.wasPressedThisFrame ||
@@ -85,8 +85,8 @@ public class TypingGameManager : MonoBehaviour
 
         if (keyPressed)
         {
-            // ‰Ÿ‚³‚ê‚½ƒL[‚É‘Î‰‚·‚é•¶š‚ğŒŸo‚µ‚Ä ProcessInput ‚ğŒÄ‚Ô
-            // ‚±‚±‚Å‚Í—Dæ‡ˆÊ‚Æ‚µ‚ÄÅ‰‚ÉŒ©‚Â‚©‚Á‚½ƒL[‚Ì‚İˆ—‚·‚é
+            // æŠ¼ã•ã‚ŒãŸã‚­ãƒ¼ã«å¯¾å¿œã™ã‚‹æ–‡å­—ã‚’æ¤œå‡ºã—ã¦ ProcessInput ã‚’å‘¼ã¶
+            // ã“ã“ã§ã¯å„ªå…ˆé †ä½ã¨ã—ã¦æœ€åˆã«è¦‹ã¤ã‹ã£ãŸã‚­ãƒ¼ã®ã¿å‡¦ç†ã™ã‚‹
             const string allowed = "abcdefghijklmnopqrstuvwxyz-";
             foreach (char c in allowed)
             {
@@ -101,36 +101,36 @@ public class TypingGameManager : MonoBehaviour
 
     private void CountMistake()
     {
-        // Œ»İ‚Ì‚¨‘è‚Ìƒ^ƒCƒvƒ~ƒX”
+        // ç¾åœ¨ã®ãŠé¡Œã®ã‚¿ã‚¤ãƒ—ãƒŸã‚¹æ•°
         currentMistakeCount++;
 
-        // ‘S‚Ä‚Ì‚¨‘è‚Ì‡Œvƒ^ƒCƒvƒ~ƒX”
+        // å…¨ã¦ã®ãŠé¡Œã®åˆè¨ˆã‚¿ã‚¤ãƒ—ãƒŸã‚¹æ•°
         totalMistakeCount++;
 
         UpdateMistakeCountDisplay();
 
-        // ƒ~ƒX—pƒAƒCƒRƒ“‚ğ‰E’[‚©‚ç1ŒÂŒ¸‚ç‚·
+        // ï¿½~ï¿½Xï¿½pï¿½Aï¿½Cï¿½Rï¿½ï¿½ï¿½ï¿½ï¿½Eï¿½[ï¿½ï¿½ï¿½ï¿½1ï¿½ÂŒï¿½ï¿½ç‚·
         if (typingMissDisplay != null)
         {
             typingMissDisplay.DecreaseCount();
 
-            // ƒAƒCƒRƒ“‚ª‚·‚×‚Ä‚È‚­‚È‚Á‚½‚çŸ‚Ì‚¨‘è‚Ö
+            // ï¿½Aï¿½Cï¿½Rï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×‚Ä‚È‚ï¿½ï¿½È‚ï¿½ï¿½ï¿½ï¿½çŸï¿½Ì‚ï¿½ï¿½ï¿½ï¿½ï¿½
             if (typingMissDisplay.GetCount() <= 0)
             {
-                // Œ»İ‚Ì‚¨‘è‚ÌŸ‚Ì‚¨‘è‚Öi‚Ş
+                // ï¿½ï¿½ï¿½İ‚Ì‚ï¿½ï¿½ï¿½ï¿½Ìï¿½ï¿½Ì‚ï¿½ï¿½ï¿½ï¿½Öiï¿½ï¿½
                 int nextIndex = (currentQuestionIndex + 1) % typingList.Count;
                 LoadRandomQuestion();
             }
         }
 
-        Debug.Log($"¡‰ñ‚Ì‚¨‘èF{currentMistakeCount}‰ñ");
+        Debug.Log($"ï¿½ï¿½ï¿½ï¿½ï¿½Ì‚ï¿½ï¿½ï¿½ï¿½F{currentMistakeCount}ï¿½ï¿½");
     }
 
     private void UpdateMistakeCountDisplay()
     {
         if (mistakeCountTextUI != null)
         {
-            mistakeCountTextUI.text = $"ƒ^ƒCƒvƒ~ƒX : {currentMistakeCount}‰ñ";
+            mistakeCountTextUI.text = $"ã‚¿ã‚¤ãƒ—ãƒŸã‚¹ : {currentMistakeCount}å›";
         }
     }
 
@@ -170,28 +170,44 @@ public class TypingGameManager : MonoBehaviour
 
         if (isCompleteMatch)
         {
-            // ³‰ğ‚µ‚½‚çƒ{ƒXHP‚ğ1Œ¸‚ç‚·
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½{ï¿½XHPï¿½ï¿½1ï¿½ï¿½ï¿½ç‚·
             if (bossHPBar != null)
             {
                 bossHPBar.TakeDamage(1);
 
-                // ƒ{ƒXHP‚ª0‚É‚È‚Á‚½‚çƒQ[ƒ€ƒNƒŠƒA
+                // ï¿½{ï¿½XHPï¿½ï¿½0ï¿½É‚È‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Qï¿½[ï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½A
                 if (bossHPBar.GetCurrentHP() <= 0)
                 {
                     rubyTextUI.text = "";
-                    targetTextUI.text = $"ƒNƒŠƒAI\n‡Œvƒ^ƒCƒvƒ~ƒXF{totalMistakeCount}‰ñ";
+                    targetTextUI.text = $"ï¿½Nï¿½ï¿½ï¿½Aï¿½I\nï¿½ï¿½ï¿½vï¿½^ï¿½Cï¿½vï¿½~ï¿½Xï¿½F{totalMistakeCount}ï¿½ï¿½";
                     inputTextUI.text = "";
                     return;
                 }
             }
 
-            // ƒ{ƒXHP‚ªc‚Á‚Ä‚¢‚ê‚ÎAŸ‚Ì‚¨‘è‚ğƒ‰ƒ“ƒ_ƒ€‚É•\¦
+            // ï¿½{ï¿½XHPï¿½ï¿½ï¿½cï¿½ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½ï¿½ÎAï¿½ï¿½ï¿½Ì‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½É•\ï¿½ï¿½
             LoadRandomQuestion();
         }
         else if (isValidPrefix)
         {
             currentInput = nextInput;
             UpdateInputDisplay();
+
+            if (isCompleteMatch)
+            {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < typingList.Count)
+                {
+                    LoadQuestion(currentQuestionIndex);
+                }
+                else
+                {
+                    rubyTextUI.text = "";
+                    // ã“ã“ã¯æ–‡å­—åˆ—è£œé–“ãŒå¿…è¦ã ã£ãŸãŸã‚ $ ã‚’è¿½åŠ 
+                    targetTextUI.text = $"ã‚¯ãƒªã‚¢ï¼\nåˆè¨ˆã‚¿ã‚¤ãƒ—ãƒŸã‚¹ï¼š{totalMistakeCount}å›";
+                    inputTextUI.text = "";
+                }
+            }
         }
         else
         {
@@ -206,7 +222,7 @@ public class TypingGameManager : MonoBehaviour
             return false;
         }
 
-        // ‘å•¶š¬•¶š‚ğ“ˆê
+        // å¤§æ–‡å­—å°æ–‡å­—ã‚’çµ±ä¸€
         c = char.ToLowerInvariant(c);
 
         switch (c)
@@ -239,7 +255,7 @@ public class TypingGameManager : MonoBehaviour
             case 'z': return Keyboard.current.zKey.wasPressedThisFrame;
             case '-': return Keyboard.current.minusKey.wasPressedThisFrame;
 
-            default: return false; // ‘¼‚Ì•¶š‚Í–³‹
+            default: return false; // ä»–ã®æ–‡å­—ã¯ç„¡è¦–
         }
     }
 
@@ -250,7 +266,7 @@ public class TypingGameManager : MonoBehaviour
             return;
         }
 
-        // ‚¨‘è‚ªˆê‚Â‘«‚©‚È‚¢ê‡‚ÍA‚»‚Ì‚¨‘è‚ğ•\¦‚·‚é
+        // ï¿½ï¿½ï¿½è‚ªï¿½ï¿½ï¿½Â‘ï¿½ï¿½ï¿½ï¿½È‚ï¿½ï¿½ê‡ï¿½ÍAï¿½ï¿½ï¿½Ì‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         if (typingList.Count == 1)
         {
             LoadQuestion(0);
@@ -259,7 +275,7 @@ public class TypingGameManager : MonoBehaviour
 
         int randomIndex = Random.Range(0, typingList.Count);
 
-        // ‘O‰ñ‚Æ“¯‚¶‚¨‘è‚ª‘I‚Î‚ê‚½ê‡‚ÍA‚à‚¤ˆê“x’Š‘I
+        // ï¿½Oï¿½ï¿½ï¿½Æ“ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½è‚ªï¿½Iï¿½Î‚ê‚½ï¿½ê‡ï¿½ÍAï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½ï¿½ï¿½I
         do
         {
             randomIndex = Random.Range(0, typingList.Count);
@@ -274,13 +290,13 @@ public class TypingGameManager : MonoBehaviour
         currentQuestionIndex = index;
         currentData = typingList[index];
 
-        // “ü—Íó‘Ô‚ğƒŠƒZƒbƒg
+        // å…¥åŠ›çŠ¶æ…‹ã‚’ãƒªã‚»ãƒƒãƒˆ
         currentInput = "";
 
-        // Œ»İ‚Ì‚¨‘è‚Ìƒ^ƒCƒvƒ~ƒX”‚¾‚¯ƒŠƒZƒbƒg
+        // ç¾åœ¨ã®ãŠé¡Œã®ã‚¿ã‚¤ãƒ—ãƒŸã‚¹æ•°ã ã‘ãƒªã‚»ãƒƒãƒˆ
         currentMistakeCount = 0;
 
-        // •\¦‚à0‰ñ‚É–ß‚·
+        // è¡¨ç¤ºã‚‚0å›ã«æˆ»ã™
         UpdateMistakeCountDisplay();
 
         if(typingMissDisplay != null)
@@ -291,19 +307,19 @@ public class TypingGameManager : MonoBehaviour
         rubyTextUI.text = currentData.ruby;
         targetTextUI.text = currentData.targetText;
 
-        // 1. ‚Ğ‚ç‚ª‚È‚ğ‰¹ß‚É•ª‰ğ
+        // 1. ã²ã‚‰ãŒãªã‚’éŸ³ç¯€ã«åˆ†è§£
         var syllables = RomajiEngine.Parse(currentData.ruby);
 
-        // 2. ‰¹ß‚Ì‘g‚İ‡‚í‚¹‚©‚çA‰Â”\‚È‘Sƒ[ƒ}šƒpƒ^[ƒ“‚ğ©“®¶¬
+        // 2. éŸ³ç¯€ã®çµ„ã¿åˆã‚ã›ã‹ã‚‰ã€å¯èƒ½ãªå…¨ãƒ­ãƒ¼ãƒå­—ãƒ‘ã‚¿ãƒ¼ãƒ³ã‚’è‡ªå‹•ç”Ÿæˆ
         activePatterns = RomajiEngine.GenerateAllPatterns(syllables);
 
         UpdateInputDisplay();
     }
 
-    // 3’i–Ú‚Ì“®“IF•ª‚¯•\¦i‘Å‚Á‚½•û‚É‡‚í‚¹‚ÄƒKƒCƒh‚ª•Ï‰»‚·‚éƒXƒ^ƒCƒ‹j
+    // 3æ®µç›®ã®å‹•çš„è‰²åˆ†ã‘è¡¨ç¤ºï¼ˆæ‰“ã£ãŸæ–¹ã«åˆã‚ã›ã¦ã‚¬ã‚¤ãƒ‰ãŒå¤‰åŒ–ã™ã‚‹ã‚¹ã‚¿ã‚¤ãƒ«ï¼‰
     private void UpdateInputDisplay()
     {
-        // Œ»İ‚Ì“ü—Í‚Éˆê”ÔƒtƒBƒbƒg‚µ‚Ä‚¢‚éi‘O•ûˆê’v‚·‚éjƒpƒ^[ƒ“‚ğƒxƒXƒgƒ}ƒbƒ`‚Æ‚µ‚ÄÌ—p
+        // ç¾åœ¨ã®å…¥åŠ›ã«ä¸€ç•ªãƒ•ã‚£ãƒƒãƒˆã—ã¦ã„ã‚‹ï¼ˆå‰æ–¹ä¸€è‡´ã™ã‚‹ï¼‰ãƒ‘ã‚¿ãƒ¼ãƒ³ã‚’ãƒ™ã‚¹ãƒˆãƒãƒƒãƒã¨ã—ã¦æ¡ç”¨
         string bestMatchedPattern = activePatterns.Count > 0 ? activePatterns[0] : "";
         foreach (string pattern in activePatterns)
         {
@@ -318,7 +334,7 @@ public class TypingGameManager : MonoBehaviour
         string typedPart = typedLen > 0 ? bestMatchedPattern.Substring(0, typedLen) : "";
         string untypedPart = (typedLen < bestMatchedPattern.Length) ? bestMatchedPattern.Substring(typedLen) : "";
 
-        // ”’i‘Å‚Á‚½•”•ªj‚ÆƒOƒŒ[i‚±‚ê‚©‚ç‚Ì•”•ªj‚ÅƒŠƒAƒ‹ƒ^ƒCƒ€•\¦
+        // ç™½ï¼ˆæ‰“ã£ãŸéƒ¨åˆ†ï¼‰ã¨ã‚°ãƒ¬ãƒ¼ï¼ˆã“ã‚Œã‹ã‚‰ã®éƒ¨åˆ†ï¼‰ã§ãƒªã‚¢ãƒ«ã‚¿ã‚¤ãƒ è¡¨ç¤º
         inputTextUI.text = $"<color=#FFFFFF>{typedPart}</color><color=#808080>{untypedPart}</color>";
     }
 }

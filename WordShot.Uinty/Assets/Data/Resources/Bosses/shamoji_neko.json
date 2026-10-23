@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "id": "shamoji_neko",
+  "name": "しゃもじ猫",
+  "hp": 100,
+  "attackInterval": 2.0,
+  "sprite": "",
+  "bgm": "",
+  "words": [
+    { "text": "猫じゃらし", "reading": "ねこじゃらし" },
+    { "text": "またたび", "reading": "またたび" },
+    { "text": "鰹節", "reading": "かつおぶし" },
+    { "text": "肉球", "reading": "にくきゅう" }
+  ],
+  "attacks": [
+    {
+      "type": "bullet",
+      "skillName": "しゃも箒!!",
+      "line": "ちりはきえるしゃもねぇ",
+      "onomatopoeia": "ダダにゃ!!"
+    }
+  ]
+}

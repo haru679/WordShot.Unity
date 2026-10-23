@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -21,6 +22,8 @@ namespace WordShot.Flow
         [SerializeField] Button resumeButton;
         [SerializeField] Button retryButton;
         [SerializeField] Button soundButton;
+        [Tooltip("言語を切り替えるボタン（なくても動く）")]
+        [SerializeField] Button languageButton;
         [SerializeField] Button backButton;
         [SerializeField] SoundSettingsPanel soundSettings;
 
@@ -87,9 +90,9 @@ namespace WordShot.Flow
         // 上下キーで、表示しているボタンの間だけを移動するようにする
         void LinkNavigation()
         {
-            Button[] buttons = retryButton.gameObject.activeSelf
-                ? new[] { resumeButton, retryButton, soundButton, backButton }
-                : new[] { resumeButton, soundButton, backButton };
+            Button[] buttons = new[] { resumeButton, retryButton, soundButton, languageButton, backButton }
+                .Where(button => button != null && button.gameObject.activeSelf)
+                .ToArray();
 
             for (int i = 0; i < buttons.Length; i++)
             {

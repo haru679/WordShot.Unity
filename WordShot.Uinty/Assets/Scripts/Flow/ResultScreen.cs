@@ -2,6 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using WordShot.Data;
 
 namespace WordShot.Flow
 {
@@ -9,7 +10,7 @@ namespace WordShot.Flow
     /// リザルト画面。GameFlow.LastResult を表示し、リトライかタイトルへ進む。
     /// </summary>
     /// <remarks>
-    /// 日本語フォントが決まるまでは、文字化けしないよう表示は英語にしている。
+    /// 今は使っていない（ゲームオーバーはその場で表示し、クリア後はステージセレクトへ戻る）。
     /// </remarks>
     public class ResultScreen : MonoBehaviour
     {
@@ -25,13 +26,16 @@ namespace WordShot.Flow
             if (result == null)
             {
                 // リザルトシーンを直接再生したとき
-                resultText.text = "NO RESULT";
-                detailText.text = "Play a stage first";
+                resultText.text = Localization.TranslateOrSame("まだ結果がありません");
+                detailText.text = Localization.TranslateOrSame("先にステージを遊んでください");
                 retryButton.interactable = false;
             }
             else
             {
-                resultText.text = result.IsCleared ? "CLEAR!" : "GAME OVER";
+                // 翻訳が必要な文字を編集画面が自動で集められるよう、文字は TranslateOrSame の中に直接書く
+                resultText.text = result.IsCleared
+                    ? Localization.TranslateOrSame("クリア！")
+                    : Localization.TranslateOrSame("ゲームオーバー");
                 detailText.text = $"{result.StageScene}   Time {result.PlayTime:0.0}s";
             }
 

@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad32eea9a308baf48aa1d1c802eeb5e8, type: 3}
+  m_Name: BGMManager
+  m_EditorClassIdentifier: Assembly-CSharp::WordShot.Events.StateEventData
+  setups:
+  - memo: "\u25B6 \u30B2\u30FC\u30E0/Cleared \u2192 \u52B9\u679C\u97F3\u3092\u9CF4\u3089\u3059"
+    when:
+      group: WordShot.Events.GameState
+      value: Cleared
+    onlyWhile:
+    - group: WordShot.Events.GameState
+      value: 
+    actions:
+    - rid: 5974847843992076370
+    testPlay: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 5974847843992076370
+      type: {class: PlaySoundAction, ns: WordShot.Events, asm: Assembly-CSharp}
+      data:
+        cue: {fileID: 0}
+        cueName: 

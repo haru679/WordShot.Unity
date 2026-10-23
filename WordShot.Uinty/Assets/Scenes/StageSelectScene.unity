@@ -1317,6 +1317,7 @@ GameObject:
   - component: {fileID: 1617710964}
   - component: {fileID: 1617710963}
   - component: {fileID: 1617710962}
+  - component: {fileID: 1617710965}
   m_Layer: 0
   m_Name: Help
   m_TagString: Untagged
@@ -1344,7 +1345,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'A / D: Move    W / Space: Jump    Enter: Select    Esc: Pause'
+  m_text: "A / D\uFF1A\u79FB\u52D5\u3000W / Space\uFF1A\u30B8\u30E3\u30F3\u30D7\u3000Enter\uFF1A\u6C7A\u5B9A\u3000Esc\uFF1A\u30DD\u30FC\u30BA"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1487,6 +1488,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 2.6}
   m_SizeDelta: {x: 10, y: 2}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1617710965
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1617710961}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c81ae3a83a9294469a71813a7c6a15d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WordShot.Data.LocalizedText
+  japanese: "A / D\uFF1A\u79FB\u52D5\u3000W / Space\uFF1A\u30B8\u30E3\u30F3\u30D7\u3000Enter\uFF1A\u6C7A\u5B9A\u3000Esc\uFF1A\u30DD\u30FC\u30BA"
 --- !u!1001 &1722968482
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2008,6 +2022,7 @@ GameObject:
   - component: {fileID: 1825877159}
   - component: {fileID: 1825877158}
   - component: {fileID: 1825877157}
+  - component: {fileID: 1825877160}
   m_Layer: 0
   m_Name: Title
   m_TagString: Untagged
@@ -2035,7 +2050,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: STAGE SELECT
+  m_text: "\u30B9\u30C6\u30FC\u30B8\u30BB\u30EC\u30AF\u30C8"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2178,6 +2193,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 3.6}
   m_SizeDelta: {x: 10, y: 2}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1825877160
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1825877156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c81ae3a83a9294469a71813a7c6a15d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WordShot.Data.LocalizedText
+  japanese: "\u30B9\u30C6\u30FC\u30B8\u30BB\u30EC\u30AF\u30C8"
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

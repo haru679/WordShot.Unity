@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using WordShot.Data;
 using WordShot.Flow;
 using WordShot.Sounds;
 
@@ -54,12 +55,14 @@ namespace WordShot.Stages
         void OnEnable()
         {
             StageProgress.Changed += Refresh;
+            GameLanguage.Changed += Refresh;   // 言語を変えたら、名前も出し直す
             Refresh();
         }
 
         void OnDisable()
         {
             StageProgress.Changed -= Refresh;
+            GameLanguage.Changed -= Refresh;
         }
 
         void Update()
@@ -133,12 +136,15 @@ namespace WordShot.Stages
             UpdatePrompt();
         }
 
+        // ボスが決まっているステージは、ボスの名前を出す（今の言語で）
         string LabelText(bool unlocked)
         {
             if (stage == null) return "(no stage)";
-            if (!unlocked) return $"{stage.DisplayName}\nLOCKED";
-            if (StageProgress.IsCleared(stage)) return $"{stage.DisplayName}\nCLEAR";
-            return stage.DisplayName;
+
+            string name = stage.Boss?.DisplayName ?? Localization.TranslateOrSame(stage.DisplayName);
+            if (!unlocked) return $"{name}\n{Localization.TranslateOrSame("ロック中")}";
+            if (StageProgress.IsCleared(stage)) return $"{name}\n{Localization.TranslateOrSame("クリア")}";
+            return name;
         }
 
         // ロック中は「Enter」の案内を出さない（LOCKED の表示で分かるようにする）

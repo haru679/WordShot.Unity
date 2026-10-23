@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 public static class RomajiEngine
@@ -9,7 +9,7 @@ public static class RomajiEngine
         public List<string> romajis;
     }
 
-    // ‚Ğ‚ç‚ª‚È‚©‚ç‰¹ßƒŠƒXƒg‚ğ¶¬‚·‚é
+    // ã²ã‚‰ãŒãªã‹ã‚‰éŸ³ç¯€ãƒªã‚¹ãƒˆã‚’ç”Ÿæˆã™ã‚‹
     public static List<Syllable> Parse(string hiraText)
     {
         List<Syllable> result = new List<Syllable>();
@@ -17,15 +17,15 @@ public static class RomajiEngine
 
         while (i < hiraText.Length)
         {
-            // ¬‚³‚¢u‚Áv‚Ìˆ—
-            if (hiraText[i] == '‚Á')
+            // å°ã•ã„ã€Œã£ã€ã®å‡¦ç†
+            if (hiraText[i] == 'ã£')
             {
-                // u‚Áv‚ªÅŒã‚É‚ ‚éê‡
+                // ã€Œã£ã€ãŒæœ€å¾Œã«ã‚ã‚‹å ´åˆ
                 if (i + 1 >= hiraText.Length)
                 {
                     result.Add(new Syllable
                     {
-                        hira = "‚Á",
+                        hira = "ã£",
                         romajis = new List<string> { "xtsu", "ltsu" }
                     });
 
@@ -33,11 +33,11 @@ public static class RomajiEngine
                     continue;
                 }
 
-                // u‚Áv‚ÌŸ‚Ì‰¹ß‚ğæ“¾‚·‚é
+                // ã€Œã£ã€ã®æ¬¡ã®éŸ³ç¯€ã‚’å–å¾—ã™ã‚‹
                 int nextIndex = i + 1;
                 string nextKey = hiraText.Substring(nextIndex, 1);
 
-                // Ÿ‚Ì•¶š‚ªu‚áE‚ãE‚åv‚È‚çX‰¹‚Æ‚µ‚Äˆµ‚¤
+                // æ¬¡ã®æ–‡å­—ãŒã€Œã‚ƒãƒ»ã‚…ãƒ»ã‚‡ã€ãªã‚‰æ‹—éŸ³ã¨ã—ã¦æ‰±ã†
                 if (nextIndex + 1 < hiraText.Length)
                 {
                     string twoChars = hiraText.Substring(nextIndex, 2);
@@ -48,7 +48,7 @@ public static class RomajiEngine
                     }
                 }
 
-                // Ÿ‚Ì‰¹ß‚Ìƒ[ƒ}šŒó•â‚ğæ“¾‚·‚é
+                // æ¬¡ã®éŸ³ç¯€ã®ãƒ­ãƒ¼ãƒå­—å€™è£œã‚’å–å¾—ã™ã‚‹
                 List<string> nextVariants = GenerateVariants(nextKey);
                 List<string> sokuonVariants = new List<string>();
 
@@ -61,7 +61,7 @@ public static class RomajiEngine
 
                     char first = romaji[0];
 
-                    // •ê‰¹‚ÆunvˆÈŠO‚Ìæ“ªq‰¹‚ğd‚Ë‚é
+                    // æ¯éŸ³ã¨ã€Œnã€ä»¥å¤–ã®å…ˆé ­å­éŸ³ã‚’é‡ã­ã‚‹
                     if (IsSokuonConsonant(first))
                     {
                         string candidate = first + romaji;
@@ -73,12 +73,12 @@ public static class RomajiEngine
                     }
                 }
 
-                // q‰¹‚ğd‚Ë‚ç‚ê‚éê‡‚Íu‚Áv‚ÆŸ‚Ì‰¹ß‚ğ‚Ü‚Æ‚ß‚é
+                // å­éŸ³ã‚’é‡ã­ã‚‰ã‚Œã‚‹å ´åˆã¯ã€Œã£ã€ã¨æ¬¡ã®éŸ³ç¯€ã‚’ã¾ã¨ã‚ã‚‹
                 if (sokuonVariants.Count > 0)
                 {
                     result.Add(new Syllable
                     {
-                        hira = "‚Á" + nextKey,
+                        hira = "ã£" + nextKey,
                         romajis = sokuonVariants
                     });
 
@@ -86,10 +86,10 @@ public static class RomajiEngine
                 }
                 else
                 {
-                    // Ÿ‚ª•ê‰¹‚È‚Ç‚Ìê‡‚Íu‚Áv‚ğ“Æ—§‚³‚¹‚é
+                    // æ¬¡ãŒæ¯éŸ³ãªã©ã®å ´åˆã¯ã€Œã£ã€ã‚’ç‹¬ç«‹ã•ã›ã‚‹
                     result.Add(new Syllable
                     {
-                        hira = "‚Á",
+                        hira = "ã£",
                         romajis = new List<string> { "xtsu", "ltsu" }
                     });
 
@@ -99,7 +99,7 @@ public static class RomajiEngine
                 continue;
             }
 
-            // ’Êí‚Ì‰¹ß‚ğæ“¾‚·‚é
+            // é€šå¸¸ã®éŸ³ç¯€ã‚’å–å¾—ã™ã‚‹
             string key = hiraText.Substring(i, 1);
 
             if (i + 1 < hiraText.Length)
@@ -121,161 +121,161 @@ public static class RomajiEngine
             i += key.Length;
         }
 
-        // u‚ñv‚Ìˆ—‚ÍŸ‚Ìè‡‚ÅC³‚·‚é
+        // ã€Œã‚“ã€ã®å‡¦ç†ã¯æ¬¡ã®æ‰‹é †ã§ä¿®æ­£ã™ã‚‹
         return result;
     }
 
-    // ‚Ğ‚ç‚ª‚È1‚Âi‚Ü‚½‚Í2‚Âj‚©‚çAˆê”Ê“I‚Èƒ[ƒ}š‚Ì‚ä‚ç‚¬‚ğ©“®–Ô—…‚·‚éƒƒWƒbƒN
+    // ã²ã‚‰ãŒãª1ã¤ï¼ˆã¾ãŸã¯2ã¤ï¼‰ã‹ã‚‰ã€ä¸€èˆ¬çš„ãªãƒ­ãƒ¼ãƒå­—ã®ã‚†ã‚‰ãã‚’è‡ªå‹•ç¶²ç¾…ã™ã‚‹ãƒ­ã‚¸ãƒƒã‚¯
     private static List<string> GenerateVariants(string hira)
     {
         List<string> list = new List<string>();
 
         switch (hira)
         {
-            // ‚ s
-            case "‚ ": list.AddRange(new[] { "a" }); break;
-            case "‚¢": list.AddRange(new[] { "i", "yi" }); break;
-            case "‚¤": list.AddRange(new[] { "u", "wu", "whu" }); break;
-            case "‚¦": list.AddRange(new[] { "e" }); break;
-            case "‚¨": list.AddRange(new[] { "o" }); break;
+            // ã‚è¡Œ
+            case "ã‚": list.AddRange(new[] { "a" }); break;
+            case "ã„": list.AddRange(new[] { "i", "yi" }); break;
+            case "ã†": list.AddRange(new[] { "u", "wu", "whu" }); break;
+            case "ãˆ": list.AddRange(new[] { "e" }); break;
+            case "ãŠ": list.AddRange(new[] { "o" }); break;
 
-            // ‚©s
-            case "‚©": list.AddRange(new[] { "ka", "ca" }); break;
-            case "‚«": list.AddRange(new[] { "ki" }); break;
-            case "‚­": list.AddRange(new[] { "ku", "cu", "qu" }); break;
-            case "‚¯": list.AddRange(new[] { "ke" }); break;
-            case "‚±": list.AddRange(new[] { "ko", "co" }); break;
+            // ã‹è¡Œ
+            case "ã‹": list.AddRange(new[] { "ka", "ca" }); break;
+            case "ã": list.AddRange(new[] { "ki" }); break;
+            case "ã": list.AddRange(new[] { "ku", "cu", "qu" }); break;
+            case "ã‘": list.AddRange(new[] { "ke" }); break;
+            case "ã“": list.AddRange(new[] { "ko", "co" }); break;
 
-            // ‚³s
-            case "‚³": list.AddRange(new[] { "sa" }); break;
-            case "‚µ": list.AddRange(new[] { "si", "shi", "ci" }); break;
-            case "‚·": list.AddRange(new[] { "su" }); break;
-            case "‚¹": list.AddRange(new[] { "se", "ce" }); break;
-            case "‚»": list.AddRange(new[] { "so" }); break;
+            // ã•è¡Œ
+            case "ã•": list.AddRange(new[] { "sa" }); break;
+            case "ã—": list.AddRange(new[] { "shi", "si", "ci" }); break;
+            case "ã™": list.AddRange(new[] { "su" }); break;
+            case "ã›": list.AddRange(new[] { "se", "ce" }); break;
+            case "ã": list.AddRange(new[] { "so" }); break;
 
-            // ‚½s
-            case "‚½": list.AddRange(new[] { "ta" }); break;
-            case "‚¿": list.AddRange(new[] { "ti", "chi" }); break;
-            case "‚Â": list.AddRange(new[] { "tu", "tsu" }); break;
-            case "‚Ä": list.AddRange(new[] { "te" }); break;
-            case "‚Æ": list.AddRange(new[] { "to" }); break;
+            // ãŸè¡Œ
+            case "ãŸ": list.AddRange(new[] { "ta" }); break;
+            case "ã¡": list.AddRange(new[] { "chi", "ti" }); break;
+            case "ã¤": list.AddRange(new[] { "tsu", "tu" }); break;
+            case "ã¦": list.AddRange(new[] { "te" }); break;
+            case "ã¨": list.AddRange(new[] { "to" }); break;
 
-            // ‚Ès
-            case "‚È": list.AddRange(new[] { "na" }); break;
-            case "‚É": list.AddRange(new[] { "ni" }); break;
-            case "‚Ê": list.AddRange(new[] { "nu" }); break;
-            case "‚Ë": list.AddRange(new[] { "ne" }); break;
-            case "‚Ì": list.AddRange(new[] { "no" }); break;
+            // ãªè¡Œ
+            case "ãª": list.AddRange(new[] { "na" }); break;
+            case "ã«": list.AddRange(new[] { "ni" }); break;
+            case "ã¬": list.AddRange(new[] { "nu" }); break;
+            case "ã­": list.AddRange(new[] { "ne" }); break;
+            case "ã®": list.AddRange(new[] { "no" }); break;
 
-            // ‚Ís
-            case "‚Í": list.AddRange(new[] { "ha" }); break;
-            case "‚Ğ": list.AddRange(new[] { "hi" }); break;
-            case "‚Ó": list.AddRange(new[] { "hu", "fu" }); break;
-            case "‚Ö": list.AddRange(new[] { "he" }); break;
-            case "‚Ù": list.AddRange(new[] { "ho" }); break;
+            // ã¯è¡Œ
+            case "ã¯": list.AddRange(new[] { "ha" }); break;
+            case "ã²": list.AddRange(new[] { "hi" }); break;
+            case "ãµ": list.AddRange(new[] { "hu", "fu" }); break;
+            case "ã¸": list.AddRange(new[] { "he" }); break;
+            case "ã»": list.AddRange(new[] { "ho" }); break;
 
-            // ‚Üs
-            case "‚Ü": list.AddRange(new[] { "ma" }); break;
-            case "‚İ": list.AddRange(new[] { "mi" }); break;
-            case "‚Ş": list.AddRange(new[] { "mu" }); break;
-            case "‚ß": list.AddRange(new[] { "me" }); break;
-            case "‚à": list.AddRange(new[] { "mo" }); break;
+            // ã¾è¡Œ
+            case "ã¾": list.AddRange(new[] { "ma" }); break;
+            case "ã¿": list.AddRange(new[] { "mi" }); break;
+            case "ã‚€": list.AddRange(new[] { "mu" }); break;
+            case "ã‚": list.AddRange(new[] { "me" }); break;
+            case "ã‚‚": list.AddRange(new[] { "mo" }); break;
 
-            // ‚âs
-            case "‚â": list.AddRange(new[] { "ya" }); break;
-            case "‚ä": list.AddRange(new[] { "yu" }); break;
-            case "‚æ": list.AddRange(new[] { "yo" }); break;
+            // ã‚„è¡Œ
+            case "ã‚„": list.AddRange(new[] { "ya" }); break;
+            case "ã‚†": list.AddRange(new[] { "yu" }); break;
+            case "ã‚ˆ": list.AddRange(new[] { "yo" }); break;
 
-            // ‚çs
-            case "‚ç": list.AddRange(new[] { "ra" }); break;
-            case "‚è": list.AddRange(new[] { "ri" }); break;
-            case "‚é": list.AddRange(new[] { "ru" }); break;
-            case "‚ê": list.AddRange(new[] { "re" }); break;
-            case "‚ë": list.AddRange(new[] { "ro" }); break;
+            // ã‚‰è¡Œ
+            case "ã‚‰": list.AddRange(new[] { "ra" }); break;
+            case "ã‚Š": list.AddRange(new[] { "ri" }); break;
+            case "ã‚‹": list.AddRange(new[] { "ru" }); break;
+            case "ã‚Œ": list.AddRange(new[] { "re" }); break;
+            case "ã‚": list.AddRange(new[] { "ro" }); break;
 
-            // ‚ísE‘¼
-            case "‚í": list.AddRange(new[] { "wa" }); break;
-            case "‚ğ": list.AddRange(new[] { "wo" }); break;
-            case "‚ñ": list.AddRange(new[] { "n", "nn"}); break;
+            // ã‚è¡Œãƒ»ä»–
+            case "ã‚": list.AddRange(new[] { "wa" }); break;
+            case "ã‚’": list.AddRange(new[] { "wo" }); break;
+            case "ã‚“": list.AddRange(new[] { "n", "nn"}); break;
 
-            // ‚ªs
-            case "‚ª": list.AddRange(new[] { "ga" }); break;
-            case "‚¬": list.AddRange(new[] { "gi" }); break;
-            case "‚®": list.AddRange(new[] { "gu" }); break;
-            case "‚°": list.AddRange(new[] { "ge" }); break;
-            case "‚²": list.AddRange(new[] { "go" }); break;
+            // ãŒè¡Œ
+            case "ãŒ": list.AddRange(new[] { "ga" }); break;
+            case "ã": list.AddRange(new[] { "gi" }); break;
+            case "ã": list.AddRange(new[] { "gu" }); break;
+            case "ã’": list.AddRange(new[] { "ge" }); break;
+            case "ã”": list.AddRange(new[] { "go" }); break;
 
-            // ‚´s
-            case "‚´": list.AddRange(new[] { "za" }); break;
-            case "‚¶": list.AddRange(new[] { "zi" }); break;
-            case "‚¸": list.AddRange(new[] { "zu" }); break;
-            case "‚º": list.AddRange(new[] { "ze" }); break;
-            case "‚¼": list.AddRange(new[] { "zo" }); break;
+            // ã–è¡Œ
+            case "ã–": list.AddRange(new[] { "za" }); break;
+            case "ã˜": list.AddRange(new[] { "zi" }); break;
+            case "ãš": list.AddRange(new[] { "zu" }); break;
+            case "ãœ": list.AddRange(new[] { "ze" }); break;
+            case "ã": list.AddRange(new[] { "zo" }); break;
 
-            // ‚¾s
-            case "‚¾": list.AddRange(new[] { "da" }); break;
-            case "‚À": list.AddRange(new[] { "di" }); break;
-            case "‚Ã": list.AddRange(new[] { "du" }); break;
-            case "‚Å": list.AddRange(new[] { "de" }); break;
-            case "‚Ç": list.AddRange(new[] { "do" }); break;
+            // ã è¡Œ
+            case "ã ": list.AddRange(new[] { "da" }); break;
+            case "ã¢": list.AddRange(new[] { "di" }); break;
+            case "ã¥": list.AddRange(new[] { "du" }); break;
+            case "ã§": list.AddRange(new[] { "de" }); break;
+            case "ã©": list.AddRange(new[] { "do" }); break;
 
-            // ‚Îs
-            case "‚Î": list.AddRange(new[] { "ba" }); break;
-            case "‚Ñ": list.AddRange(new[] { "bi" }); break;
-            case "‚Ô": list.AddRange(new[] { "bu" }); break;
-            case "‚×": list.AddRange(new[] { "be" }); break;
-            case "‚Ú": list.AddRange(new[] { "bo" }); break;
+            // ã°è¡Œ
+            case "ã°": list.AddRange(new[] { "ba" }); break;
+            case "ã³": list.AddRange(new[] { "bi" }); break;
+            case "ã¶": list.AddRange(new[] { "bu" }); break;
+            case "ã¹": list.AddRange(new[] { "be" }); break;
+            case "ã¼": list.AddRange(new[] { "bo" }); break;
 
-            // ‚Ïs
-            case "‚Ï": list.AddRange(new[] { "pa" }); break;
-            case "‚Ò": list.AddRange(new[] { "pi" }); break;
-            case "‚Õ": list.AddRange(new[] { "pu" }); break;
-            case "‚Ø": list.AddRange(new[] { "pe" }); break;
-            case "‚Û": list.AddRange(new[] { "po" }); break;
+            // ã±è¡Œ
+            case "ã±": list.AddRange(new[] { "pa" }); break;
+            case "ã´": list.AddRange(new[] { "pi" }); break;
+            case "ã·": list.AddRange(new[] { "pu" }); break;
+            case "ãº": list.AddRange(new[] { "pe" }); break;
+            case "ã½": list.AddRange(new[] { "po" }); break;
 
-            // X‰¹
-            case "‚«‚á": list.AddRange(new[] { "kya", "kilya", "kixya" }); break;
-            case "‚«‚ã": list.AddRange(new[] { "kyu", "kilyu", "kixyu" }); break;
-            case "‚«‚å": list.AddRange(new[] { "kyo", "kilyo", "kixyo" }); break;
-            case "‚¬‚á": list.AddRange(new[] { "gya", "gilya", "gixya" }); break;
-            case "‚¬‚ã": list.AddRange(new[] { "gyu", "gilyu", "gixyu" }); break;
-            case "‚¬‚å": list.AddRange(new[] { "gyo", "gilyo", "gixyo" }); break;
+            // æ‹—éŸ³
+            case "ãã‚ƒ": list.AddRange(new[] { "kya", "kilya", "kixya" }); break;
+            case "ãã‚…": list.AddRange(new[] { "kyu", "kilyu", "kixyu" }); break;
+            case "ãã‚‡": list.AddRange(new[] { "kyo", "kilyo", "kixyo" }); break;
+            case "ãã‚ƒ": list.AddRange(new[] { "gya", "gilya", "gixya" }); break;
+            case "ãã‚…": list.AddRange(new[] { "gyu", "gilyu", "gixyu" }); break;
+            case "ãã‚‡": list.AddRange(new[] { "gyo", "gilyo", "gixyo" }); break;
 
-            case "‚µ‚á": list.AddRange(new[] { "sya", "sha", "silya", "sixya" }); break;
-            case "‚µ‚ã": list.AddRange(new[] { "syu", "shu", "silyu", "sixyu" }); break;
-            case "‚µ‚å": list.AddRange(new[] { "syo", "sho", "silyo", "sixyo" }); break;
-            case "‚¶‚á": list.AddRange(new[] { "ja", "jya", "jilya", "jixya" }); break;
-            case "‚¶‚ã": list.AddRange(new[] { "ju", "jyu", "jilyu", "jixyu" }); break;
-            case "‚¶‚å": list.AddRange(new[] { "jo", "jyo", "jilyo", "jixyo" }); break;
+            case "ã—ã‚ƒ": list.AddRange(new[] { "sha", "sya", "silya", "sixya" }); break;
+            case "ã—ã‚…": list.AddRange(new[] { "shu", "syu", "silyu", "sixyu" }); break;
+            case "ã—ã‚‡": list.AddRange(new[] { "sho", "syo", "silyo", "sixyo" }); break;
+            case "ã˜ã‚ƒ": list.AddRange(new[] { "ja", "jya", "jilya", "jixya" }); break;
+            case "ã˜ã‚…": list.AddRange(new[] { "ju", "jyu", "jilyu", "jixyu" }); break;
+            case "ã˜ã‚‡": list.AddRange(new[] { "jo", "jyo", "jilyo", "jixyo" }); break;
 
-            case "‚¿‚á": list.AddRange(new[] { "tya", "cya", "cha", "tilya", "tixya" }); break;
-            case "‚¿‚ã": list.AddRange(new[] { "tyu", "cyu", "chu", "tilyu", "tixyu" }); break;
-            case "‚¿‚å": list.AddRange(new[] { "tyo", "cyo", "cho", "tilyo", "tixyo" }); break;
-            case "‚À‚á": list.AddRange(new[] { "dya", "dilya", "dixya" }); break;
-            case "‚À‚ã": list.AddRange(new[] { "dyu", "dilyu", "dixyu" }); break;
-            case "‚À‚å": list.AddRange(new[] { "dyo", "dilyo", "dixyo" }); break;
+            case "ã¡ã‚ƒ": list.AddRange(new[] { "tya", "cya", "cha", "tilya", "tixya" }); break;
+            case "ã¡ã‚…": list.AddRange(new[] { "tyu", "cyu", "chu", "tilyu", "tixyu" }); break;
+            case "ã¡ã‚‡": list.AddRange(new[] { "tyo", "cyo", "cho", "tilyo", "tixyo" }); break;
+            case "ã¢ã‚ƒ": list.AddRange(new[] { "dya", "dilya", "dixya" }); break;
+            case "ã¢ã‚…": list.AddRange(new[] { "dyu", "dilyu", "dixyu" }); break;
+            case "ã¢ã‚‡": list.AddRange(new[] { "dyo", "dilyo", "dixyo" }); break;
 
-            case "‚É‚á": list.AddRange(new[] { "nya", "nilya", "nixya" }); break;
-            case "‚É‚ã": list.AddRange(new[] { "nyu", "nilyu", "nixyu" }); break;
-            case "‚É‚å": list.AddRange(new[] { "nyo", "nilyo", "nixyo" }); break;
+            case "ã«ã‚ƒ": list.AddRange(new[] { "nya", "nilya", "nixya" }); break;
+            case "ã«ã‚…": list.AddRange(new[] { "nyu", "nilyu", "nixyu" }); break;
+            case "ã«ã‚‡": list.AddRange(new[] { "nyo", "nilyo", "nixyo" }); break;
 
-            case "‚Ğ‚á": list.AddRange(new[] { "hya", "hilya", "hixya" }); break;
-            case "‚Ğ‚ã": list.AddRange(new[] { "hyu", "hilyu", "hixyu" }); break;
-            case "‚Ğ‚å": list.AddRange(new[] { "hyo", "hilyo", "hixyo" }); break;
-            case "‚Ñ‚á": list.AddRange(new[] { "bya", "bilya", "bixya" }); break;
-            case "‚Ñ‚ã": list.AddRange(new[] { "byu", "bilyu", "bixyu" }); break;
-            case "‚Ñ‚å": list.AddRange(new[] { "byo", "bilyo", "bixyo" }); break;
-            case "‚Ò‚á": list.AddRange(new[] { "pya", "pilya", "pixya" }); break;
-            case "‚Ò‚ã": list.AddRange(new[] { "pyu", "pilyu", "pixyu" }); break;
-            case "‚Ò‚å": list.AddRange(new[] { "pyo", "pilyo", "pixyo" }); break;
+            case "ã²ã‚ƒ": list.AddRange(new[] { "hya", "hilya", "hixya" }); break;
+            case "ã²ã‚…": list.AddRange(new[] { "hyu", "hilyu", "hixyu" }); break;
+            case "ã²ã‚‡": list.AddRange(new[] { "hyo", "hilyo", "hixyo" }); break;
+            case "ã³ã‚ƒ": list.AddRange(new[] { "bya", "bilya", "bixya" }); break;
+            case "ã³ã‚…": list.AddRange(new[] { "byu", "bilyu", "bixyu" }); break;
+            case "ã³ã‚‡": list.AddRange(new[] { "byo", "bilyo", "bixyo" }); break;
+            case "ã´ã‚ƒ": list.AddRange(new[] { "pya", "pilya", "pixya" }); break;
+            case "ã´ã‚…": list.AddRange(new[] { "pyu", "pilyu", "pixyu" }); break;
+            case "ã´ã‚‡": list.AddRange(new[] { "pyo", "pilyo", "pixyo" }); break;
 
-            case "‚İ‚á": list.AddRange(new[] { "mya", "milya", "mixya" }); break;
-            case "‚İ‚ã": list.AddRange(new[] { "myu", "milyu", "mixyu" }); break;
-            case "‚İ‚å": list.AddRange(new[] { "myo", "milyo", "mixyo" }); break;
+            case "ã¿ã‚ƒ": list.AddRange(new[] { "mya", "milya", "mixya" }); break;
+            case "ã¿ã‚…": list.AddRange(new[] { "myu", "milyu", "mixyu" }); break;
+            case "ã¿ã‚‡": list.AddRange(new[] { "myo", "milyo", "mixyo" }); break;
 
-            case "‚è‚á": list.AddRange(new[] { "rya", "rilya", "rixya" }); break;
-            case "‚è‚ã": list.AddRange(new[] { "ryu", "rilyu", "rixyu" }); break;
-            case "‚è‚å": list.AddRange(new[] { "ryo", "rilyo", "rixyo" }); break;
+            case "ã‚Šã‚ƒ": list.AddRange(new[] { "rya", "rilya", "rixya" }); break;
+            case "ã‚Šã‚…": list.AddRange(new[] { "ryu", "rilyu", "rixyu" }); break;
+            case "ã‚Šã‚‡": list.AddRange(new[] { "ryo", "rilyo", "rixyo" }); break;
 
 
 
@@ -295,9 +295,9 @@ public static class RomajiEngine
 
         char second = text[1];
 
-        return second == '‚á'
-            || second == '‚ã'
-            || second == '‚å';
+        return second == 'ã‚ƒ'
+            || second == 'ã‚…'
+            || second == 'ã‚‡';
     }
 
     private static bool IsSokuonConsonant(char c)
@@ -312,26 +312,26 @@ public static class RomajiEngine
             && c != 'n';
     }
 
-    // u‚ñv‚ÌŒã‚É•ê‰¹ia, i, u, e, o, yjˆÈŠO‚Ì•¶šiq‰¹j‚ª—ˆ‚éê‡A
-    // unv1‰ñ‚¾‚ÆŸ‚Ì•¶š‚Æ¬‚´‚Á‚Ä‚µ‚Ü‚¤‚½‚ßAunnv‚âun'v‚ğŠmÀ‚É’Ê‚·‚½‚ß‚ÌŒãˆ—
+    // ã€Œã‚“ã€ã®å¾Œã«æ¯éŸ³ï¼ˆa, i, u, e, o, yï¼‰ä»¥å¤–ã®æ–‡å­—ï¼ˆå­éŸ³ï¼‰ãŒæ¥ã‚‹å ´åˆã€
+    // ã€Œnã€1å›ã ã¨æ¬¡ã®æ–‡å­—ã¨æ··ã–ã£ã¦ã—ã¾ã†ãŸã‚ã€ã€Œnnã€ã‚„ã€Œn'ã€ã‚’ç¢ºå®Ÿã«é€šã™ãŸã‚ã®å¾Œå‡¦ç†
     private static void PostProcessForNn(List<Syllable> syllables)
     {
         for (int i = 0; i < syllables.Count; i++)
         {
-            if (syllables[i].hira == "‚ñ")
+            if (syllables[i].hira == "ã‚“")
             {
-                // ‚à‚µŸ‚Ì•¶š‚ª‘¶İ‚·‚é‚È‚ç
+                // ã‚‚ã—æ¬¡ã®æ–‡å­—ãŒå­˜åœ¨ã™ã‚‹ãªã‚‰
                 if (i + 1 < syllables.Count)
                 {
                     string nextHiraFirstRomaji = syllables[i + 1].romajis[0];
                     char firstCharOfNext = nextHiraFirstRomaji[0];
 
-                    // Ÿ‚Ì•¶š‚ªu‚ s(a, i, u, e, o, y, n“™)vˆÈŠO‚Ìq‰¹‚Ìê‡
+                    // æ¬¡ã®æ–‡å­—ãŒã€Œã‚è¡Œ(a, i, u, e, o, y, nç­‰)ã€ä»¥å¤–ã®å­éŸ³ã®å ´åˆ
                     if (firstCharOfNext != 'a' && firstCharOfNext != 'i' && firstCharOfNext != 'u' &&
                         firstCharOfNext != 'e' && firstCharOfNext != 'o' && firstCharOfNext != 'y')
                     {
-                        // unv’P‘Ì‚¾‚ÆŸ‚Æ¬‚´‚é‚Ì‚ÅAunnv‚âun'v‚ğ—DæEŠmÀ‚É‚·‚é
-                        // i‚·‚Å‚É romajis ‚É“ü‚Á‚Ä‚¢‚é‚Ì‚ÅA‚±‚±‚Å‚Í•À‚Ñ‡‚Ì’²®‚â’Ç‰Á•â³‚ğs‚¤j
+                        // ã€Œnã€å˜ä½“ã ã¨æ¬¡ã¨æ··ã–ã‚‹ã®ã§ã€ã€Œnnã€ã‚„ã€Œn'ã€ã‚’å„ªå…ˆãƒ»ç¢ºå®Ÿã«ã™ã‚‹
+                        // ï¼ˆã™ã§ã« romajis ã«å…¥ã£ã¦ã„ã‚‹ã®ã§ã€ã“ã“ã§ã¯ä¸¦ã³é †ã®èª¿æ•´ã‚„è¿½åŠ è£œæ­£ã‚’è¡Œã†ï¼‰
                     }
                 }
             }
