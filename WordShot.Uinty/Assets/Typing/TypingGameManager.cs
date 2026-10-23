@@ -170,16 +170,16 @@ public class TypingGameManager : MonoBehaviour
 
         if (isCompleteMatch)
         {
-            // �����������{�XHP��1���炷
+            // ミス用のアイコンを1つ減らす
             if (bossHPBar != null)
             {
                 bossHPBar.TakeDamage(1);
 
-                // �{�XHP��0�ɂȂ������Q�[���N���A
+                // アイコンがずべ手無くなったら次のお題へ進む
                 if (bossHPBar.GetCurrentHP() <= 0)
                 {
                     rubyTextUI.text = "";
-                    targetTextUI.text = $"�N���A�I\n���v�^�C�v�~�X�F{totalMistakeCount}��";
+                    targetTextUI.text = $"合計タイピングミス数{totalMistakeCount}回";
                     inputTextUI.text = "";
                     return;
                 }
