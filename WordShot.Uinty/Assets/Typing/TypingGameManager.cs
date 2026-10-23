@@ -14,7 +14,7 @@ public class TypingGameManager : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI mistakeCountTextUI;
     [SerializeField] private SpriteCountDisplay typingMissDisplay;
-    [SerializeField] private SpriteCountDisplay bossHPDisplay;
+    [SerializeField] private HPBar bossHPBar;
 
     [Header("UI References")]
     [SerializeField] private TextMeshProUGUI rubyTextUI;
@@ -36,7 +36,7 @@ public class TypingGameManager : MonoBehaviour
     // 全てのお題の合計タイプミス数
     private int totalMistakeCount = 0;
 
-    // 解く全のフレームで文字入力居バントが発生したか
+    // 解く全てのフレームで文字入力イベントが発生したか
     private bool receivedTextInput = false;
 
     void Start()
@@ -171,12 +171,12 @@ public class TypingGameManager : MonoBehaviour
         if (isCompleteMatch)
         {
             // 正解したらボスHPを1減らす
-            if (bossHPDisplay != null)
+            if (bossHPBar != null)
             {
-                bossHPDisplay.DecreaseCount();
+                bossHPBar.TakeDamage(1);
 
                 // ボスHPが0になったらゲームクリア
-                if (bossHPDisplay.GetCount() <= 0)
+                if (bossHPBar.GetCurrentHP() <= 0)
                 {
                     rubyTextUI.text = "";
                     targetTextUI.text = $"クリア！\n合計タイプミス：{totalMistakeCount}回";
