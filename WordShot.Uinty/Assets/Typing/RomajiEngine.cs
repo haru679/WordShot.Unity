@@ -148,15 +148,15 @@ public static class RomajiEngine
 
             // さ行
             case "さ": list.AddRange(new[] { "sa" }); break;
-            case "し": list.AddRange(new[] { "shi", "si", "ci" }); break;
+            case "し": list.AddRange(new[] { "si", "shi", "ci" }); break;
             case "す": list.AddRange(new[] { "su" }); break;
             case "せ": list.AddRange(new[] { "se", "ce" }); break;
             case "そ": list.AddRange(new[] { "so" }); break;
 
             // た行
             case "た": list.AddRange(new[] { "ta" }); break;
-            case "ち": list.AddRange(new[] { "chi", "ti" }); break;
-            case "つ": list.AddRange(new[] { "tsu", "tu" }); break;
+            case "ち": list.AddRange(new[] { "ti", "chi" }); break;
+            case "つ": list.AddRange(new[] { "tu", "tsu" }); break;
             case "て": list.AddRange(new[] { "te" }); break;
             case "と": list.AddRange(new[] { "to" }); break;
 
