@@ -6,7 +6,7 @@
     "entries": [
         {
             "ja": "しゃもじ猫",
-            "text": "Shamoji Cat"
+            "text": "shamoji cat"
         },
         {
             "ja": "猫じゃらし",
@@ -187,6 +187,26 @@
         {
             "ja": "セーブに失敗しました",
             "text": "Save failed"
+        },
+        {
+            "ja": "ねこまんま",
+            "text": "rice soaked in miso soup"
+        },
+        {
+            "ja": "おさかな",
+            "text": "fish"
+        },
+        {
+            "ja": "サーモン",
+            "text": "salmon"
+        },
+        {
+            "ja": "飯",
+            "text": "rice"
+        },
+        {
+            "ja": "かつお",
+            "text": "bonito"
         }
     ]
 }
