@@ -4,39 +4,209 @@
     "displayName": "English",
     "fallbackFonts": [],
     "entries": [
-        { "ja": "しゃもじ猫", "text": "Shamoji Cat" },
-        { "ja": "猫じゃらし", "text": "foxtail" },
-        { "ja": "またたび", "text": "silver vine" },
-        { "ja": "鰹節", "text": "bonito flakes" },
-        { "ja": "肉球", "text": "paw pads" },
-        { "ja": "スタート", "text": "Start" },
-        { "ja": "オプション", "text": "Options" },
-        { "ja": "おわる", "text": "Quit" },
-        { "ja": "ポーズ", "text": "PAUSE" },
-        { "ja": "つづける", "text": "Resume" },
-        { "ja": "やり直す", "text": "Retry" },
-        { "ja": "サウンド", "text": "Sound" },
-        { "ja": "もどる", "text": "Back" },
-        { "ja": "ゲームオーバー", "text": "GAME OVER" },
-        { "ja": "Shiftキーでやり直し", "text": "Press Shift Key" },
-        { "ja": "ステージクリア！", "text": "STAGE CLEAR!" },
-        { "ja": "全体", "text": "Master" },
-        { "ja": "BGM", "text": "BGM" },
-        { "ja": "効果音", "text": "SE" },
-        { "ja": "打鍵音", "text": "Typing" },
-        { "ja": "ミュート", "text": "Mute" },
-        { "ja": "とじる", "text": "Close" },
-        { "ja": "ステージセレクト", "text": "STAGE SELECT" },
-        { "ja": "A / D：移動　W / Space：ジャンプ　Enter：決定　Esc：ポーズ", "text": "A / D: Move    W / Space: Jump    Enter: Select    Esc: Pause" },
-        { "ja": "リトライ", "text": "Retry" },
-        { "ja": "タイトルへ", "text": "Title" },
-        { "ja": "ロード中", "text": "NOW LOADING" },
-        { "ja": "ロック中", "text": "LOCKED" },
-        { "ja": "クリア", "text": "CLEAR" },
-        { "ja": "クリア！", "text": "CLEAR!" },
-        { "ja": "まだ結果がありません", "text": "No result" },
-        { "ja": "先にステージを遊んでください", "text": "Play a stage first" },
-        { "ja": "ステージA", "text": "Stage A" },
-        { "ja": "ステージB", "text": "Stage B" }
+        {
+            "ja": "しゃもじ猫",
+            "text": "shamoji cat"
+        },
+        {
+            "ja": "猫じゃらし",
+            "text": "foxtail"
+        },
+        {
+            "ja": "またたび",
+            "text": "silver vine"
+        },
+        {
+            "ja": "鰹節",
+            "text": "bonito flakes"
+        },
+        {
+            "ja": "肉球",
+            "text": "paw pads"
+        },
+        {
+            "ja": "スタート",
+            "text": "Start"
+        },
+        {
+            "ja": "オプション",
+            "text": "Options"
+        },
+        {
+            "ja": "おわる",
+            "text": "Quit"
+        },
+        {
+            "ja": "ポーズ",
+            "text": "PAUSE"
+        },
+        {
+            "ja": "つづける",
+            "text": "Resume"
+        },
+        {
+            "ja": "やり直す",
+            "text": "Retry"
+        },
+        {
+            "ja": "サウンド",
+            "text": "Sound"
+        },
+        {
+            "ja": "もどる",
+            "text": "Back"
+        },
+        {
+            "ja": "ゲームオーバー",
+            "text": "GAME OVER"
+        },
+        {
+            "ja": "Shiftキーでやり直し",
+            "text": "Press Shift Key"
+        },
+        {
+            "ja": "ステージクリア！",
+            "text": "STAGE CLEAR!"
+        },
+        {
+            "ja": "全体",
+            "text": "Master"
+        },
+        {
+            "ja": "BGM",
+            "text": "BGM"
+        },
+        {
+            "ja": "効果音",
+            "text": "SE"
+        },
+        {
+            "ja": "打鍵音",
+            "text": "Typing"
+        },
+        {
+            "ja": "ミュート",
+            "text": "Mute"
+        },
+        {
+            "ja": "とじる",
+            "text": "Close"
+        },
+        {
+            "ja": "ステージセレクト",
+            "text": "STAGE SELECT"
+        },
+        {
+            "ja": "A / D：移動　W / Space：ジャンプ　Enter：決定　Esc：ポーズ",
+            "text": "A / D: Move    W / Space: Jump    Enter: Select    Esc: Pause"
+        },
+        {
+            "ja": "リトライ",
+            "text": "Retry"
+        },
+        {
+            "ja": "タイトルへ",
+            "text": "Title"
+        },
+        {
+            "ja": "ロード中",
+            "text": "NOW LOADING"
+        },
+        {
+            "ja": "ロック中",
+            "text": "LOCKED"
+        },
+        {
+            "ja": "クリア",
+            "text": "CLEAR"
+        },
+        {
+            "ja": "クリア！",
+            "text": "CLEAR!"
+        },
+        {
+            "ja": "まだ結果がありません",
+            "text": "No result"
+        },
+        {
+            "ja": "先にステージを遊んでください",
+            "text": "Play a stage first"
+        },
+        {
+            "ja": "ステージA",
+            "text": "Stage A"
+        },
+        {
+            "ja": "ステージB",
+            "text": "Stage B"
+        },
+        {
+            "ja": "鈴",
+            "text": "bell"
+        },
+        {
+            "ja": "爪とぎ",
+            "text": "scratching post"
+        },
+        {
+            "ja": "日向ぼっこ",
+            "text": "sunbathing"
+        },
+        {
+            "ja": "招き猫",
+            "text": "beckoning cat"
+        },
+        {
+            "ja": "猫まんま",
+            "text": "cat rice"
+        },
+        {
+            "ja": "かんたん",
+            "text": "Easy"
+        },
+        {
+            "ja": "ふつう",
+            "text": "Normal"
+        },
+        {
+            "ja": "むずかしい",
+            "text": "Hard"
+        },
+        {
+            "ja": "難易度をえらぶ",
+            "text": "Choose difficulty"
+        },
+        {
+            "ja": "Esc：もどる",
+            "text": "Esc: Back"
+        },
+        {
+            "ja": "セーブ中",
+            "text": "Saving"
+        },
+        {
+            "ja": "セーブに失敗しました",
+            "text": "Save failed"
+        },
+        {
+            "ja": "ねこまんま",
+            "text": "rice soaked in miso soup"
+        },
+        {
+            "ja": "おさかな",
+            "text": "fish"
+        },
+        {
+            "ja": "サーモン",
+            "text": "salmon"
+        },
+        {
+            "ja": "飯",
+            "text": "rice"
+        },
+        {
+            "ja": "かつお",
+            "text": "bonito"
+        }
     ]
 }

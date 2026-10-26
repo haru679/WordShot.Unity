@@ -106,8 +106,10 @@ namespace WordShot.Data
 
         static void Validate(BossData boss, string fileName, DataReport report)
         {
-            if (boss.version != BossData.CurrentVersion)
-                report.Warning(fileName, $"version が {boss.version} です（今の形は {BossData.CurrentVersion}）。項目が足りないかもしれません");
+            if (boss.version < 2)
+                report.Error(fileName, $"version が {boss.version} の古い形です。難易度ごとの値（difficulties）を書いて version を {BossData.CurrentVersion} にしてください");
+            else if (boss.version != BossData.CurrentVersion)
+                report.Warning(fileName, $"version が {boss.version} です（今の形は {BossData.CurrentVersion}）");
 
             if (string.IsNullOrEmpty(boss.id)) report.Error(fileName, "id が空です");
             else if (!boss.id.All(c => c < 128 && (char.IsLetterOrDigit(c) || c == '_')))
@@ -116,14 +118,8 @@ namespace WordShot.Data
                 report.Warning(fileName, $"id「{boss.id}」とファイル名が違います。そろえると探しやすくなります");
 
             if (string.IsNullOrEmpty(boss.name)) report.Error(fileName, "name（ボスの名前）が空です");
-            if (boss.hp <= 0) report.Error(fileName, $"hp が {boss.hp} です。1 以上にしてください");
-            if (boss.attackInterval <= 0f) report.Error(fileName, $"attackInterval が {boss.attackInterval} です。0 より大きくしてください");
 
-            if (boss.words == null || boss.words.Length == 0) report.Error(fileName, "words（お題）が1つもありません");
-            else
-            {
-                for (int i = 0; i < boss.words.Length; i++) ValidateWord(boss.words[i], $"words の {i + 1}つ目", fileName, report);
-            }
+            ValidateDifficulties(boss, fileName, report);
 
             if (boss.attacks == null || boss.attacks.Length == 0) report.Warning(fileName, "attacks（攻撃）が1つもありません");
             else
@@ -133,6 +129,44 @@ namespace WordShot.Data
                     if (string.IsNullOrEmpty(boss.attacks[i]?.type))
                         report.Error(fileName, $"attacks の {i + 1}つ目：type（攻撃の種類）が空です");
                 }
+            }
+        }
+
+        // 難易度は easy / normal / hard を1つずつ。それぞれ HP・間隔・速さ・妨害・お題をチェックする
+        static void ValidateDifficulties(BossData boss, string fileName, DataReport report)
+        {
+            var seen = new HashSet<Difficulty>();
+            foreach (BossDifficultyData data in boss.difficulties ?? Array.Empty<BossDifficultyData>())
+            {
+                if (data == null) continue;
+                if (!DifficultyExtensions.TryParse(data.level, out Difficulty difficulty))
+                {
+                    report.Error(fileName, $"difficulties の level「{data.level}」は、easy / normal / hard のどれかにしてください");
+                    continue;
+                }
+                if (!seen.Add(difficulty))
+                {
+                    report.Error(fileName, $"難易度「{difficulty.ToKey()}」が2つあります");
+                    continue;
+                }
+
+                string where = $"{difficulty.ToKey()}";
+                if (data.hp <= 0) report.Error(fileName, $"{where}：hp が {data.hp} です。1 以上にしてください");
+                if (data.attackInterval <= 0f) report.Error(fileName, $"{where}：attackInterval が {data.attackInterval} です。0 より大きくしてください");
+                if (data.attackSpeed <= 0f) report.Error(fileName, $"{where}：attackSpeed が {data.attackSpeed} です。0 より大きくしてください");
+                if (!DifficultyExtensions.TryParse(data.interference, out Interference _))
+                    report.Error(fileName, $"{where}：interference「{data.interference}」は、none / normal / strong のどれかにしてください");
+
+                if (data.words == null || data.words.Length == 0) report.Error(fileName, $"{where}：words（お題）が1つもありません");
+                else
+                {
+                    for (int i = 0; i < data.words.Length; i++) ValidateWord(data.words[i], $"{where}：words の {i + 1}つ目", fileName, report);
+                }
+            }
+
+            foreach (Difficulty difficulty in DifficultyExtensions.All)
+            {
+                if (!seen.Contains(difficulty)) report.Error(fileName, $"難易度「{difficulty.ToKey()}」の値（difficulties）がありません");
             }
         }
 

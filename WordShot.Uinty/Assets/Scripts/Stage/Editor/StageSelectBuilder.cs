@@ -6,6 +6,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using WordShot.Data;
 using WordShot.EditorTools;
 using WordShot.Flow;
 using WordShot.Flow.EditorTools;
@@ -105,6 +106,7 @@ namespace WordShot.Stages.EditorTools
             PrefabUtility.InstantiatePrefab(pauseMenu, scene);
 
             new GameObject(nameof(StageSelectDebugKeys)).AddComponent<StageSelectDebugKeys>();
+            CreateDifficultySelect();
 
             EditorSceneManager.SaveScene(scene, GameLoopSceneBuilder.StageSelectPath);
         }
@@ -293,6 +295,73 @@ namespace WordShot.Stages.EditorTools
             serialized.ApplyModifiedPropertiesWithoutUndo();
             AssetDatabase.SaveAssets();
             return data;
+        }
+
+        // ---- 難易度を選ぶ画面 ----
+
+        /// <summary>作ってあるステージセレクトに、難易度を選ぶ画面を置く（すでにあれば何もしない）</summary>
+        [MenuItem("WordShot/難易度を選ぶ画面を作成")]
+        public static void AddDifficultySelect()
+        {
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+
+            Scene scene = EditorSceneManager.OpenScene(GameLoopSceneBuilder.StageSelectPath);
+            bool exists = scene.GetRootGameObjects().Any(root => root.GetComponentInChildren<DifficultySelectPanel>(true) != null);
+            if (exists)
+            {
+                Debug.Log("[StageSelectBuilder] 難易度を選ぶ画面はすでにあります");
+                return;
+            }
+
+            CreateDifficultySelect();
+            EditorSceneManager.SaveScene(scene);
+            Debug.Log("[StageSelectBuilder] 難易度を選ぶ画面を置きました。扉の前で Enter を押すと開きます");
+        }
+
+        // 画面いっぱいの薄暗い板の上に、ボスの名前と、かんたん・ふつう・むずかしいのボタンを縦に並べる
+        static void CreateDifficultySelect()
+        {
+            GameObject root = EditorUIFactory.CreateCanvas().gameObject;
+            root.name = "DifficultySelect";
+            root.GetComponent<Canvas>().sortingOrder = 80;   // ポーズ画面（100）より奥
+
+            Image panel = EditorUIFactory.CreateImage(root.transform, "Panel", new Color(0f, 0f, 0f, 0.6f), Vector2.zero, Vector2.zero);
+            EditorUIFactory.Stretch(panel.rectTransform);
+            Image window = EditorUIFactory.CreateImage(panel.transform, "Window", new Color(0.13f, 0.13f, 0.18f), Vector2.zero, new Vector2(720f, 560f));
+
+            TMP_Text header = EditorUIFactory.CreateText(window.transform, "Header", "難易度をえらぶ", 34, new Vector2(0f, 220f), new Vector2(640f, 60f));
+            header.color = new Color(1f, 1f, 1f, 0.7f);
+            Localize(header, "難易度をえらぶ");
+            TMP_Text title = EditorUIFactory.CreateText(window.transform, "Title", "しゃもじ猫", 64, new Vector2(0f, 150f), new Vector2(680f, 90f));
+
+            Transform list = EditorUIFactory.CreateVerticalList(window.transform, "Buttons", new Vector2(0f, 80f));
+            var buttons = new Button[3];
+            string[] names = { "Easy", "Normal", "Hard" };
+            string[] labels = { "かんたん", "ふつう", "むずかしい" };
+            for (int i = 0; i < 3; i++) buttons[i] = EditorUIFactory.CreateButton(list, $"{names[i]}Button", labels[i]);
+
+            TMP_Text hint = EditorUIFactory.CreateText(window.transform, "Hint", "Esc：もどる", 28, new Vector2(0f, -235f), new Vector2(640f, 50f));
+            hint.color = new Color(1f, 1f, 1f, 0.6f);
+            Localize(hint, "Esc：もどる");
+
+            var selector = root.AddComponent<DifficultySelectPanel>();
+            var serialized = new SerializedObject(selector);
+            serialized.FindProperty("panel").objectReferenceValue = panel.gameObject;
+            serialized.FindProperty("titleText").objectReferenceValue = title;
+            SerializedProperty array = serialized.FindProperty("buttons");
+            array.arraySize = buttons.Length;
+            for (int i = 0; i < buttons.Length; i++) array.GetArrayElementAtIndex(i).objectReferenceValue = buttons[i];
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+
+            panel.gameObject.SetActive(false);
+        }
+
+        static void Localize(TMP_Text text, string japanese)
+        {
+            var localized = text.gameObject.AddComponent<LocalizedText>();
+            var serialized = new SerializedObject(localized);
+            serialized.FindProperty("japanese").stringValue = japanese;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
         }
 
         // ---- タイトル画面 ----

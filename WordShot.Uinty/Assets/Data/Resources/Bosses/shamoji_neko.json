@@ -1,23 +1,120 @@
 {
-  "version": 1,
-  "id": "shamoji_neko",
-  "name": "しゃもじ猫",
-  "hp": 100,
-  "attackInterval": 2.0,
-  "sprite": "",
-  "bgm": "",
-  "words": [
-    { "text": "猫じゃらし", "reading": "ねこじゃらし" },
-    { "text": "またたび", "reading": "またたび" },
-    { "text": "鰹節", "reading": "かつおぶし" },
-    { "text": "肉球", "reading": "にくきゅう" }
-  ],
-  "attacks": [
-    {
-      "type": "bullet",
-      "skillName": "しゃも箒!!",
-      "line": "ちりはきえるしゃもねぇ",
-      "onomatopoeia": "ダダにゃ!!"
-    }
-  ]
+    "version": 2,
+    "id": "shamoji_neko",
+    "name": "しゃもじ猫",
+    "sprite": "",
+    "bgm": "",
+    "attacks": [
+        {
+            "type": "rush",
+            "skillName": "しゃも切り",
+            "line": "",
+            "onomatopoeia": ""
+        },
+        {
+            "type": "bullet",
+            "skillName": "しゃも箒!!",
+            "line": "ちりはきえるしゃもねぇ",
+            "onomatopoeia": ""
+        },
+        {
+            "type": "bullet",
+            "skillName": "米粒弾",
+            "line": "ダダにゃ!!",
+            "onomatopoeia": ""
+        }
+    ],
+    "difficulties": [
+        {
+            "level": "easy",
+            "hp": 60,
+            "attackInterval": 3.0,
+            "attackSpeed": 1.0,
+            "interference": "none",
+            "words": [
+                {
+                    "text": "またたび",
+                    "reading": "またたび"
+                },
+                {
+                    "text": "肉球",
+                    "reading": "にくきゅう"
+                },
+                {
+                    "text": "鈴",
+                    "reading": "すず"
+                },
+                {
+                    "text": "ねこまんま",
+                    "reading": "ねこまんま"
+                },
+                {
+                    "text": "かつお",
+                    "reading": "かつお"
+                },
+                {
+                    "text": "おさかな",
+                    "reading": "おさかな"
+                },
+                {
+                    "text": "しゃもじ猫",
+                    "reading": "しゃもじねこ"
+                },
+                {
+                    "text": "飯",
+                    "reading": "めし"
+                },
+                {
+                    "text": "サーモン",
+                    "reading": "さもん"
+                },
+                {
+                    "text": "猫じゃらし",
+                    "reading": "ねこじゃらし"
+                }
+            ]
+        },
+        {
+            "level": "normal",
+            "hp": 100,
+            "attackInterval": 3.0,
+            "attackSpeed": 1.0,
+            "interference": "normal",
+            "words": [
+                {
+                    "text": "猫じゃらし",
+                    "reading": "ねこじゃらし"
+                },
+                {
+                    "text": "鰹節",
+                    "reading": "かつおぶし"
+                },
+                {
+                    "text": "爪とぎ",
+                    "reading": "つめとぎ"
+                }
+            ]
+        },
+        {
+            "level": "hard",
+            "hp": 150,
+            "attackInterval": 3.0,
+            "attackSpeed": 1.0,
+            "interference": "strong",
+            "words": [
+                {
+                    "text": "日向ぼっこ",
+                    "reading": "ひなたぼっこ"
+                },
+                {
+                    "text": "招き猫",
+                    "reading": "まねきねこ"
+                },
+                {
+                    "text": "猫まんま",
+                    "reading": "ねこまんま"
+                }
+            ]
+        }
+    ]
 }
