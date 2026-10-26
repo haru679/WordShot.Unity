@@ -2117,6 +2117,8 @@ MonoBehaviour:
     targetText: "HAL\u5927\u962A"
   - ruby: "\u306B\u3093\u3066\u3093\u3069\u3046\u3059\u3044\u3063\u3061"
     targetText: Nintendo Switch
+  - ruby: "\u3042\u30FC\u3051\u30FC\u3069"
+    targetText: "\u30A2\u30FC\u30B1\u30FC\u30C9"
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -197,6 +197,7 @@ public static class RomajiEngine
             case "わ": list.AddRange(new[] { "wa" }); break;
             case "を": list.AddRange(new[] { "wo" }); break;
             case "ん": list.AddRange(new[] { "n", "nn"}); break;
+            case "ー": list.AddRange(new[] { "-" }); break;
 
             // が行
             case "が": list.AddRange(new[] { "ga" }); break;
