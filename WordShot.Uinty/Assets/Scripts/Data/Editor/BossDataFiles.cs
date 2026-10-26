@@ -54,14 +54,31 @@ namespace WordShot.Data.EditorTools
         }
 
         /// <summary>新しいボスのひな形</summary>
+        /// <remarks>難易度ごとの値は、企画書の目安（かんたん＝遅い・妨害なし、むずかしい＝速い・妨害強い）で入れておく</remarks>
         public static BossData CreateTemplate(string id) => new BossData
         {
             version = BossData.CurrentVersion,
             id = id,
             name = "",
-            words = new[] { new WordData { text = "", reading = "" } },
             attacks = new[] { new AttackData { type = "bullet" } },
+            difficulties = new[]
+            {
+                CreateDifficulty(Difficulty.Easy, 60, 3f, 0.8f, Interference.None),
+                CreateDifficulty(Difficulty.Normal, 100, 2f, 1f, Interference.Normal),
+                CreateDifficulty(Difficulty.Hard, 150, 1.4f, 1.3f, Interference.Strong),
+            },
         };
+
+        static BossDifficultyData CreateDifficulty(Difficulty difficulty, int hp, float interval, float speed, Interference interference) =>
+            new BossDifficultyData
+            {
+                level = difficulty.ToKey(),
+                hp = hp,
+                attackInterval = interval,
+                attackSpeed = speed,
+                interference = interference.ToKey(),
+                words = new[] { new WordData { text = "", reading = "" } },
+            };
 
         /// <summary>id として使えるか（半角英数字と _、まだないもの）</summary>
         public static bool IsNewValidId(string id) =>
@@ -175,7 +192,7 @@ namespace WordShot.Data.EditorTools
                 BossData boss = Load(path, new DataReport());
                 if (boss == null) continue;
                 result.Add(boss.name);
-                foreach (WordData word in boss.words) result.Add(word.text);
+                foreach (WordData word in boss.AllWords) result.Add(word.text);
             }
             return result;
         }

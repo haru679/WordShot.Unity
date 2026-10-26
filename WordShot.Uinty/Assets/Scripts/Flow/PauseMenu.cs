@@ -61,7 +61,8 @@ namespace WordShot.Flow
             if (soundSettings.IsOpen || soundSettings.LastClosedFrame == Time.frameCount) return;
 
             GameFlow flow = GameFlow.Instance;
-            if (flow.State == PlayState.Playing) flow.Pause();
+            // 難易度を選ぶ画面を Esc で閉じた同じフレームに、ポーズまで開かないよう IsPlaying も見る
+            if (flow.State == PlayState.Playing && flow.IsPlaying) flow.Pause();
             else if (flow.State == PlayState.Paused) flow.Resume();
         }
 

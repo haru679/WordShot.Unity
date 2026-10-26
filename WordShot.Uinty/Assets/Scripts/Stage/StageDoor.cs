@@ -119,7 +119,11 @@ namespace WordShot.Stages
             }
 
             if (enterSound != null) Sound.Play(enterSound);
-            GameFlow.Instance.StartStage(stage);
+
+            // 難易度を選ぶ画面があれば開く。なければ「かんたん」で始める
+            var difficultySelect = FindAnyObjectByType<DifficultySelectPanel>();
+            if (difficultySelect != null) difficultySelect.Open(stage);
+            else GameFlow.Instance.StartStage(stage, Difficulty.Easy);
             return true;
         }
 
@@ -143,7 +147,10 @@ namespace WordShot.Stages
 
             string name = stage.Boss?.DisplayName ?? Localization.TranslateOrSame(stage.DisplayName);
             if (!unlocked) return $"{name}\n{Localization.TranslateOrSame("ロック中")}";
-            if (StageProgress.IsCleared(stage)) return $"{name}\n{Localization.TranslateOrSame("クリア")}";
+            // クリアした一番むずかしい難易度を出す（例：しゃもじ猫 / クリア：ふつう）
+            Difficulty? best = StageProgress.BestCleared(stage);
+            string colon = GameLanguage.IsJapanese ? "：" : ": ";
+            if (best != null) return $"{name}\n{Localization.TranslateOrSame("クリア")}{colon}{best.Value.DisplayName()}";
             return name;
         }
 

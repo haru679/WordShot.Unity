@@ -2,15 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using WordShot.Data;
 
 namespace WordShot.Stages
 {
     /// <summary>
-    /// どのステージをクリアしたか（＝どこまで解放したか）。PlayerPrefs に保存し、次に起動したときも続きから遊べる。
+    /// どのステージをどの難易度でクリアしたか（＝どこまで解放したか）。PlayerPrefs に保存し、次に起動したときも続きから遊べる。
     /// </summary>
+    /// <remarks>
+    /// 解放のルール：
+    /// ・ステージの「かんたん」… requiredClears のステージを全部「かんたん」以上でクリアすると解放（空なら最初から）
+    /// ・「ふつう」… そのステージの「かんたん」をクリアすると解放
+    /// ・「むずかしい」… そのステージの「ふつう」をクリアすると解放
+    /// </remarks>
     public static class StageProgress
     {
-        const string SaveKey = "Stage.Cleared";   // クリアしたステージの ID を「,」でつないで保存する
+        const string SaveKey = "Stage.Cleared";   // 「ステージID:難易度」を「,」でつないで保存する（例：stage_a:easy,stage_a:normal）
 
         static HashSet<string> cleared;
 
@@ -32,23 +39,42 @@ namespace WordShot.Stages
                 if (cleared != null) return cleared;
 
                 string saved = PlayerPrefs.GetString(SaveKey, "");
-                cleared = new HashSet<string>(saved.Split(',', StringSplitOptions.RemoveEmptyEntries));
+                // 難易度を足す前に保存したもの（「stage_a」だけ）は、「かんたん」をクリアしたことにする
+                cleared = new HashSet<string>(saved.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(entry => entry.Contains(':') ? entry : $"{entry}:{Difficulty.Easy.ToKey()}"));
                 return cleared;
             }
         }
 
-        public static bool IsCleared(StageData stage) => stage != null && Cleared.Contains(stage.StageId);
+        static string Key(StageData stage, Difficulty difficulty) => $"{stage.StageId}:{difficulty.ToKey()}";
 
-        /// <summary>解放の条件（requiredClears）を全部クリアしていれば true</summary>
+        /// <summary>その難易度でクリアしたか</summary>
+        public static bool IsCleared(StageData stage, Difficulty difficulty) => stage != null && Cleared.Contains(Key(stage, difficulty));
+
+        /// <summary>どれかの難易度でクリアしたか</summary>
+        public static bool IsCleared(StageData stage) => DifficultyExtensions.All.Any(d => IsCleared(stage, d));
+
+        /// <summary>クリアした一番むずかしい難易度。まだクリアしていなければ null</summary>
+        public static Difficulty? BestCleared(StageData stage) =>
+            DifficultyExtensions.All.Reverse().Where(d => IsCleared(stage, d)).Select(d => (Difficulty?)d).FirstOrDefault();
+
+        /// <summary>ステージそのもの（扉）が解放されているか ＝「かんたん」が遊べるか</summary>
         public static bool IsUnlocked(StageData stage)
         {
             if (stage == null) return false;
-            return stage.RequiredClears.All(required => required == null || IsCleared(required));
+            return stage.RequiredClears.All(required => required == null || IsCleared(required, Difficulty.Easy));
         }
 
-        public static void MarkCleared(StageData stage)
+        /// <summary>その難易度が遊べるか（ひとつ下の難易度をクリアしていれば解放）</summary>
+        public static bool IsUnlocked(StageData stage, Difficulty difficulty)
         {
-            if (stage == null || !Cleared.Add(stage.StageId)) return;
+            if (!IsUnlocked(stage)) return false;
+            return difficulty == Difficulty.Easy || IsCleared(stage, difficulty - 1);
+        }
+
+        public static void MarkCleared(StageData stage, Difficulty difficulty)
+        {
+            if (stage == null || !Cleared.Add(Key(stage, difficulty))) return;
             Save();
         }
 

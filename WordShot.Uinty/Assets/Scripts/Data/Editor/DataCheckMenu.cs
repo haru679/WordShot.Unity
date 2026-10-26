@@ -32,7 +32,7 @@ namespace WordShot.Data.EditorTools
                 string fileName = $"{Localization.Folder}/{language}.json";
                 foreach (BossData boss in bosses.Values)
                 {
-                    string[] needed = new[] { boss.name }.Concat(boss.words.Select(w => w.text)).Distinct().ToArray();
+                    string[] needed = new[] { boss.name }.Concat(boss.AllWords.Select(w => w.text)).Distinct().ToArray();
                     string[] missing = needed.Where(text => !table.ContainsKey(text)).ToArray();
                     if (missing.Length > 0)
                         report.Warning(fileName, $"{boss.id} の翻訳がありません：{string.Join("、", missing)}（ルビは日本語の読みのまま出ます）");

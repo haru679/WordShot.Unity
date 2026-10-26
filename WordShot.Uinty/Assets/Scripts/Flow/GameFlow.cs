@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using WordShot.Data;
 using WordShot.Sounds;
 using WordShot.Stages;
 
@@ -24,6 +25,8 @@ namespace WordShot.Flow
         GameOver,
         /// <summary>ボスを倒した。少し待ってからステージセレクトへ戻る</summary>
         Cleared,
+        /// <summary>難易度を選ぶ画面などを開いている。時間が止まり、プレイヤーは動かない</summary>
+        Menu,
     }
 
     /// <summary>
@@ -54,6 +57,17 @@ namespace WordShot.Flow
         /// （ステージのシーンを直接再生したときは null で、クリアしても解放は記録されない）
         /// </summary>
         public StageData CurrentStageData { get; private set; }
+
+        /// <summary>今遊んでいるステージの難易度</summary>
+        public Difficulty CurrentDifficulty { get; private set; }
+
+        /// <summary>今戦っているボスのデータ（扉から入ったときだけ。ないときは null）</summary>
+        public BossData CurrentBoss => CurrentStageData?.Boss;
+
+        /// <summary>
+        /// 今の難易度でのボスの値（HP・攻撃の間隔と速さ・妨害・お題）。ボスやタイピングはこれを使う。ないときは null
+        /// </summary>
+        public BossDifficultyData CurrentBossLevel => CurrentBoss?.Get(CurrentDifficulty);
 
         /// <summary>直前のステージの結果。まだ遊んでいなければ null</summary>
         public StageResult LastResult { get; private set; }
@@ -119,11 +133,16 @@ namespace WordShot.Flow
             LoadScene(hasStageSelect ? SceneNames.StageSelect : SceneNames.Title, FadeDuration, useLoadingScreen: true);
         }
 
-        /// <summary>ステージセレクトの扉から呼ぶ。クリアしたときに、このステージの解放が記録される</summary>
-        public void StartStage(StageData stage)
+        /// <summary>
+        /// ステージセレクトから呼ぶ。クリアしたときに、このステージのこの難易度のクリアが記録される（次が解放される）
+        /// </summary>
+        public void StartStage(StageData stage, Difficulty difficulty = Difficulty.Easy)
         {
             if (stage == null) return;
-            if (LoadScene(stage.SceneName, FadeDuration, useLoadingScreen: true)) CurrentStageData = stage;
+            if (!LoadScene(stage.SceneName, FadeDuration, useLoadingScreen: true)) return;
+
+            CurrentStageData = stage;
+            CurrentDifficulty = difficulty;
         }
 
         /// <summary>シーン名を指定してステージへ（開発用。クリアしても解放は記録されない）</summary>
@@ -180,7 +199,7 @@ namespace WordShot.Flow
             if (isCleared)
             {
                 SetState(PlayState.Cleared);
-                StageProgress.MarkCleared(CurrentStageData);   // これで次のステージが解放される
+                StageProgress.MarkCleared(CurrentStageData, CurrentDifficulty);   // これで次の難易度・次のステージが解放される
                 StageCleared?.Invoke(CurrentStage);
                 clearWait = StartCoroutine(GoToStageSelectAfter(ClearWaitTime));
             }
@@ -216,6 +235,27 @@ namespace WordShot.Flow
 
             Time.timeScale = 1f;
             Sound.SetPaused(false);
+            SetState(PlayState.Playing);
+        }
+
+        // ---- メニュー（難易度を選ぶ画面など）----
+
+        /// <summary>
+        /// メニューを開く。時間を止めてプレイヤーが動かないようにする（音は止めない）。ポーズ画面は出ない
+        /// </summary>
+        public void OpenMenu()
+        {
+            if (State != PlayState.Playing || IsTransitioning) return;
+
+            Time.timeScale = 0f;
+            SetState(PlayState.Menu);
+        }
+
+        public void CloseMenu()
+        {
+            if (State != PlayState.Menu) return;
+
+            Time.timeScale = 1f;
             SetState(PlayState.Playing);
         }
 

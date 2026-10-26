@@ -28,6 +28,7 @@ namespace WordShot.Data.EditorTools
         [SerializeField] string selectedPath;
         [SerializeField] BossData boss;
         [SerializeField] int selectedWord;
+        [SerializeField] int selectedDifficulty;   // 0：かんたん　1：ふつう　2：むずかしい
         [SerializeField] bool previewTranslated;
         [SerializeField] string translationLanguage;   // 今、翻訳を入力している言語（例：en）
         [SerializeField] string newBossId = "";
@@ -309,12 +310,32 @@ namespace WordShot.Data.EditorTools
             EditorGUILayout.HelpBox("画面に LocalizedText を付けた文字と、スクリプトの Localization.TranslateOrSame(\"…\") の文字は、「一覧を読み直す」で自動で並びます。", MessageType.None);
         }
 
+        /// <summary>
+        /// 保存・読み込み・確認ダイアログ・タブの切り替えは、画面を描いている途中ではなく、描き終わったあとで行う。
+        /// </summary>
+        /// <remarks>
+        /// 描いている途中でファイルを読み書きしたりダイアログを出したりすると、Unity の画面の組み立てが崩れて
+        /// 「EndLayoutGroup: BeginLayoutGroup must be called first」のエラーが出る。
+        /// また、入力中の欄があると、その値が切り替え後の別の欄に入ってしまうので、先に入力を終わらせる。
+        /// </remarks>
+        void Defer(Action action)
+        {
+            GUIUtility.keyboardControl = 0;
+            EditorGUIUtility.editingTextField = false;
+            EditorApplication.delayCall += () =>
+            {
+                if (this == null) return;   // 画面が閉じられていたら何もしない
+                action();
+                Repaint();
+            };
+        }
+
         void HandleShortcuts()
         {
             Event e = Event.current;
             if (e.type == EventType.KeyDown && (e.control || e.command) && e.keyCode == KeyCode.S)
             {
-                Save();
+                Defer(Save);
                 e.Use();
             }
         }
@@ -329,7 +350,7 @@ namespace WordShot.Data.EditorTools
                 {
                     bool isSelected = path == selectedPath;
                     string label = Path.GetFileNameWithoutExtension(path) + (isSelected && hasUnsavedChanges ? " *" : "");
-                    if (GUILayout.Toggle(isSelected, label, "Button") && !isSelected) TrySelect(path);
+                    if (GUILayout.Toggle(isSelected, label, "Button") && !isSelected) Defer(() => TrySelect(path));
                 }
                 EditorGUILayout.EndScrollView();
 
@@ -338,7 +359,7 @@ namespace WordShot.Data.EditorTools
                 newBossId = EditorGUILayout.TextField(newBossId);
                 using (new EditorGUI.DisabledScope(!BossDataFiles.IsNewValidId(newBossId.Trim())))
                 {
-                    if (GUILayout.Button("＋ 作成")) CreateBoss();
+                    if (GUILayout.Button("＋ 作成")) Defer(CreateBoss);
                 }
 
                 EditorGUILayout.Space();
@@ -350,12 +371,12 @@ namespace WordShot.Data.EditorTools
                 }
                 using (new EditorGUI.DisabledScope(!BossDataFiles.IsNewValidLanguage(newLanguageCode.Trim())))
                 {
-                    if (GUILayout.Button("＋ 言語を追加")) CreateLanguage();
+                    if (GUILayout.Button("＋ 言語を追加")) Defer(CreateLanguage);
                 }
 
                 EditorGUILayout.Space();
-                if (GUILayout.Button("一覧を読み直す")) Refresh();
-                if (GUILayout.Button("全部のデータをチェック")) DataCheckMenu.Run();
+                if (GUILayout.Button("一覧を読み直す")) Defer(Refresh);
+                if (GUILayout.Button("全部のデータをチェック")) Defer(DataCheckMenu.Run);
             }
         }
 
@@ -380,9 +401,9 @@ namespace WordShot.Data.EditorTools
 
                 DrawBasics();
                 EditorGUILayout.Space(8f);
-                DrawWords();
-                EditorGUILayout.Space(8f);
                 DrawAttacks();
+                EditorGUILayout.Space(12f);
+                DrawDifficulty();
 
                 if (EditorGUI.EndChangeCheck())
                 {
@@ -412,9 +433,15 @@ namespace WordShot.Data.EditorTools
 
                 int index = Mathf.Max(0, Array.FindIndex(languages, l => l.Code == translationLanguage));
                 string[] labels = languages.Select(l => $"{l.DisplayName}（{l.Code}）").ToArray();
-                // 言語の切り替えは「変更」ではないので、保存していない印を付けない
+                // 言語の切り替えは「変更」ではないので、保存していない印を付けない。
+                // 入力中の文字が次の言語の欄に入らないよう、描画が終わったあとで切り替える
                 bool changed = GUI.changed;
-                translationLanguage = languages[EditorGUILayout.Popup(index, labels)].Code;
+                int newIndex = EditorGUILayout.Popup(index, labels);
+                if (newIndex != index)
+                {
+                    string code = languages[newIndex].Code;
+                    Defer(() => translationLanguage = code);
+                }
                 GUI.changed = changed;
             }
         }
@@ -437,15 +464,94 @@ namespace WordShot.Data.EditorTools
                 if (newTranslatedName != translatedName) SetTranslation(boss.name, newTranslatedName);
             }
 
-            boss.hp = EditorGUILayout.IntField("HP", boss.hp);
-            boss.attackInterval = EditorGUILayout.FloatField(new GUIContent("攻撃の間隔（秒）"), boss.attackInterval);
             boss.sprite = EditorGUILayout.TextField(new GUIContent("画像の名前", "Resources/Bosses/ の画像の名前（まだなければ空でよい）"), boss.sprite);
             boss.bgm = EditorGUILayout.TextField(new GUIContent("BGM の名前", "Resources/Sounds/ の SoundCue の名前（まだなければ空でよい）"), boss.bgm);
         }
 
-        void DrawWords()
+        // ---- 難易度ごとの値 ----
+
+        static readonly string[] DifficultyTabs = { "かんたん", "ふつう", "むずかしい" };
+        static readonly string[] InterferenceLabels = { "なし（none）", "あり（normal）", "強い（strong）" };
+
+        Difficulty SelectedDifficulty => DifficultyExtensions.All[Mathf.Clamp(selectedDifficulty, 0, 2)];
+
+        // 選んでいる難易度の値（なければ作る）
+        BossDifficultyData CurrentLevel => GetOrCreateLevel(SelectedDifficulty);
+
+        BossDifficultyData GetOrCreateLevel(Difficulty difficulty)
         {
-            EditorGUILayout.LabelField($"お題（{boss.words.Length}）", EditorStyles.boldLabel);
+            BossDifficultyData level = boss.Get(difficulty);
+            if (level != null) return level;
+
+            level = new BossDifficultyData { level = difficulty.ToKey(), words = new[] { new WordData { text = "", reading = "" } } };
+            boss.difficulties = boss.difficulties.Append(level).OrderBy(d => d.Difficulty).ToArray();
+            hasUnsavedChanges = true;
+            return level;
+        }
+
+        void DrawDifficulty()
+        {
+            EditorGUILayout.LabelField("難易度ごとの値", EditorStyles.boldLabel);
+
+            // 難易度のタブの切り替えは「変更」ではないので、保存していない印を付けない。
+            // 数値の欄を選んだまま切り替えると、その入力中の値が次のタブの同じ欄に入ってしまうので、
+            // 入力をいったん終わらせてから、描画が終わったあとで切り替える
+            bool changed = GUI.changed;
+            int newSelected = GUILayout.Toolbar(selectedDifficulty, DifficultyTabs, GUILayout.Height(24f));
+            if (newSelected != selectedDifficulty)
+            {
+                Defer(() =>
+                {
+                    selectedDifficulty = newSelected;
+                    selectedWord = 0;
+                });
+            }
+            GUI.changed = changed;
+
+            BossDifficultyData level = CurrentLevel;
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                level.hp = EditorGUILayout.IntField("HP", level.hp);
+                level.attackInterval = EditorGUILayout.FloatField(new GUIContent("攻撃の間隔（秒）", "小さいほど攻撃が多い"), level.attackInterval);
+                level.attackSpeed = EditorGUILayout.FloatField(new GUIContent("攻撃の速さ（倍率）", "1 = ふつう、1.3 = 3割速い"), level.attackSpeed);
+                int interference = EditorGUILayout.Popup(new GUIContent("妨害", "タイピングへの妨害の強さ"), (int)level.Interference, InterferenceLabels);
+                level.interference = ((Interference)interference).ToKey();
+
+                if (selectedDifficulty > 0)
+                {
+                    Difficulty previous = SelectedDifficulty - 1;
+                    if (GUILayout.Button($"{DifficultyTabs[selectedDifficulty - 1]}の値とお題をコピーする", GUILayout.Width(240f)))
+                    {
+                        string from = DifficultyTabs[selectedDifficulty - 1];
+                        string to = DifficultyTabs[selectedDifficulty];
+                        // 確認ダイアログは、描画が終わったあとで出す（描画の途中で出すと画面が崩れる）
+                        Defer(() =>
+                        {
+                            if (!EditorUtility.DisplayDialog("コピーしますか？", $"{to}の値とお題を、{from}と同じにします。", "コピーする", "やめる")) return;
+                            CopyLevel(GetOrCreateLevel(previous), level);
+                            hasUnsavedChanges = true;
+                            Validate();
+                        });
+                    }
+                }
+            }
+
+            EditorGUILayout.Space(6f);
+            DrawWords(level);
+        }
+
+        static void CopyLevel(BossDifficultyData from, BossDifficultyData to)
+        {
+            to.hp = from.hp;
+            to.attackInterval = from.attackInterval;
+            to.attackSpeed = from.attackSpeed;
+            to.interference = from.interference;
+            to.words = from.words.Select(w => new WordData { text = w.text, reading = w.reading }).ToArray();
+        }
+
+        void DrawWords(BossDifficultyData level)
+        {
+            EditorGUILayout.LabelField($"お題（{level.words.Length}）", EditorStyles.boldLabel);
             using (new EditorGUILayout.HorizontalScope())
             {
                 GUILayout.Space(32f);
@@ -457,9 +563,9 @@ namespace WordShot.Data.EditorTools
             }
 
             int removeIndex = -1;
-            for (int i = 0; i < boss.words.Length; i++)
+            for (int i = 0; i < level.words.Length; i++)
             {
-                WordData word = boss.words[i];
+                WordData word = level.words[i];
                 using (new EditorGUILayout.HorizontalScope())
                 {
                     // 番号を押すと、そのお題をプレビューに出す
@@ -490,12 +596,12 @@ namespace WordShot.Data.EditorTools
 
             if (removeIndex >= 0)
             {
-                boss.words = boss.words.Where((_, index) => index != removeIndex).ToArray();
+                level.words = level.words.Where((_, index) => index != removeIndex).ToArray();
                 GUI.changed = true;
             }
             if (GUILayout.Button("＋ お題を追加", GUILayout.Width(140f)))
             {
-                boss.words = boss.words.Append(new WordData { text = "", reading = "" }).ToArray();
+                level.words = level.words.Append(new WordData { text = "", reading = "" }).ToArray();
                 GUI.changed = true;
             }
         }
@@ -555,10 +661,11 @@ namespace WordShot.Data.EditorTools
                     previewTranslated = GUILayout.Toolbar(previewTranslated ? 1 : 0, tabs, GUILayout.Width(220f)) == 1;
                 }
             }
-            if (boss.words.Length == 0) return;
+            WordData[] words = CurrentLevel.words;
+            if (words.Length == 0) return;
 
             bool translatedView = previewTranslated && HasTranslationLanguage;
-            WordData word = boss.words[Mathf.Clamp(selectedWord, 0, boss.words.Length - 1)];
+            WordData word = words[Mathf.Clamp(selectedWord, 0, words.Length - 1)];
             string translated = GetTranslation(word.text);
             string ruby = translatedView && !string.IsNullOrEmpty(translated) ? translated : word.reading;
             (string romaji, _) = RomajiExample(word.reading);
@@ -580,7 +687,7 @@ namespace WordShot.Data.EditorTools
             foreach (string warning in report.Warnings) EditorGUILayout.HelpBox(StripFileName(warning), MessageType.Warning);
 
             // 翻訳の書き忘れは、言語ごとに知らせる（選んでいない言語のぶんも）
-            string[] needed = new[] { boss.name }.Concat(boss.words.Select(w => w.text))
+            string[] needed = new[] { boss.name }.Concat(boss.AllWords.Select(w => w.text))
                 .Where(text => !string.IsNullOrEmpty(text)).Distinct().ToArray();
             bool anyMissing = false;
             foreach (LanguageInfo language in languages)
@@ -605,8 +712,8 @@ namespace WordShot.Data.EditorTools
                 GUILayout.FlexibleSpace();
                 using (new EditorGUI.DisabledScope(!hasUnsavedChanges))
                 {
-                    if (GUILayout.Button("元に戻す", GUILayout.Width(100f))) Revert();
-                    if (GUILayout.Button("保存（Ctrl+S）", GUILayout.Width(140f))) Save();
+                    if (GUILayout.Button("元に戻す", GUILayout.Width(100f))) Defer(Revert);
+                    if (GUILayout.Button("保存（Ctrl+S）", GUILayout.Width(140f))) Defer(Save);
                 }
             }
         }
