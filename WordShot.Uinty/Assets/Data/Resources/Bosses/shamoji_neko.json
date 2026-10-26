@@ -6,10 +6,22 @@
     "bgm": "",
     "attacks": [
         {
+            "type": "rush",
+            "skillName": "しゃも切り",
+            "line": "",
+            "onomatopoeia": ""
+        },
+        {
             "type": "bullet",
             "skillName": "しゃも箒!!",
             "line": "ちりはきえるしゃもねぇ",
-            "onomatopoeia": "ダダにゃ!!"
+            "onomatopoeia": ""
+        },
+        {
+            "type": "bullet",
+            "skillName": "米粒弾",
+            "line": "ダダにゃ!!",
+            "onomatopoeia": ""
         }
     ],
     "difficulties": [
@@ -31,6 +43,34 @@
                 {
                     "text": "鈴",
                     "reading": "すず"
+                },
+                {
+                    "text": "ねこまんま",
+                    "reading": "ねこまんま"
+                },
+                {
+                    "text": "かつお",
+                    "reading": "かつお"
+                },
+                {
+                    "text": "おさかな",
+                    "reading": "おさかな"
+                },
+                {
+                    "text": "しゃもじ猫",
+                    "reading": "しゃもじねこ"
+                },
+                {
+                    "text": "飯",
+                    "reading": "めし"
+                },
+                {
+                    "text": "サーモン",
+                    "reading": "さもん"
+                },
+                {
+                    "text": "猫じゃらし",
+                    "reading": "ねこじゃらし"
                 }
             ]
         },
