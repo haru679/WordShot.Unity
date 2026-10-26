@@ -3,24 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using WordShot.Data;
+using WordShot.Saves;
 
 namespace WordShot.Stages
 {
     /// <summary>
-    /// どのステージをどの難易度でクリアしたか（＝どこまで解放したか）。PlayerPrefs に保存し、次に起動したときも続きから遊べる。
+    /// どのステージをどの難易度でクリアしたか（＝どこまで解放したか）。セーブデータ（SaveSystem）に保存し、次に起動したときも続きから遊べる。
     /// </summary>
     /// <remarks>
     /// 解放のルール：
     /// ・ステージの「かんたん」… requiredClears のステージを全部「かんたん」以上でクリアすると解放（空なら最初から）
     /// ・「ふつう」… そのステージの「かんたん」をクリアすると解放
     /// ・「むずかしい」… そのステージの「ふつう」をクリアすると解放
+    /// クリア状況が変わると、オートセーブする（「セーブ中...」が出る）。
     /// </remarks>
     public static class StageProgress
     {
-        const string SaveKey = "Stage.Cleared";   // 「ステージID:難易度」を「,」でつないで保存する（例：stage_a:easy,stage_a:normal）
-
-        static HashSet<string> cleared;
-
         /// <summary>クリア状況が変わったとき。ステージセレクトの扉が見た目を変えるのに使う</summary>
         public static event Action Changed;
 
@@ -28,23 +26,11 @@ namespace WordShot.Stages
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetStatics()
         {
-            cleared = null;
             Changed = null;
         }
 
-        static HashSet<string> Cleared
-        {
-            get
-            {
-                if (cleared != null) return cleared;
-
-                string saved = PlayerPrefs.GetString(SaveKey, "");
-                // 難易度を足す前に保存したもの（「stage_a」だけ）は、「かんたん」をクリアしたことにする
-                cleared = new HashSet<string>(saved.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(entry => entry.Contains(':') ? entry : $"{entry}:{Difficulty.Easy.ToKey()}"));
-                return cleared;
-            }
-        }
+        // セーブデータの「クリアしたステージ」の一覧（「ステージID:難易度」の形。例：stage_a:easy）
+        static List<string> Cleared => SaveSystem.Data.clearedStages;
 
         static string Key(StageData stage, Difficulty difficulty) => $"{stage.StageId}:{difficulty.ToKey()}";
 
@@ -72,23 +58,27 @@ namespace WordShot.Stages
             return difficulty == Difficulty.Easy || IsCleared(stage, difficulty - 1);
         }
 
+        /// <summary>クリアを記録する。初めてのクリアならオートセーブする</summary>
         public static void MarkCleared(StageData stage, Difficulty difficulty)
         {
-            if (stage == null || !Cleared.Add(Key(stage, difficulty))) return;
+            if (stage == null) return;
+            string key = Key(stage, difficulty);
+            if (Cleared.Contains(key)) return;
+            Cleared.Add(key);
             Save();
         }
 
         /// <summary>開発用：全部クリアしていない状態に戻す</summary>
         public static void ResetAll()
         {
+            if (Cleared.Count == 0) return;
             Cleared.Clear();
             Save();
         }
 
         static void Save()
         {
-            PlayerPrefs.SetString(SaveKey, string.Join(",", Cleared));
-            PlayerPrefs.Save();
+            SaveSystem.RequestSave();
             Changed?.Invoke();
         }
     }

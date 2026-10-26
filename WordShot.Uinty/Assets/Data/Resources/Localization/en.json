@@ -179,6 +179,14 @@
         {
             "ja": "Esc：もどる",
             "text": "Esc: Back"
+        },
+        {
+            "ja": "セーブ中",
+            "text": "Saving"
+        },
+        {
+            "ja": "セーブに失敗しました",
+            "text": "Save failed"
         }
     ]
 }

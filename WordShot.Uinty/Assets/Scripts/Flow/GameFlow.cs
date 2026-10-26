@@ -445,7 +445,7 @@ namespace WordShot.Flow
 
             var canvas = canvasObject.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = short.MaxValue;   // 一番手前に描く
+            canvas.sortingOrder = 30000;   // ほぼ一番手前に描く（「セーブ中...」の表示だけは、さらに手前）
 
             fade = canvasObject.GetComponent<CanvasGroup>();
             fade.alpha = 0f;
