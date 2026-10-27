@@ -94,9 +94,11 @@ public class SpriteCountDisplay : MonoBehaviour
     {
         currentCount = Mathf.Clamp(count, 0, maxCount);
 
+        int hideenCount = maxCount - currentCount;
+
         for (int i = 0; i < icons.Count; i++)
         {
-            icons[i].enabled = i < currentCount;
+            icons[i].enabled = i >= hideenCount;
         }
     }
 
