@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Stage_B
   m_EditorClassIdentifier: Assembly-CSharp::WordShot.Stages.StageData
   stageId: stage_b
-  displayName: Stage B
+  displayName: "\u30B9\u30C6\u30FC\u30B8B"
   sceneName: TypingScene
   requiredClears:
   - {fileID: 11400000, guid: 1d836770368d75d4c92e86efa56d1b2a, type: 2}
+  bossId: 

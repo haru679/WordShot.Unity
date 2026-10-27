@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using WordShot.Data;
 
 namespace WordShot.Flow
 {
@@ -17,14 +18,15 @@ namespace WordShot.Flow
         [Tooltip("ゲージの中身。右端（anchorMax.x）を進み具合に合わせて伸ばす")]
         [SerializeField] RectTransform gaugeFill;
         [SerializeField] TMP_Text percentText;
-        [Tooltip("「NOW LOADING」の文字。後ろの「...」を動かす")]
+        [Tooltip("「ロード中」の文字（今の言語で出す）。後ろの「...」を動かす")]
         [SerializeField] TMP_Text loadingText;
 
         string loadingBaseText;
 
         void Awake()
         {
-            loadingBaseText = loadingText != null ? loadingText.text.TrimEnd('.') : "";
+            // 今の言語の「ロード中」（後ろの「...」はここで付ける）
+            loadingBaseText = Localization.TranslateOrSame("ロード中");
             SetProgress(0f);
         }
 
@@ -42,7 +44,7 @@ namespace WordShot.Flow
 
         void Update()
         {
-            // 「NOW LOADING.」「..」「...」と点を増やして、止まっていないことを見せる
+            // 「ロード中.」「..」「...」と点を増やして、止まっていないことを見せる
             if (loadingText == null) return;
             int dots = 1 + (int)(Time.unscaledTime / DotInterval) % 3;
             loadingText.text = loadingBaseText + new string('.', dots);

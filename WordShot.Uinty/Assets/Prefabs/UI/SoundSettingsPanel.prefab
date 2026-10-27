@@ -51,6 +51,7 @@ GameObject:
   - component: {fileID: 2814078672205042793}
   - component: {fileID: 8210109453222681393}
   - component: {fileID: 4413889260095449272}
+  - component: {fileID: 3120321396759101834}
   m_Layer: 0
   m_Name: Header
   m_TagString: Untagged
@@ -105,7 +106,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Sound
+  m_text: "\u30B5\u30A6\u30F3\u30C9"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -177,6 +178,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &3120321396759101834
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 175400217917829936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c81ae3a83a9294469a71813a7c6a15d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WordShot.Data.LocalizedText
+  japanese: "\u30B5\u30A6\u30F3\u30C9"
 --- !u!1 &344904564882875624
 GameObject:
   m_ObjectHideFlags: 0
@@ -325,6 +339,7 @@ GameObject:
   - component: {fileID: 8790993973232194086}
   - component: {fileID: 6263145827018872082}
   - component: {fileID: 3856371507575712256}
+  - component: {fileID: 265271137798132416}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -379,7 +394,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Close
+  m_text: "\u3068\u3058\u308B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -451,6 +466,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &265271137798132416
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 463498621444628219}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c81ae3a83a9294469a71813a7c6a15d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WordShot.Data.LocalizedText
+  japanese: "\u3068\u3058\u308B"
 --- !u!1 &532515065532138403
 GameObject:
   m_ObjectHideFlags: 0
@@ -911,6 +939,7 @@ GameObject:
   - component: {fileID: 3000172155144857989}
   - component: {fileID: 5656546359022724981}
   - component: {fileID: 2165171845919301463}
+  - component: {fileID: 8313292053744229411}
   m_Layer: 0
   m_Name: MuteLabel
   m_TagString: Untagged
@@ -965,7 +994,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Mute
+  m_text: "\u30DF\u30E5\u30FC\u30C8"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1037,6 +1066,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &8313292053744229411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1487822091966737287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c81ae3a83a9294469a71813a7c6a15d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WordShot.Data.LocalizedText
+  japanese: "\u30DF\u30E5\u30FC\u30C8"
 --- !u!1 &1698343514699531198
 GameObject:
   m_ObjectHideFlags: 0
@@ -1420,6 +1462,7 @@ GameObject:
   - component: {fileID: 1981802540637895050}
   - component: {fileID: 8228857111045998938}
   - component: {fileID: 3382808421155612267}
+  - component: {fileID: 2673888163659418102}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -1474,7 +1517,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Master
+  m_text: "\u5168\u4F53"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1546,6 +1589,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &2673888163659418102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2818842030667684116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c81ae3a83a9294469a71813a7c6a15d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WordShot.Data.LocalizedText
+  japanese: "\u5168\u4F53"
 --- !u!1 &3123253846714067190
 GameObject:
   m_ObjectHideFlags: 0
@@ -1593,6 +1649,7 @@ GameObject:
   - component: {fileID: 1645531550209367651}
   - component: {fileID: 4833304448201750329}
   - component: {fileID: 54243438015082019}
+  - component: {fileID: 6818284417777895417}
   m_Layer: 0
   m_Name: MuteLabel
   m_TagString: Untagged
@@ -1647,7 +1704,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Mute
+  m_text: "\u30DF\u30E5\u30FC\u30C8"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1719,6 +1776,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &6818284417777895417
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3333262336673095714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c81ae3a83a9294469a71813a7c6a15d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WordShot.Data.LocalizedText
+  japanese: "\u30DF\u30E5\u30FC\u30C8"
 --- !u!1 &3531380032564474799
 GameObject:
   m_ObjectHideFlags: 0
@@ -1927,6 +1997,7 @@ GameObject:
   - component: {fileID: 5114219094520636912}
   - component: {fileID: 689882615608710304}
   - component: {fileID: 8952937851478986840}
+  - component: {fileID: 4042711232392717246}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -2053,6 +2124,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &4042711232392717246
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3730462961143445902}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c81ae3a83a9294469a71813a7c6a15d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WordShot.Data.LocalizedText
+  japanese: BGM
 --- !u!1 &3803188695321195491
 GameObject:
   m_ObjectHideFlags: 0
@@ -2229,6 +2313,7 @@ GameObject:
   - component: {fileID: 3591432684751055095}
   - component: {fileID: 5687368771320713473}
   - component: {fileID: 3657866781197245194}
+  - component: {fileID: 2646909514182926993}
   m_Layer: 0
   m_Name: MuteLabel
   m_TagString: Untagged
@@ -2283,7 +2368,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Mute
+  m_text: "\u30DF\u30E5\u30FC\u30C8"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2355,6 +2440,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &2646909514182926993
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4024811959182405026}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c81ae3a83a9294469a71813a7c6a15d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WordShot.Data.LocalizedText
+  japanese: "\u30DF\u30E5\u30FC\u30C8"
 --- !u!1 &4277073356939865903
 GameObject:
   m_ObjectHideFlags: 0
@@ -2441,6 +2539,7 @@ GameObject:
   - component: {fileID: 6985758433173485017}
   - component: {fileID: 7817322398492092548}
   - component: {fileID: 4855048556234583352}
+  - component: {fileID: 8502147613099751228}
   m_Layer: 0
   m_Name: MuteLabel
   m_TagString: Untagged
@@ -2495,7 +2594,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Mute
+  m_text: "\u30DF\u30E5\u30FC\u30C8"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2567,6 +2666,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &8502147613099751228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4334422097031629797}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c81ae3a83a9294469a71813a7c6a15d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WordShot.Data.LocalizedText
+  japanese: "\u30DF\u30E5\u30FC\u30C8"
 --- !u!1 &4468331664628720592
 GameObject:
   m_ObjectHideFlags: 0
@@ -2663,6 +2775,7 @@ GameObject:
   - component: {fileID: 552923393142886295}
   - component: {fileID: 6092774015394235027}
   - component: {fileID: 4612308030841405335}
+  - component: {fileID: 4006714838285801355}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -2717,7 +2830,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Typing
+  m_text: "\u6253\u9375\u97F3"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2789,6 +2902,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &4006714838285801355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4972733595425286436}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c81ae3a83a9294469a71813a7c6a15d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WordShot.Data.LocalizedText
+  japanese: "\u6253\u9375\u97F3"
 --- !u!1 &5251460073398193125
 GameObject:
   m_ObjectHideFlags: 0
@@ -3257,6 +3383,7 @@ GameObject:
   - component: {fileID: 8414543665334774105}
   - component: {fileID: 216418822908253788}
   - component: {fileID: 1265937040137101389}
+  - component: {fileID: 8578871189241035432}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -3311,7 +3438,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: SE
+  m_text: "\u52B9\u679C\u97F3"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3383,6 +3510,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &8578871189241035432
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6363450179662429138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c81ae3a83a9294469a71813a7c6a15d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WordShot.Data.LocalizedText
+  japanese: "\u52B9\u679C\u97F3"
 --- !u!1 &6412471234541480015
 GameObject:
   m_ObjectHideFlags: 0

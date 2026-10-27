@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -21,6 +22,8 @@ namespace WordShot.Flow
         [SerializeField] Button resumeButton;
         [SerializeField] Button retryButton;
         [SerializeField] Button soundButton;
+        [Tooltip("言語を切り替えるボタン（なくても動く）")]
+        [SerializeField] Button languageButton;
         [SerializeField] Button backButton;
         [SerializeField] SoundSettingsPanel soundSettings;
 
@@ -58,7 +61,8 @@ namespace WordShot.Flow
             if (soundSettings.IsOpen || soundSettings.LastClosedFrame == Time.frameCount) return;
 
             GameFlow flow = GameFlow.Instance;
-            if (flow.State == PlayState.Playing) flow.Pause();
+            // 難易度を選ぶ画面を Esc で閉じた同じフレームに、ポーズまで開かないよう IsPlaying も見る
+            if (flow.State == PlayState.Playing && flow.IsPlaying) flow.Pause();
             else if (flow.State == PlayState.Paused) flow.Resume();
         }
 
@@ -87,9 +91,9 @@ namespace WordShot.Flow
         // 上下キーで、表示しているボタンの間だけを移動するようにする
         void LinkNavigation()
         {
-            Button[] buttons = retryButton.gameObject.activeSelf
-                ? new[] { resumeButton, retryButton, soundButton, backButton }
-                : new[] { resumeButton, soundButton, backButton };
+            Button[] buttons = new[] { resumeButton, retryButton, soundButton, languageButton, backButton }
+                .Where(button => button != null && button.gameObject.activeSelf)
+                .ToArray();
 
             for (int i = 0; i < buttons.Length; i++)
             {
