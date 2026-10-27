@@ -607,7 +607,7 @@ GameObject:
   - component: {fileID: 1018608012}
   - component: {fileID: 1018608015}
   m_Layer: 7
-  m_Name: Square
+  m_Name: Boss
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -758,7 +758,37 @@ MonoBehaviour:
   sinkDepth: 0.8
   sweepPassTime: 0.5
   sweepReturnTime: 0.4
+  liftHeight: 8.08
+  liftSpeed: 6
+  hiddenTime: 2
+  dropSpeed: 10
+  waitAfterDrop: 3
+  upsideDownAngle: 180
+  swayAngle: 30
+  swayFrequency: 1.5
+  sweepMoveSpeed: 6
+  videoSinkDepth: -1
+  videoStartX: -8.5
+  videoEndX: 10
+  waitBeforeReturn: 0.38
+  returnSpeed: 5
+  returnHeight: 12
   recoverTime: 2
+  player: {fileID: 465112329}
+  ricePrefab: {fileID: 1386454661278522018, guid: 832170744f103e54f93ee5996eb972af, type: 3}
+  riceSpawnOffsets:
+  - {x: -1.5, y: 2.5, z: 0}
+  - {x: 0, y: 3, z: 0}
+  - {x: 1.5, y: 2.5, z: 0}
+  riceAppearTime: 0.5
+  aimTime: 0.3
+  shotInterval: 0.5
+  riceSpeed: 10
+  riceLifeTime: 4
+  riceDamage: 1
+  riceHitRadius: 0.5
+  rotateTime: 0.1
+  fireStiffTime: 0.05
   pivotOffset: {x: 0, y: -5.42, z: 0}
   showPivotGizmo: 1
 --- !u!1 &1122312926

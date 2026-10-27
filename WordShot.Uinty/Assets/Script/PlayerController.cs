@@ -120,7 +120,7 @@ public class PlayerController : MonoBehaviour
 
 
         // ジャンプ入力の取得
-        if (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current. upArrowKey.wasPressedThisFrame)
+        if (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
             jumpRequested = true;
         }
@@ -219,17 +219,23 @@ public class PlayerController : MonoBehaviour
     void TryTakeDamage(GameObject other)
     {
         if (!other.CompareTag("Enemy")) return;
+        TakeDamage(contactDamage);
+    }
+
+    // 外部(敵の攻撃・米粒など)からダメージを受ける。無敵中・HP0の時は無効
+    public void TakeDamage(int amount)
+    {
         if (Time.time < invincibleEndTime) return;   // 無敵中
         if (currentHp <= 0) return;                  // 既にHPが0
 
-        currentHp -= contactDamage;
+        currentHp -= amount;
         invincibleEndTime = Time.time + invincibleDuration;
 
         // 無敵時間と同じ長さで点滅させる
         StartBlink();
 
         // HP表示はUI実装までデバッグログのみ
-        Debug.Log($"敵に当たった！ ダメージ: {contactDamage} / HP: {currentHp}/{maxHp}");//todo: ここにUI実装
+        Debug.Log($"ダメージを受けた！ ダメージ: {amount} / HP: {currentHp}/{maxHp}");//todo: ここにUI実装
 
         if (currentHp <= 0)
         {

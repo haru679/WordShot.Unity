@@ -42,29 +42,66 @@ public class Boss_AI : MonoBehaviour
     [Tooltip("上へ上がる速さ(ユニット/秒)")]
     [SerializeField] float liftSpeed = 6f;
     [Tooltip("画面の外で待つ時間(秒)")]
-    [SerializeField] float hiddenTime = 1f;
+    [SerializeField] float hiddenTime = 2f;
     [Tooltip("上から落ちてくる速さ(ユニット/秒)")]
     [SerializeField] float dropSpeed = 12f;
+    [Tooltip("下に降りてから止まっている時間(秒)")]
+    [SerializeField] float waitAfterDrop = 3f;
     [Tooltip("逆さまになる角度(度)")]
     [SerializeField] float upsideDownAngle = 180f;
     [Tooltip("左右に揺れる角度(度)")]
     [SerializeField] float swayAngle = 30f;
     [Tooltip("左右に揺れる速さ(往復回数/秒)")]
     [SerializeField] float swayFrequency = 1.5f;
-    [Tooltip("横へ進む向き。1=右へ、-1=左へ(動画では左から右へ進んでいたので1)")]
-    [SerializeField] float swayDirection = 1f;
     [Tooltip("横へ進む速さ(ユニット/秒)")]
     [SerializeField] float sweepMoveSpeed = 5f;
-    [Tooltip("画面の外へ抜けるまでの余白(ユニット)")]
-    [SerializeField] float exitMargin = 2f;
+    [Tooltip("床へ沈む量(ユニット)。大きいほど低い位置を通ります")]
+    [SerializeField] float videoSinkDepth = 0.8f;
+    [Tooltip("横移動の開始位置(中央からのX座標)。画面の外に置いてください")]
+    [SerializeField] float videoStartX = -6f;
+    [Tooltip("横移動の終了位置(中央からのX座標)。画面の外に置いてください")]
+    [SerializeField] float videoEndX = 6f;
     [Tooltip("横へ抜けてから上へ戻るまでの待ち時間(秒)")]
     [SerializeField] float waitBeforeReturn = 0.5f;
     [Tooltip("上から戻ってくる速さ(ユニット/秒)")]
     [SerializeField] float returnSpeed = 5f;
+    [Tooltip("最後に上から戻ってくる時の開始高さ(ユニット)。liftHeightの1.5倍が目安")]
+    [SerializeField] float returnHeight = 9f;
 
     [Header("攻撃後の硬直")]
     [Tooltip("攻撃後の硬直時間(秒)")]
     [SerializeField] float recoverTime = 1.0f;
+
+    [Header("米粒攻撃")]
+    [Tooltip("狙う相手(プレイヤー)")]
+    [SerializeField] Transform player;
+    [Tooltip("米粒のPrefab")]
+    [SerializeField] GameObject ricePrefab;
+    [Tooltip("頭上に出す3つの位置(ボスからのオフセット)。左・真ん中・右の順")]
+    [SerializeField]
+    Vector3[] riceSpawnOffsets = {
+        new Vector3(-1.5f, 2.5f, 0f),
+        new Vector3(0f, 3f, 0f),
+        new Vector3(1.5f, 2.5f, 0f)
+    };
+    [Tooltip("米粒が頭上に出てから、打ち始めるまでの時間(秒)")]
+    [SerializeField] float riceAppearTime = 0.5f;
+    [Tooltip("打つ前にプレイヤーを確認する時間(秒)")]
+    [SerializeField] float aimTime = 0.3f;
+    [Tooltip("1発撃ってから次を確認するまでの間隔(秒)")]
+    [SerializeField] float shotInterval = 0.5f;
+    [Tooltip("米粒の飛ぶ速さ(ユニット/秒)")]
+    [SerializeField] float riceSpeed = 10f;
+    [Tooltip("米粒が消えるまでの時間(秒)")]
+    [SerializeField] float riceLifeTime = 4f;
+    [Tooltip("米粒のダメージ量。プレイヤーの TakeDamage(int) に渡されます")]
+    [SerializeField] int riceDamage = 1;
+    [Tooltip("プレイヤーに当たったと判定する距離(ユニット)")]
+    [SerializeField] float riceHitRadius = 0.5f;
+    [Tooltip("打つ前に、米粒が敵の方向へ回転する時間(秒)")]
+    [SerializeField] float rotateTime = 0.3f;
+    [Tooltip("回転し終えてから発射するまでの硬直時間(秒)")]
+    [SerializeField] float fireStiffTime = 0.2f;
 
     [Header("ピボット")]
     [Tooltip("回転の中心。ボスのローカル座標で指定します(スケール前の値)")]
@@ -105,17 +142,24 @@ public class Boss_AI : MonoBehaviour
         if (!IsAttacking) StartCoroutine(AttackRoutine(1f, false));
     }
 
-    // 動画の動きの掃く攻撃(1回)
+    // 動画の動きの掃く攻撃(左から右へ・1回)
     public void StartRiseSweep()
     {
-        if (!IsAttacking) StartCoroutine(AttackRoutine(0f, true));
+        if (!IsAttacking) StartCoroutine(AttackRoutine(0f, true, false));
+    }
+
+    // 動画の動きの掃く攻撃(右から左へ・1回)
+    public void StartRiseSweepRightToLeft()
+    {
+        if (!IsAttacking) StartCoroutine(AttackRoutine(0f, true, true));
     }
 
     // ===== 攻撃全体 =====
 
     // side: -1 = 左から掃く / +1 = 右から掃く(従来の攻撃のみ使用)
     // video: true = 動画の動きの攻撃 / false = 従来の掃く攻撃
-    IEnumerator AttackRoutine(float side, bool video)
+    // rightToLeft: 動画の動きの攻撃の向き(true=右から左へ / false=左から右へ)
+    IEnumerator AttackRoutine(float side, bool video, bool rightToLeft = false)
     {
         IsAttacking = true;
 
@@ -128,7 +172,7 @@ public class Boss_AI : MonoBehaviour
             CaptureBase();
 
             // 3. 動画の動き
-            yield return VideoSweep();
+            yield return VideoSweep(rightToLeft);
         }
         else
         {
@@ -188,12 +232,11 @@ public class Boss_AI : MonoBehaviour
     // ===== 動画の動きの攻撃(＠キー) =====
     // 上へ上がって画面外 → 逆さまで床へ落ちる → 左右に揺れながら横へ進んで画面外
     // → 上から戻ってきて元の姿勢へ
-    IEnumerator VideoSweep()
+    IEnumerator VideoSweep(bool rightToLeft)
     {
-        float dir = Mathf.Sign(swayDirection) >= 0f ? 1f : -1f;
-        float offX = sweepDistance + exitMargin;          // 画面の外までの距離
-        float startX = -dir * offX;                       // 画面の外(進行方向の逆側)からスタート
-        float exitX = dir * offX;                         // 画面の外へ抜ける位置
+        // 横移動の開始位置と終了位置(インスペクターで指定した値。右から左なら入れ替える)
+        float startX = rightToLeft ? videoEndX : videoStartX;
+        float exitX = rightToLeft ? videoStartX : videoEndX;
 
         // 1. 上へ上がり、画面の上へ消える(姿勢は変えない)
         float liftTime = liftHeight / Mathf.Max(liftSpeed, 0.01f);
@@ -208,7 +251,10 @@ public class Boss_AI : MonoBehaviour
         SetLean(upsideDownAngle, startX);
         float dropTime = liftHeight / Mathf.Max(dropSpeed, 0.01f);
         yield return RisePass(startX, startX, upsideDownAngle, upsideDownAngle,
-                              sinkDepth, 0f, dropTime);
+                              videoSinkDepth, 0f, dropTime);
+
+        // 3-2. 下に降りたまま、数秒待つ
+        yield return new WaitForSeconds(waitAfterDrop);
 
         // 4. 左右に揺れながら、横へ進んで画面の外へ出る
         float swayTime = Mathf.Abs(exitX - startX) / Mathf.Max(sweepMoveSpeed, 0.01f);
@@ -217,11 +263,11 @@ public class Boss_AI : MonoBehaviour
         // 5. 画面の外で待つ
         yield return new WaitForSeconds(waitBeforeReturn);
 
-        // 6. 上から戻ってきて、元の姿勢へ
-        currentRise = liftHeight;
+        // 6. 上から戻ってきて、元の姿勢へ(returnHeightの高さから降りてくる)
+        currentRise = returnHeight;
         currentSink = 0f;
         SetLean(upsideDownAngle, 0f);
-        float returnTime = liftHeight / Mathf.Max(returnSpeed, 0.01f);
+        float returnTime = returnHeight / Mathf.Max(returnSpeed, 0.01f);
         yield return RisePass(0f, 0f, upsideDownAngle, 0f, 0f, 0f, returnTime);
     }
 
@@ -271,6 +317,109 @@ public class Boss_AI : MonoBehaviour
         }
 
         SetLean(baseAngle, toX);
+    }
+
+    // ===== 米粒攻撃 =====
+
+    // 米粒攻撃(1回)
+    public void StartRiceAttack()
+    {
+        if (!IsAttacking) StartCoroutine(RiceAttackRoutine());
+    }
+
+    // 頭上に3つ出す → 左・真ん中・右の順に、打つ瞬間にプレイヤーを狙って発射
+    IEnumerator RiceAttackRoutine()
+    {
+        if (ricePrefab == null)
+        {
+            Debug.LogWarning("ricePrefab が設定されていません");
+            yield break;
+        }
+
+        IsAttacking = true;
+
+        // 1. 頭上に3つ出す
+        GameObject[] rice = new GameObject[riceSpawnOffsets.Length];
+        for (int i = 0; i < rice.Length; i++)
+        {
+            rice[i] = Instantiate(ricePrefab, transform.position + riceSpawnOffsets[i], Quaternion.identity);
+        }
+        yield return new WaitForSeconds(riceAppearTime);
+
+        // 2. 1発目 確認→発射 / 2発目 確認→発射 / 3発目 確認→発射
+        for (int i = 0; i < rice.Length; i++)
+        {
+            // 確認
+            yield return new WaitForSeconds(aimTime);
+
+            // 回転: rotateTime をかけて、米粒の「下」を敵の方向へ向ける
+            Quaternion startRot = rice[i].transform.rotation;
+            float rotTimer = 0f;
+            while (rotTimer < rotateTime)
+            {
+                rotTimer += Time.deltaTime;
+                float t = Mathf.Clamp01(rotTimer / rotateTime);
+                Vector3 aimDir = DirToPlayer(rice[i].transform.position);
+                Quaternion targetRot = Quaternion.Euler(0f, 0f, AngleForDir(aimDir));
+                rice[i].transform.rotation = Quaternion.Slerp(startRot, targetRot, t);
+                yield return null;
+            }
+
+            // 硬直(回転し終えてから発射まで止まる)
+            yield return new WaitForSeconds(fireStiffTime);
+
+            // 発射(この瞬間のプレイヤーの方向へまっすぐ飛ばす)
+            Vector3 fireDir = DirToPlayer(rice[i].transform.position);
+            StartCoroutine(FlyRice(rice[i], fireDir));
+
+            yield return new WaitForSeconds(shotInterval);
+        }
+
+        // 3. 硬直
+        yield return new WaitForSeconds(recoverTime);
+        IsAttacking = false;
+    }
+
+    // 米粒の位置からプレイヤーへの方向(2D)。プレイヤーがいなければ下向き
+    Vector3 DirToPlayer(Vector3 from)
+    {
+        if (player == null) return Vector3.down;
+        Vector3 dir = player.position - from;
+        dir.z = 0f;
+        return dir.sqrMagnitude > 0.0001f ? dir.normalized : Vector3.down;
+    }
+
+    // 米粒の「下」が dir を向くための回転角(度)
+    float AngleForDir(Vector3 dir) => Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg + 90f;
+
+    // 米粒を指定方向へ飛ばす。プレイヤーに当たったらダメージを与えて消える
+    IEnumerator FlyRice(GameObject rice, Vector3 dir)
+    {
+        // 米粒の「下」(-Y)がプレイヤーの方向を向くように回転させる
+        // (-Y を dir へ向けるには、dir の角度に +90 度すればよい)
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg + 90f;
+        rice.transform.rotation = Quaternion.Euler(0f, 0f, angle);
+
+        float timer = 0f;
+        while (timer < riceLifeTime && rice != null)
+        {
+            timer += Time.deltaTime;
+            rice.transform.position += dir * riceSpeed * Time.deltaTime;
+
+            // 当たり判定(プレイヤーとの距離で判定)
+            if (player != null && Vector3.Distance(rice.transform.position, player.position) <= riceHitRadius)
+            {
+                // プレイヤーのダメージ処理を呼ぶ(無敵中・HP0の時は PlayerController 側で無効)
+                PlayerController pc = player.GetComponent<PlayerController>();
+                if (pc != null) pc.TakeDamage(riceDamage);
+                Destroy(rice);
+                yield break;
+            }
+
+            yield return null;
+        }
+
+        if (rice != null) Destroy(rice);
     }
 
     // ===== 共通の動き =====
@@ -388,6 +537,7 @@ public class Boss_AI : MonoBehaviour
         if (Keyboard.current.qKey.wasPressedThisFrame) StartSlam();
         if (Keyboard.current.eKey.wasPressedThisFrame) StartSlamRightFirst();
         if (Keyboard.current.leftBracketKey.wasPressedThisFrame) StartRiseSweep();
+        if (Keyboard.current.pKey.wasPressedThisFrame) StartRiceAttack();
     }
 #endif
 }
