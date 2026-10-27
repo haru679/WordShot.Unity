@@ -1,8 +1,5 @@
 using System.Collections;
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEngine.InputSystem;
-#endif
 
 public class Boss_AI : MonoBehaviour
 {
@@ -108,6 +105,12 @@ public class Boss_AI : MonoBehaviour
     [SerializeField] Vector3 pivotOffset = new Vector3(0f, -1f, 0f);
     [SerializeField] bool showPivotGizmo = true;
 
+    [Header("ランダム攻撃")]
+    [Tooltip("ONにすると、ため攻撃(左・右)・掃き攻撃(左・右)・米粒攻撃の5種類をランダムに繰り返します")]
+    [SerializeField] bool autoRandomAttack = true;
+    [Tooltip("1つの攻撃が終わってから次の攻撃を出すまでの間隔(秒)")]
+    [SerializeField] float attackInterval = 2f;
+
     Vector3 originalScale;
     Quaternion originalRotation;
 
@@ -126,6 +129,35 @@ public class Boss_AI : MonoBehaviour
     {
         originalScale = transform.localScale;
         originalRotation = transform.localRotation;
+    }
+
+    void Start()
+    {
+        if (autoRandomAttack) StartCoroutine(RandomAttackLoop());
+    }
+
+    // 攻撃が終わってから attackInterval 秒待ち、ランダムな攻撃を1つ出すことを繰り返す
+    IEnumerator RandomAttackLoop()
+    {
+        while (true)
+        {
+            yield return new WaitUntil(() => !IsAttacking);
+            yield return new WaitForSeconds(attackInterval);
+            PlayRandomAttack();
+        }
+    }
+
+    // 5種類の攻撃からランダムに1つ実行する
+    void PlayRandomAttack()
+    {
+        switch (Random.Range(0, 5))
+        {
+            case 0: StartSlam(); break;                  // ため攻撃(左)
+            case 1: StartSlamRightFirst(); break;        // ため攻撃(右)
+            case 2: StartRiseSweep(); break;             // 掃き攻撃(左から右)
+            case 3: StartRiseSweepRightToLeft(); break;  // 掃き攻撃(右から左)
+            default: StartRiceAttack(); break;           // 米粒攻撃
+        }
     }
 
     // ===== 外部(AI側)から呼び出す =====
@@ -191,6 +223,9 @@ public class Boss_AI : MonoBehaviour
 
             // 6. 掃く
             yield return Sweep(side, charge);
+
+            // 6-2. 元の大きさまで縮める(パッと戻さない)
+            yield return Shrink();
         }
 
         // 7. 硬直
@@ -439,6 +474,23 @@ public class Boss_AI : MonoBehaviour
         }
     }
 
+    // 膨らんだ大きさから元の大きさまで滑らかに縮める(時間は growTime と同じ)
+    IEnumerator Shrink()
+    {
+        Vector3 startScale = transform.localScale;
+        float timer = 0f;
+
+        while (timer < growTime)
+        {
+            timer += Time.deltaTime;
+            float t = Mathf.Clamp01(timer / growTime);
+            transform.localScale = Vector3.Lerp(startScale, originalScale, t);
+            yield return null;
+        }
+
+        transform.localScale = originalScale;
+    }
+
     IEnumerator Grow()
     {
         float timer = 0f;
@@ -524,20 +576,4 @@ public class Boss_AI : MonoBehaviour
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(pivotWorld, 0.15f);
     }
-
-#if UNITY_EDITOR
-    void Update()
-    {
-        if (Keyboard.current == null) return;
-
-        // テスト用
-        // Qキー: 左から掃く(従来)
-        // Eキー: 右から掃く(従来)
-        // ＠キー(日本語キーボードでは「P」の右隣の「@」): 動画の動きの攻撃
-        if (Keyboard.current.qKey.wasPressedThisFrame) StartSlam();
-        if (Keyboard.current.eKey.wasPressedThisFrame) StartSlamRightFirst();
-        if (Keyboard.current.leftBracketKey.wasPressedThisFrame) StartRiseSweep();
-        if (Keyboard.current.pKey.wasPressedThisFrame) StartRiceAttack();
-    }
-#endif
 }
