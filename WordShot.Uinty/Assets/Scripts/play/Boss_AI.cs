@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using WordShot.Flow;
+using WordShot.Sounds;
 
 public class Boss_AI : MonoBehaviour
 {
@@ -127,16 +130,14 @@ public class Boss_AI : MonoBehaviour
     [System.Serializable]
     public class AttackSE
     {
-        [Tooltip("再生する音声")] public AudioClip clip;
+        [Tooltip("鳴らすSoundCue(音量・ピッチ・ループなどはSoundCueで設定します)")] public SoundCue cue;
         [Tooltip("攻撃動作の開始からの再生開始時刻(秒)")] public float startTime = 0f;
-        [Tooltip("停止する時刻(秒)。開始より後に設定しない場合は最後まで鳴らします")] public float endTime = 0f;
-        [Tooltip("ループ再生するか。終了時刻が設定されていない場合は攻撃が終わるまで繰り返します")] public bool loop = false;
-        [Tooltip("音量")] [Range(0f, 1f)] public float volume = 1f;
-        [Tooltip("ピッチ")] [Range(-3f, 3f)] public float pitch = 1f;
-        [Tooltip("0 = 2D(距離による減衰なし)")] [Range(0f, 1f)] public float spatialBlend = 0f;
-        [Tooltip("左右の定位(-1=左, 0=中央, 1=右)。2Dで有効")] [Range(-1f, 1f)] public float stereoPan = 0f;
-        [Tooltip("優先度(0が最優先、256が最低)")] [Range(0, 256)] public int priority = 128;
+        [Tooltip("停止する時刻(秒)。開始より後に設定しない場合は、攻撃が終わったときに止めます")] public float endTime = 0f;
     }
+
+    [Header("デバッグ用キー")]
+    [Tooltip("ONにすると 1～5 キーで攻撃を発動します(1:叩き付け左 2:叩き付け右 3:掃き左から右 4:掃き右から左 5:米粒)")]
+    [SerializeField] bool debugAttackKeys = true;
 
     Vector3 originalScale;
     Quaternion originalRotation;
@@ -152,56 +153,51 @@ public class Boss_AI : MonoBehaviour
 
     public bool IsAttacking { get; private set; }
 
-    // ===== 攻撃SE =====
+    // ===== 攻撃SE(SoundCueで鳴らす) =====
     void PlayAttackSEs(List<AttackSE> list)
     {
-        Debug.Log("[BossSE] PlayAttackSEs count=" + (list == null ? -1 : list.Count));
         if (list == null) return;
         foreach (AttackSE se in list)
         {
-            if (se != null) StartCoroutine(PlayAttackSE(se));
+            if (se != null && se.cue != null) StartCoroutine(PlayAttackSE(se));
         }
     }
 
     IEnumerator PlayAttackSE(AttackSE se)
     {
-        Debug.Log("[BossSE] start wait clip=" + (se.clip == null ? "NULL" : se.clip.name) + " start=" + se.startTime + " end=" + se.endTime + " loop=" + se.loop);
-        if (se.clip == null) yield break;
         if (se.startTime > 0f) yield return new WaitForSeconds(se.startTime);
+        Sound.Play(se.cue);
 
-        GameObject go = new GameObject("AttackSE_" + se.clip.name);
-        go.transform.SetParent(transform, false);
-        AudioSource src = go.AddComponent<AudioSource>();
-        src.clip = se.clip;
-        src.volume = se.volume;
-        src.pitch = se.pitch;
-        src.spatialBlend = se.spatialBlend;
-        src.panStereo = se.stereoPan;
-        src.priority = se.priority;
-        src.loop = se.loop;
-        src.playOnAwake = false;
-        src.Play();
-        Debug.Log("[BossSE] playing " + se.clip.name + " isPlaying=" + src.isPlaying + " vol=" + src.volume);
-
-        // 停止時刻が開始より後ならその時刻で止める。そうでなければ最後まで鳴らす
-        if (se.loop && se.endTime <= se.startTime)
+        if (se.endTime > se.startTime)
         {
-            // ループで終了時刻がない場合は、攻撃が終わるまで鳴らし続ける
-            yield return new WaitUntil(() => !IsAttacking);
+            // 終了時刻で止める
+            yield return new WaitForSeconds(se.endTime - se.startTime);
+            Sound.Stop(se.cue);
         }
         else
         {
-            float duration = se.endTime > se.startTime ? se.endTime - se.startTime : se.clip.length;
-            yield return new WaitForSeconds(duration);
+            // 終了時刻がなければ、攻撃が終わるまで鳴らして、終わったら止める
+            yield return new WaitUntil(() => !IsAttacking);
+            Sound.Stop(se.cue);
         }
-
-        if (go != null) Destroy(go);
     }
 
     void Awake()
     {
         originalScale = transform.localScale;
         originalRotation = transform.localRotation;
+    }
+
+    void Update()
+    {
+        if (!debugAttackKeys || Keyboard.current == null) return;
+        if (GameFlow.Instance != null && !GameFlow.Instance.IsPlaying) return;
+
+        if (Keyboard.current.digit1Key.wasPressedThisFrame) StartSlam();
+        if (Keyboard.current.digit2Key.wasPressedThisFrame) StartSlamRightFirst();
+        if (Keyboard.current.digit3Key.wasPressedThisFrame) StartRiseSweep();
+        if (Keyboard.current.digit4Key.wasPressedThisFrame) StartRiseSweepRightToLeft();
+        if (Keyboard.current.digit5Key.wasPressedThisFrame) StartRiceAttack();
     }
 
     void Start()
