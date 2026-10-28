@@ -35,6 +35,9 @@ namespace WordShot.Saves
         /// <summary>セーブが終わったとき（true なら成功）</summary>
         public static event Action<bool> SaveFinished;
 
+        /// <summary>開発用：セーブデータを消したとき（DeleteAll）</summary>
+        public static event Action Deleted;
+
         public static bool IsSaving { get; private set; }
 
         public static string FilePath => Path.Combine(Application.persistentDataPath, FileName);
@@ -54,6 +57,7 @@ namespace WordShot.Saves
             IsSaving = false;
             SaveStarted = null;
             SaveFinished = null;
+            Deleted = null;
             Application.quitting -= SaveOnQuit;
             Application.quitting += SaveOnQuit;
         }
@@ -211,15 +215,22 @@ namespace WordShot.Saves
 
         // ---- 開発用 ----
 
-        /// <summary>開発用：セーブデータのファイルを消して、最初の状態に戻す</summary>
+        /// <summary>開発用：セーブデータのファイルを消して、最初の状態に戻す。終わったら Deleted が呼ばれる</summary>
         public static void DeleteAll()
         {
-            foreach (string path in new[] { FilePath, BackupPath, TempPath })
+            lock (fileLock)
             {
-                if (File.Exists(path)) File.Delete(path);
+                foreach (string path in new[] { FilePath, BackupPath, TempPath })
+                {
+                    if (File.Exists(path)) File.Delete(path);
+                }
+                // 裏でセーブしている途中なら、その（消す前の）内容は書かないようにする
+                writtenNumber = ++lastSnapshotNumber;
             }
             data = new SaveData();
             isDirty = false;
+            saveAgain = false;
+            Deleted?.Invoke();
         }
     }
 }
