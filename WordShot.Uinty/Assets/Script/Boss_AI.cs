@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Boss_AI : MonoBehaviour
@@ -111,6 +112,32 @@ public class Boss_AI : MonoBehaviour
     [Tooltip("1つの攻撃が終わってから次の攻撃を出すまでの間隔(秒)")]
     [SerializeField] float attackInterval = 2f;
 
+    [Header("攻撃SE(各攻撃ごとに複数追加できます)")]
+    [Tooltip("叩き付け(左)の攻撃で鳴らすSE")]
+    public List<AttackSE> seSlamLeft = new List<AttackSE>();
+    [Tooltip("叩き付け(右)の攻撃で鳴らすSE")]
+    public List<AttackSE> seSlamRight = new List<AttackSE>();
+    [Tooltip("掃き攻撃(左から右)で鳴らすSE")]
+    public List<AttackSE> seSweepLeftToRight = new List<AttackSE>();
+    [Tooltip("掃き攻撃(右から左)で鳴らすSE")]
+    public List<AttackSE> seSweepRightToLeft = new List<AttackSE>();
+    [Tooltip("米粒攻撃で鳴らすSE")]
+    public List<AttackSE> seRice = new List<AttackSE>();
+
+    [System.Serializable]
+    public class AttackSE
+    {
+        [Tooltip("再生する音声")] public AudioClip clip;
+        [Tooltip("攻撃動作の開始からの再生開始時刻(秒)")] public float startTime = 0f;
+        [Tooltip("停止する時刻(秒)。開始より後に設定しない場合は最後まで鳴らします")] public float endTime = 0f;
+        [Tooltip("ループ再生するか。終了時刻が設定されていない場合は攻撃が終わるまで繰り返します")] public bool loop = false;
+        [Tooltip("音量")] [Range(0f, 1f)] public float volume = 1f;
+        [Tooltip("ピッチ")] [Range(-3f, 3f)] public float pitch = 1f;
+        [Tooltip("0 = 2D(距離による減衰なし)")] [Range(0f, 1f)] public float spatialBlend = 0f;
+        [Tooltip("左右の定位(-1=左, 0=中央, 1=右)。2Dで有効")] [Range(-1f, 1f)] public float stereoPan = 0f;
+        [Tooltip("優先度(0が最優先、256が最低)")] [Range(0, 256)] public int priority = 128;
+    }
+
     Vector3 originalScale;
     Quaternion originalRotation;
 
@@ -124,6 +151,52 @@ public class Boss_AI : MonoBehaviour
     float currentRise;  // 現在の上昇量
 
     public bool IsAttacking { get; private set; }
+
+    // ===== 攻撃SE =====
+    void PlayAttackSEs(List<AttackSE> list)
+    {
+        Debug.Log("[BossSE] PlayAttackSEs count=" + (list == null ? -1 : list.Count));
+        if (list == null) return;
+        foreach (AttackSE se in list)
+        {
+            if (se != null) StartCoroutine(PlayAttackSE(se));
+        }
+    }
+
+    IEnumerator PlayAttackSE(AttackSE se)
+    {
+        Debug.Log("[BossSE] start wait clip=" + (se.clip == null ? "NULL" : se.clip.name) + " start=" + se.startTime + " end=" + se.endTime + " loop=" + se.loop);
+        if (se.clip == null) yield break;
+        if (se.startTime > 0f) yield return new WaitForSeconds(se.startTime);
+
+        GameObject go = new GameObject("AttackSE_" + se.clip.name);
+        go.transform.SetParent(transform, false);
+        AudioSource src = go.AddComponent<AudioSource>();
+        src.clip = se.clip;
+        src.volume = se.volume;
+        src.pitch = se.pitch;
+        src.spatialBlend = se.spatialBlend;
+        src.panStereo = se.stereoPan;
+        src.priority = se.priority;
+        src.loop = se.loop;
+        src.playOnAwake = false;
+        src.Play();
+        Debug.Log("[BossSE] playing " + se.clip.name + " isPlaying=" + src.isPlaying + " vol=" + src.volume);
+
+        // 停止時刻が開始より後ならその時刻で止める。そうでなければ最後まで鳴らす
+        if (se.loop && se.endTime <= se.startTime)
+        {
+            // ループで終了時刻がない場合は、攻撃が終わるまで鳴らし続ける
+            yield return new WaitUntil(() => !IsAttacking);
+        }
+        else
+        {
+            float duration = se.endTime > se.startTime ? se.endTime - se.startTime : se.clip.length;
+            yield return new WaitForSeconds(duration);
+        }
+
+        if (go != null) Destroy(go);
+    }
 
     void Awake()
     {
@@ -197,6 +270,12 @@ public class Boss_AI : MonoBehaviour
 
         // 1. 中央へ移動
         yield return MoveToCenter();
+
+        // 攻撃の種類に合わせたSEを、攻撃動作の開始時刻から鳴らす
+        if (video)
+            PlayAttackSEs(rightToLeft ? seSweepRightToLeft : seSweepLeftToRight);
+        else
+            PlayAttackSEs(side < 0f ? seSlamLeft : seSlamRight);
 
         if (video)
         {
@@ -374,6 +453,8 @@ public class Boss_AI : MonoBehaviour
         IsAttacking = true;
 
         // 1. 頭上に3つ出す
+        PlayAttackSEs(seRice);
+
         GameObject[] rice = new GameObject[riceSpawnOffsets.Length];
         for (int i = 0; i < rice.Length; i++)
         {
