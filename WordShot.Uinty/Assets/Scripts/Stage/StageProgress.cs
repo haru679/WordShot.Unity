@@ -47,6 +47,13 @@ namespace WordShot.Stages
         /// <summary>ステージそのもの（扉）が解放されているか ＝「かんたん」が遊べるか</summary>
         public static bool IsUnlocked(StageData stage)
         {
+            if (stage == null || stage.ComingSoon) return false;   // 近日公開のステージは、条件を満たしても解放しない
+            return MeetsRequirements(stage);
+        }
+
+        /// <summary>解放の条件（requiredClears を全部クリア）を満たしているか。近日公開のステージでも調べる</summary>
+        public static bool MeetsRequirements(StageData stage)
+        {
             if (stage == null) return false;
             return stage.RequiredClears.All(required => required == null || IsCleared(required, Difficulty.Easy));
         }

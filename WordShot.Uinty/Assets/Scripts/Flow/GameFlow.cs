@@ -189,7 +189,10 @@ namespace WordShot.Flow
         /// true：クリア表示を出し、少し待ってからステージセレクトへ戻る。
         /// false：時間を止めてゲームオーバー表示を出す。Shift キーでやり直す。
         /// </remarks>
-        public void FinishStage(bool isCleared)
+        public void FinishStage(bool isCleared) => FinishStage(isCleared, ClearWaitTime);
+
+        /// <summary>ステージを終える。クリアのとき、クリア表示を出してからステージセレクトへ戻るまでの秒数を決められる</summary>
+        public void FinishStage(bool isCleared, float clearWaitTime)
         {
             // 撃破とやられたが同じタイミングで来ても、最初の1回だけを採用する
             if (!IsInStage || State != PlayState.Playing || IsTransitioning) return;
@@ -201,7 +204,7 @@ namespace WordShot.Flow
                 SetState(PlayState.Cleared);
                 StageProgress.MarkCleared(CurrentStageData, CurrentDifficulty);   // これで次の難易度・次のステージが解放される
                 StageCleared?.Invoke(CurrentStage);
-                clearWait = StartCoroutine(GoToStageSelectAfter(ClearWaitTime));
+                clearWait = StartCoroutine(GoToStageSelectAfter(clearWaitTime));
             }
             else
             {

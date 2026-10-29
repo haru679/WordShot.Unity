@@ -1,7 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using WordShot.Data;
+using WordShot.Flow;
+using WordShot.Sounds;
 
 [System.Serializable]
 public class TypingData
@@ -22,7 +26,19 @@ public class TypingGameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI inputTextUI;
 
     [Header("Typing Data")]
+    [Tooltip("お題。ゲームが始まると、ボスのデータ（選んだ難易度）の words に置き換わる。ボスのデータがないときだけ、ここのお題を使う")]
     [SerializeField] private List<TypingData> typingList = new List<TypingData>();
+    [Tooltip("このシーンを直接再生したとき（ステージセレクトを通らないとき）に使うボスの id と難易度")]
+    [SerializeField] private string fallbackBossId = "shamoji_neko";
+    [SerializeField] private Difficulty fallbackDifficulty = Difficulty.Easy;
+
+    [Header("音（なくてもよい）")]
+    [Tooltip("1文字正しく打ったときの音（キーボード）")]
+    [SerializeField] private SoundCue typeSound;
+    [Tooltip("打ち間違えたときの音")]
+    [SerializeField] private SoundCue missSound;
+    [Tooltip("お題を打ち切ったときの攻撃の音")]
+    [SerializeField] private SoundCue wordCompleteSound;
 
     private int currentQuestionIndex = 0;
     private TypingData currentData;
@@ -39,8 +55,13 @@ public class TypingGameManager : MonoBehaviour
     // 解く全のフレームで文字入力居バントが発生したか
     private bool receivedTextInput = false;
 
+    /// <summary>ボスのHPが0になったとき（ステージクリアは BattleOutcome が行う）</summary>
+    public event System.Action BossDefeated;
+
     void Start()
     {
+        LoadWordsFromBossData();
+
         if (typingList.Count > 0)
         {
             LoadRandomQuestion();
@@ -50,6 +71,12 @@ public class TypingGameManager : MonoBehaviour
     private void Update()
     {
         if (Keyboard.current == null)
+        {
+            return;
+        }
+
+        // ポーズ中・ゲームオーバー・クリアの後は、入力を受け付けない
+        if (GameFlow.Instance != null && !GameFlow.Instance.IsPlaying)
         {
             return;
         }
@@ -99,8 +126,24 @@ public class TypingGameManager : MonoBehaviour
         }
     }
 
+    // お題をボスのデータから取る（ステージセレクトで選んだボスと難易度。直接再生したときは fallbackBossId）
+    private void LoadWordsFromBossData()
+    {
+        BossDifficultyData level = GameFlow.Instance != null ? GameFlow.Instance.CurrentBossLevel : null;
+        if (level == null) level = BossDatabase.Find(fallbackBossId)?.Get(fallbackDifficulty);
+
+        if (level == null || level.words == null || level.words.Length == 0)
+        {
+            Debug.LogWarning("[Typing] ボスのデータにお題がないので、インスペクターのお題を使います");
+            return;
+        }
+        typingList = level.words.Select(word => word.ToTypingData()).ToList();
+    }
+
     private void CountMistake()
     {
+        if (missSound != null) Sound.Play(missSound);
+
         // 現在のお題のタイプミス数
         currentMistakeCount++;
 
@@ -170,6 +213,9 @@ public class TypingGameManager : MonoBehaviour
 
         if (isCompleteMatch)
         {
+            if (typeSound != null) Sound.Play(typeSound);
+            if (wordCompleteSound != null) Sound.Play(wordCompleteSound);
+
             // ミス用のアイコンを1つ減らす
             if (bossHPBar != null)
             {
@@ -181,6 +227,8 @@ public class TypingGameManager : MonoBehaviour
                     rubyTextUI.text = "";
                     targetTextUI.text = $"合計タイピングミス数{totalMistakeCount}回";
                     inputTextUI.text = "";
+                    enabled = false;   // もう入力を受け付けない
+                    BossDefeated?.Invoke();
                     return;
                 }
             }
@@ -190,6 +238,7 @@ public class TypingGameManager : MonoBehaviour
         }
         else if (isValidPrefix)
         {
+            if (typeSound != null) Sound.Play(typeSound);
             currentInput = nextInput;
             UpdateInputDisplay();
 

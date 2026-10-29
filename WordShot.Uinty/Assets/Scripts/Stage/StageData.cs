@@ -29,7 +29,11 @@ namespace WordShot.Stages
         [Tooltip("このステージで戦うボスの id（Assets/Data/Resources/Bosses/（id）.json）")]
         [SerializeField] string bossId;
 
+        [Tooltip("ON にすると、まだ遊べないステージになる。解放の条件を満たしても解放せず、扉に「近日公開！」と出す")]
+        [SerializeField] bool comingSoon;
+
         public string StageId => stageId;
+        public bool ComingSoon => comingSoon;
         public string DisplayName => string.IsNullOrEmpty(displayName) ? name : displayName;
         public string SceneName => sceneName;
         public StageData[] RequiredClears => requiredClears;

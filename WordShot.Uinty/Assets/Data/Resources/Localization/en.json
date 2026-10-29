@@ -97,8 +97,8 @@
             "text": "STAGE SELECT"
         },
         {
-            "ja": "A / D：移動　W / Space：ジャンプ　Enter：決定　Esc：ポーズ",
-            "text": "A / D: Move    W / Space: Jump    Enter: Select    Esc: Pause"
+            "ja": "←→：移動　↑ / Space：ジャンプ　Enter：決定　Esc：ポーズ",
+            "text": "←→: Move    ↑ / Space: Jump    Enter: Select    Esc: Pause"
         },
         {
             "ja": "リトライ",
@@ -207,6 +207,54 @@
         {
             "ja": "かつお",
             "text": "bonito"
+        },
+        {
+            "ja": "Ctrlキーでステージセレクトへ",
+            "text": "Ctrl: Back to Stage Select"
+        },
+        {
+            "ja": "近日公開！",
+            "text": "Coming Soon!"
+        },
+        {
+            "ja": "ステージC",
+            "text": "Stage C"
+        },
+        {
+            "ja": "ステージD",
+            "text": "Stage D"
+        },
+        {
+            "ja": "ステージE",
+            "text": "Stage E"
+        },
+        {
+            "ja": "ステージF",
+            "text": "Stage F"
+        },
+        {
+            "ja": "ステージG",
+            "text": "Stage G"
+        },
+        {
+            "ja": "ステージH",
+            "text": "Stage H"
+        },
+        {
+            "ja": "クレジット",
+            "text": "Credits"
+        },
+        {
+            "ja": "プランナー",
+            "text": "Planner"
+        },
+        {
+            "ja": "プログラマー",
+            "text": "Programmer"
+        },
+        {
+            "ja": "BGM素材・使用楽曲",
+            "text": "Music"
         }
     ]
 }

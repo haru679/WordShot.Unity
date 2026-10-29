@@ -17,6 +17,10 @@ namespace WordShot.Flow
         [SerializeField] Button optionsButton;
         [SerializeField] SoundSettingsPanel soundSettings;
 
+        [Header("クレジット（なくても動く）")]
+        [SerializeField] Button creditsButton;
+        [SerializeField] CreditsScreen credits;
+
         [Header("効果音（なくても動く）")]
         [Tooltip("ボタンを押したときに鳴らすSoundCue(Categoryは UI)")]
         [SerializeField] SoundCue clickSound;
@@ -29,6 +33,11 @@ namespace WordShot.Flow
             if (optionsButton != null && soundSettings != null)
             {
                 optionsButton.onClick.AddListener(() => { PlayClick(); soundSettings.Open(optionsButton.gameObject); });
+            }
+
+            if (creditsButton != null && credits != null)
+            {
+                creditsButton.onClick.AddListener(() => { PlayClick(); credits.Open(creditsButton.gameObject); });
             }
 
             // マウスがなくても矢印キー＋Enterで選べるよう、Start を選んでおく

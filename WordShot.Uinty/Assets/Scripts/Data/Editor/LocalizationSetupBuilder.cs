@@ -69,7 +69,7 @@ namespace WordShot.Data.EditorTools
             ["Assets/Scenes/StageSelectScene.unity"] = new[]
             {
                 ("Title", "ステージセレクト"),
-                ("Help", "A / D：移動　W / Space：ジャンプ　Enter：決定　Esc：ポーズ"),
+                ("Help", "←→：移動　↑ / Space：ジャンプ　Enter：決定　Esc：ポーズ"),
             },
             ["Assets/Scenes/ResultScene.unity"] = new[]
             {

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
+using WordShot.Sounds;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
@@ -39,14 +40,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
 
     [Header("ダメージ")]
-    [Tooltip("最大HP（現在はデバッグ表示のみ）")]
+    [Tooltip("最大HP。HPバーへの表示と、0になったときのゲームオーバーは BattleOutcome が行う")]
     [SerializeField] private int maxHp = 3;
 
     [Tooltip("敵に当たったときに受けるダメージ量")]
     [SerializeField] private int contactDamage = 1;
 
     [Tooltip("ダメージを受けた後の無敵時間（秒）。点滅の長さもこの値になる")]
-    [SerializeField] private float invincibleDuration = 1f;
+    [SerializeField] private float invincibleDuration = 1.5f;
 
     [Header("点滅")]
     [Tooltip("被弾時の点滅のON/OFF")]
@@ -55,7 +56,16 @@ public class PlayerController : MonoBehaviour
     [Tooltip("表示/非表示を切り替える間隔（秒）。小さいほど速く点滅する")]
     [SerializeField] private float blinkInterval = 0.1f;
 
+    [Header("音（なくてもよい）")]
+    [Tooltip("ジャンプしたときの音")]
+    [SerializeField] private SoundCue jumpSound;
+    [Tooltip("二段ジャンプしたときの音（空ならジャンプの音）")]
+    [SerializeField] private SoundCue doubleJumpSound;
+    [Tooltip("ダメージを受けたときの音")]
+    [SerializeField] private SoundCue damageSound;
+
     private Rigidbody2D rb;
+    private Collider2D bodyCollider;
 
     private float moveInput;
     private bool jumpRequested;   // ジャンプキーが押された（FixedUpdate で消費）
@@ -74,9 +84,20 @@ public class PlayerController : MonoBehaviour
     // 向きを変える画像（子オブジェクトの SpriteRenderer をすべて対象にする）。画像は右向きを想定
     private SpriteRenderer[] spriteRenderers;
 
+    public int CurrentHp => currentHp;
+    public int MaxHp => maxHp;
+    public bool IsDead => currentHp <= 0;
+
+    /// <summary>HPが変わったとき（今のHP, 最大HP）。HPバーの表示に使う</summary>
+    public event System.Action<int, int> HpChanged;
+
+    /// <summary>HPが0になったとき。この後は動けなくなる</summary>
+    public event System.Action Died;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        bodyCollider = GetComponent<Collider2D>();
 
         // 重力は Rigidbody2D ではなくこのスクリプトで管理する
         rb.gravityScale = 0f;
@@ -121,6 +142,11 @@ public class PlayerController : MonoBehaviour
     {
         // 入力の取得（左右移動：← →）
         moveInput = 0f;
+        jumpHeld = false;
+
+        // キーボードがないとき・死んだ後は動かない
+        if (Keyboard.current == null || IsDead) return;
+
         if (Keyboard.current.leftArrowKey.isPressed) moveInput -= 1f;
         if (Keyboard.current.rightArrowKey.isPressed) moveInput += 1f;
 
@@ -211,6 +237,8 @@ public class PlayerController : MonoBehaviour
     void StartJump()
     {
         jumpCount++;
+        SoundCue sound = jumpCount >= 2 && doubleJumpSound != null ? doubleJumpSound : jumpSound;
+        if (sound != null) Sound.Play(sound);
         jumpStartY = rb.position.y;
         isRising = true;
         leftGround = false;
@@ -221,7 +249,13 @@ public class PlayerController : MonoBehaviour
     {
         if (groundCheck == null) return false;
 
-        return Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer) != null;
+        // groundCheck が自分自身のときは、足元（当たり判定の下の端）で調べる。
+        // 中心で調べると、プレイヤーを大きく表示したシーン（ステージセレクト）で床に届かず、着地できないため
+        Vector2 point = groundCheck.position;
+        if (groundCheck == transform && bodyCollider != null)
+            point = new Vector2(bodyCollider.bounds.center.x, bodyCollider.bounds.min.y);
+
+        return Physics2D.OverlapCircle(point, groundCheckRadius, groundLayer) != null;
     }
 
     // =========================================================== 敵との当たり判定 ======================================================//
@@ -253,13 +287,22 @@ public class PlayerController : MonoBehaviour
         // 無敵時間と同じ長さで点滅させる
         StartBlink();
 
-        // HP表示はUI実装までデバッグログのみ
-        Debug.Log($"ダメージを受けた！ ダメージ: {amount} / HP: {currentHp}/{maxHp}");//todo: ここにUI実装
+        if (currentHp < 0) currentHp = 0;
+        if (damageSound != null) Sound.Play(damageSound);
+        Debug.Log($"ダメージを受けた！ ダメージ: {amount} / HP: {currentHp}/{maxHp}");
+        HpChanged?.Invoke(currentHp, maxHp);
 
         if (currentHp <= 0)
         {
             Debug.Log("HPが0になった");
+            Died?.Invoke();
         }
+    }
+
+    /// <summary>これ以上ダメージを受けないようにする（ボスを倒した後の演出中など）</summary>
+    public void SetInvincibleForever()
+    {
+        invincibleEndTime = float.MaxValue;
     }
 
     // ================================================================ 点滅 ==============================================================//

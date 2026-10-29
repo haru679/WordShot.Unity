@@ -12,15 +12,15 @@ namespace WordShot.Flow
     /// <remarks>
     /// プレハブ：Assets/Prefabs/UI/StageOverlay.prefab
     /// 表示を出すだけで、やり直し（Shift キー）やステージセレクトへ戻る処理（Ctrl キー）は GameFlow が行う。
-    /// ゲームオーバーの画面には画像を1枚張れる（Game Over Image。空なら出さない）。
+    /// ゲームオーバーの画面には画像を1枚張れる（Game Over Image）。画像を入れたときは画像だけを出す
+    /// （画像に「Shift でやり直し・Ctrl でステージセレクト」まで描いてあるので、文字の案内は出さない）。
     /// </remarks>
     public class StageOverlay : MonoBehaviour
     {
         const float BlinkInterval = 0.5f;
 
-        // ゲームオーバーの画像の位置と大きさ（画面の中央より上に出す）
-        static readonly Vector2 PictureSize = new Vector2(640f, 320f);
-        const float PictureY = 300f;
+        // ゲームオーバーの画像の大きさ（画面の中央に大きく出す）
+        static readonly Vector2 PictureSize = new Vector2(1400f, 700f);
         const float StageSelectHintY = -200f;
         const float StageSelectHintFontSize = 40f;
 
@@ -30,7 +30,7 @@ namespace WordShot.Flow
         [SerializeField] GameObject clearRoot;
 
         [Header("ゲームオーバーの画面")]
-        [Tooltip("ゲームオーバーの画面に出す画像（1枚）。空なら出さない")]
+        [Tooltip("ゲームオーバーの画面に出す画像（1枚）。入れると画像だけを出す。空なら文字の案内を出す")]
         [SerializeField] Sprite gameOverImage;
 
         [Header("音（なくてもよい）")]
@@ -41,8 +41,8 @@ namespace WordShot.Flow
 
         void Awake()
         {
-            if (gameOverImage != null) CreateGameOverPicture();
-            CreateStageSelectHint();
+            if (gameOverImage != null) ShowPictureOnly();
+            else CreateStageSelectHint();
         }
 
         void Start()
@@ -70,15 +70,17 @@ namespace WordShot.Flow
         void Update()
         {
             // 時間が止まっていても点滅するよう、unscaled の時間を使う
-            if (gameOverRoot.activeSelf)
+            if (gameOverRoot.activeSelf && gameOverImage == null)
             {
                 retryHint.SetActive(Mathf.Repeat(Time.unscaledTime, BlinkInterval * 2f) < BlinkInterval);
             }
         }
 
-        // ゲームオーバーの画面に1枚画像を出す。文字より奥に描く
-        void CreateGameOverPicture()
+        // ゲームオーバーの画面を画像だけにする（もとからある文字は隠す）
+        void ShowPictureOnly()
         {
+            foreach (Transform child in gameOverRoot.transform) child.gameObject.SetActive(false);
+
             var picture = new GameObject("GameOverPicture", typeof(RectTransform), typeof(Image));
             picture.transform.SetParent(gameOverRoot.transform, false);
             picture.transform.SetAsFirstSibling();
@@ -91,7 +93,7 @@ namespace WordShot.Flow
             var rect = (RectTransform)picture.transform;
             rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
             rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.anchoredPosition = new Vector2(0f, PictureY);
+            rect.anchoredPosition = Vector2.zero;
             rect.sizeDelta = PictureSize;
         }
 

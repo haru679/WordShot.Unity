@@ -32,7 +32,7 @@ namespace WordShot.Stages.EditorTools
 
         const string PlayerPrefabPath = "Assets/Prefabs/GameObject/Player.prefab";
         const string GroundLayerName = "ground";
-        const string HelpText = "A / D: Move    W / Space: Jump    Enter: Select    Esc: Pause";
+        const string HelpText = "←→: Move    ↑ / Space: Jump    Enter: Select    Esc: Pause";
 
         const float GroundTop = -3.5f;
         // 重なり順（Order in Layer）。数字が大きいほど手前。プレイヤーのプレハブは 0

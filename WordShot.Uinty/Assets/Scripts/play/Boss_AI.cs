@@ -1,4 +1,4 @@
-using System.Collections;
+п»їusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -7,158 +7,160 @@ using WordShot.Sounds;
 
 public class Boss_AI : MonoBehaviour
 {
-    [Header("ѓXѓeЃ[ѓW’†‰›‚Ц€Ъ“®")]
-    [SerializeField] Transform centerPoint;     // ѓXѓeЃ[ѓW’†‰›‚Й’u‚­‹у‚МѓIѓuѓWѓFѓNѓg
-    [SerializeField] float moveSpeed = 5f;      // €Ъ“®‘¬“x(ѓ†ѓjѓbѓg/•b)
+    [Header("г‚№гѓ†гѓјг‚ёдё­е¤®гЃёз§»е‹•")]
+    [SerializeField] Transform centerPoint;     // г‚№гѓ†гѓјг‚ёдё­е¤®гЃ«зЅ®гЃЏз©єгЃ®г‚Єгѓ–г‚ёг‚§г‚Їгѓ€
+    [SerializeField] float moveSpeed = 5f;      // з§»е‹•йЂџеє¦(гѓ¦гѓ‹гѓѓгѓ€/з§’)
 
-    [Header("–c’Ј(QѓLЃ[ / EѓLЃ[)")]
-    [SerializeField] float growScale = 1.5f;    // –c‚з‚с‚ѕЋћ‚М”{—¦
-    [SerializeField] float growTime = 0.6f;     // –c‚з‚ЮЋћЉФ(•b)
+    [Header("и†Ёејµ(Qг‚­гѓј / Eг‚­гѓј)")]
+    [SerializeField] float growScale = 1.5f;    // и†Ёг‚‰г‚“гЃ ж™‚гЃ®еЂЌзЋ‡
+    [SerializeField] float growTime = 0.6f;     // и†Ёг‚‰г‚Ђж™‚й–“(з§’)
+    [Tooltip("и†Ёг‚‰г‚Ђй–“гЃ«дёЉгЃёдёЉгЃЊг‚‹й‡Џ(гѓ¦гѓ‹гѓѓгѓ€)гЂ‚и†Ёг‚‰г‚“гЃ§г‚‚дё‹г‚’гЃЏгЃђгЃЈгЃ¦еЏЌеЇѕеЃґгЃёйЂѓгЃ’г‚‰г‚Њг‚‹г‚€гЃ†гЃ«гЃ™г‚‹гЂ‚жЋѓгЃЏгЃЁгЃЌгЃЇгЃ“гЃ®е€†г‚‚жІ€г‚ЂгЃ®гЃ§гЂЃж”»ж’ѓгЃ®й«гЃ•гЃЇе¤‰г‚Џг‚ЉгЃѕгЃ›г‚“")]
+    [SerializeField] float growRise = 0.9f;
 
-    [Header("—­‚Я(QѓLЃ[ / EѓLЃ[)")]
-    [SerializeField] float chargeTime = 2.5f;   // —­‚ЯЋћЉФ(•b)
-    [SerializeField] float chargeAngle = -25f;  // —­‚Я‚ЕЊг‚л‚ЙЊX‚Ї‚йЉp“x(Ќ¶ЌUЊ‚‚МЉоЏЂЃB‰EЌUЊ‚‚Н”Ѕ“])
+    [Header("жєњг‚Ѓ(Qг‚­гѓј / Eг‚­гѓј)")]
+    [SerializeField] float chargeTime = 2.5f;   // жєњг‚Ѓж™‚й–“(з§’)
+    [SerializeField] float chargeAngle = -25f;  // жєњг‚ЃгЃ§еѕЊг‚ЌгЃ«е‚ѕгЃ‘г‚‹и§’еє¦(е·¦ж”»ж’ѓгЃ®еџєжє–гЂ‚еЏіж”»ж’ѓгЃЇеЏЌи»ў)
 
-    [Header("ЌUЊ‚‘O‚М’вЋ~(QѓLЃ[ / EѓLЃ[)")]
-    [Tooltip("ЊX‚ў‚ЅЏу‘Ф‚ЕЋ~‚Ь‚йЋћЉФ(•b)ЃB‚±‚±‚ЕЌUЊ‚—\Ќђ‚рЏo‚µ‚Ь‚·")]
+    [Header("ж”»ж’ѓе‰ЌгЃ®еЃњж­ў(Qг‚­гѓј / Eг‚­гѓј)")]
+    [Tooltip("е‚ѕгЃ„гЃџзЉ¶ж…‹гЃ§ж­ўгЃѕг‚‹ж™‚й–“(з§’)гЂ‚гЃ“гЃ“гЃ§ж”»ж’ѓдє€е‘Љг‚’е‡єгЃ—гЃѕгЃ™")]
     [SerializeField] float strikePauseTime = 0.3f;
 
-    [Header("‘|‚­ЌUЊ‚ - ‹¤’К(QѓLЃ[ / EѓLЃ[)")]
-    [Tooltip("‘|‚­‹——Ј(ѓXѓeЃ[ѓW‚М”ј•Є‚М•ќ‚ЙЌ‡‚н‚№‚й)")]
+    [Header("жЋѓгЃЏж”»ж’ѓ - е…±йЂљ(Qг‚­гѓј / Eг‚­гѓј)")]
+    [Tooltip("жЋѓгЃЏи·ќй›ў(г‚№гѓ†гѓјг‚ёгЃ®еЌЉе€†гЃ®е№…гЃ«еђ€г‚ЏгЃ›г‚‹)")]
     [SerializeField] float sweepDistance = 4f;
-    [Tooltip("Џ°‚Ц“|‚к‚йЉp“x(“x)ЃBЌ¶ЌUЊ‚‚Н‰E‚ЙЃA‰EЌUЊ‚‚НЌ¶‚Й“|‚к‚Ь‚·")]
+    [Tooltip("еєЉгЃёеЂ’г‚Њг‚‹и§’еє¦(еє¦)гЂ‚е·¦ж”»ж’ѓгЃЇеЏігЃ«гЂЃеЏіж”»ж’ѓгЃЇе·¦гЃ«еЂ’г‚ЊгЃѕгЃ™")]
     [SerializeField] float leanDownAngle = 90f;
-    [Tooltip("Џ°‚Й“|‚к‚ЅЋћ‚М’ѕ‚ЭЌћ‚Э—К(ѓ†ѓjѓbѓg)ЃB‘е‚«‚ў‚Ж’б‚ў€К’u‚р‘|‚«‚Ь‚·")]
+    [Tooltip("еєЉгЃ«еЂ’г‚ЊгЃџж™‚гЃ®жІ€гЃїиѕјгЃїй‡Џ(гѓ¦гѓ‹гѓѓгѓ€)гЂ‚е¤§гЃЌгЃ„гЃЁдЅЋгЃ„дЅЌзЅ®г‚’жЋѓгЃЌгЃѕгЃ™")]
     [SerializeField] float sinkDepth = 0.8f;
 
-    [Header("‘|‚­ЌUЊ‚ - Џ]—€(QѓLЃ[ / EѓLЃ[)")]
-    [Tooltip("“|‚к‚Д‘|‚­ЋћЉФ(•b)")]
+    [Header("жЋѓгЃЏж”»ж’ѓ - еѕ“жќҐ(Qг‚­гѓј / Eг‚­гѓј)")]
+    [Tooltip("еЂ’г‚ЊгЃ¦жЋѓгЃЏж™‚й–“(з§’)")]
     [SerializeField] float sweepPassTime = 0.5f;
-    [Tooltip("–Я‚и‚МЋћЉФ(•b)")]
+    [Tooltip("ж€»г‚ЉгЃ®ж™‚й–“(з§’)")]
     [SerializeField] float sweepReturnTime = 0.4f;
 
-    [Header("‘|‚­ЌUЊ‚ - “®‰ж‚М“®‚«(Ѓ—ѓLЃ[)")]
-    [Tooltip("‰ж–К‚МЏг‚ЦЏБ‚¦‚й‚Ь‚ЕЏг‚Є‚йЌ‚‚і(ѓ†ѓjѓbѓg)ЃBѓXѓeЃ[ѓW‚М‘е‚«‚і‚ЙЌ‡‚н‚№‚Д’Іђ®‚µ‚Д‚­‚ѕ‚і‚ў")]
+    [Header("жЋѓгЃЏж”»ж’ѓ - е‹•з”»гЃ®е‹•гЃЌ(пј г‚­гѓј)")]
+    [Tooltip("з”»йќўгЃ®дёЉгЃёж¶€гЃ€г‚‹гЃѕгЃ§дёЉгЃЊг‚‹й«гЃ•(гѓ¦гѓ‹гѓѓгѓ€)гЂ‚г‚№гѓ†гѓјг‚ёгЃ®е¤§гЃЌгЃ•гЃ«еђ€г‚ЏгЃ›гЃ¦иЄїж•ґгЃ—гЃ¦гЃЏгЃ гЃ•гЃ„")]
     [SerializeField] float liftHeight = 6f;
-    [Tooltip("Џг‚ЦЏг‚Є‚й‘¬‚і(ѓ†ѓjѓbѓg/•b)")]
+    [Tooltip("дёЉгЃёдёЉгЃЊг‚‹йЂџгЃ•(гѓ¦гѓ‹гѓѓгѓ€/з§’)")]
     [SerializeField] float liftSpeed = 6f;
-    [Tooltip("‰ж–К‚МЉO‚Е‘Т‚ВЋћЉФ(•b)")]
+    [Tooltip("з”»йќўгЃ®е¤–гЃ§еѕ…гЃ¤ж™‚й–“(з§’)")]
     [SerializeField] float hiddenTime = 2f;
-    [Tooltip("Џг‚©‚з—Ћ‚ї‚Д‚­‚й‘¬‚і(ѓ†ѓjѓbѓg/•b)")]
+    [Tooltip("дёЉгЃ‹г‚‰иђЅгЃЎгЃ¦гЃЏг‚‹йЂџгЃ•(гѓ¦гѓ‹гѓѓгѓ€/з§’)")]
     [SerializeField] float dropSpeed = 12f;
-    [Tooltip("‰є‚ЙЌ~‚и‚Д‚©‚зЋ~‚Ь‚Б‚Д‚ў‚йЋћЉФ(•b)")]
+    [Tooltip("дё‹гЃ«й™Ќг‚ЉгЃ¦гЃ‹г‚‰ж­ўгЃѕгЃЈгЃ¦гЃ„г‚‹ж™‚й–“(з§’)")]
     [SerializeField] float waitAfterDrop = 3f;
-    [Tooltip("‹t‚і‚Ь‚Й‚И‚йЉp“x(“x)")]
+    [Tooltip("йЂ†гЃ•гЃѕгЃ«гЃЄг‚‹и§’еє¦(еє¦)")]
     [SerializeField] float upsideDownAngle = 180f;
-    [Tooltip("Ќ¶‰E‚Й—h‚к‚йЉp“x(“x)")]
+    [Tooltip("е·¦еЏігЃ«жЏєг‚Њг‚‹и§’еє¦(еє¦)")]
     [SerializeField] float swayAngle = 30f;
-    [Tooltip("Ќ¶‰E‚Й—h‚к‚й‘¬‚і(‰ќ•њ‰сђ”/•b)")]
+    [Tooltip("е·¦еЏігЃ«жЏєг‚Њг‚‹йЂџгЃ•(еѕЂеѕ©е›ћж•°/з§’)")]
     [SerializeField] float swayFrequency = 1.5f;
-    [Tooltip("‰Ў‚Цђi‚Ю‘¬‚і(ѓ†ѓjѓbѓg/•b)")]
+    [Tooltip("жЁЄгЃёйЂІг‚ЂйЂџгЃ•(гѓ¦гѓ‹гѓѓгѓ€/з§’)")]
     [SerializeField] float sweepMoveSpeed = 5f;
-    [Tooltip("Џ°‚Ц’ѕ‚Ю—К(ѓ†ѓjѓbѓg)ЃB‘е‚«‚ў‚Щ‚З’б‚ў€К’u‚р’К‚и‚Ь‚·")]
+    [Tooltip("еєЉгЃёжІ€г‚Ђй‡Џ(гѓ¦гѓ‹гѓѓгѓ€)гЂ‚е¤§гЃЌгЃ„гЃ»гЃ©дЅЋгЃ„дЅЌзЅ®г‚’йЂљг‚ЉгЃѕгЃ™")]
     [SerializeField] float videoSinkDepth = 0.8f;
-    [Tooltip("‰Ў€Ъ“®‚МЉJЋn€К’u(’†‰›‚©‚з‚МXЌА•W)ЃB‰ж–К‚МЉO‚Й’u‚ў‚Д‚­‚ѕ‚і‚ў")]
+    [Tooltip("е·¦гЃ‹г‚‰еЏігЃёжЋѓгЃЏгЃЁгЃЌгЃ®гЂЃжЁЄз§»е‹•гЃ®й–‹е§‹дЅЌзЅ®(дё­е¤®гЃ‹г‚‰гЃ®Xеє§жЁ™)гЂ‚еЏігЃ‹г‚‰е·¦гЃ®гЃЁгЃЌгЃЇе·¦еЏіеЏЌи»ўгЃ—гЃџдЅЌзЅ®г‚’дЅїгЃ„гЃѕгЃ™")]
     [SerializeField] float videoStartX = -6f;
-    [Tooltip("‰Ў€Ъ“®‚МЏI—№€К’u(’†‰›‚©‚з‚МXЌА•W)ЃB‰ж–К‚МЉO‚Й’u‚ў‚Д‚­‚ѕ‚і‚ў")]
+    [Tooltip("е·¦гЃ‹г‚‰еЏігЃёжЋѓгЃЏгЃЁгЃЌгЃ®гЂЃжЁЄз§»е‹•гЃ®зµ‚дє†дЅЌзЅ®(дё­е¤®гЃ‹г‚‰гЃ®Xеє§жЁ™)гЂ‚з”»йќўгЃ®е¤–гЃ«зЅ®гЃ„гЃ¦гЃЏгЃ гЃ•гЃ„гЂ‚еЏігЃ‹г‚‰е·¦гЃ®гЃЁгЃЌгЃЇе·¦еЏіеЏЌи»ўгЃ—гЃџдЅЌзЅ®г‚’дЅїгЃ„гЃѕгЃ™")]
     [SerializeField] float videoEndX = 6f;
-    [Tooltip("‰Ў‚Ц”І‚Ї‚Д‚©‚зЏг‚Ц–Я‚й‚Ь‚Е‚М‘Т‚їЋћЉФ(•b)")]
+    [Tooltip("жЁЄгЃёжЉњгЃ‘гЃ¦гЃ‹г‚‰дёЉгЃёж€»г‚‹гЃѕгЃ§гЃ®еѕ…гЃЎж™‚й–“(з§’)")]
     [SerializeField] float waitBeforeReturn = 0.5f;
-    [Tooltip("Џг‚©‚з–Я‚Б‚Д‚­‚й‘¬‚і(ѓ†ѓjѓbѓg/•b)")]
+    [Tooltip("дёЉгЃ‹г‚‰ж€»гЃЈгЃ¦гЃЏг‚‹йЂџгЃ•(гѓ¦гѓ‹гѓѓгѓ€/з§’)")]
     [SerializeField] float returnSpeed = 5f;
-    [Tooltip("ЌЕЊг‚ЙЏг‚©‚з–Я‚Б‚Д‚­‚йЋћ‚МЉJЋnЌ‚‚і(ѓ†ѓjѓbѓg)ЃBliftHeight‚М1.5”{‚Є–Ъ€А")]
+    [Tooltip("жњЂеѕЊгЃ«дёЉгЃ‹г‚‰ж€»гЃЈгЃ¦гЃЏг‚‹ж™‚гЃ®й–‹е§‹й«гЃ•(гѓ¦гѓ‹гѓѓгѓ€)гЂ‚liftHeightгЃ®1.5еЂЌгЃЊз›®е®‰")]
     [SerializeField] float returnHeight = 9f;
 
-    [Header("‚µ‚б‚авґ‚М—\’›ђЭ’и")]
-    [Tooltip("‚µ‚б‚авґ‚Є“®‚«Ћn‚Я‚й‰Ѕ•b‘O‚ЙѓZѓЉѓt‚в—\’›‚рЏo‚·‚©")]
+    [Header("гЃ—г‚ѓг‚‚з®’гЃ®дє€е…†иЁ­е®љ")]
+    [Tooltip("гЃ—г‚ѓг‚‚з®’гЃЊе‹•гЃЌе§‹г‚Ѓг‚‹дЅ•з§’е‰ЌгЃ«г‚»гѓЄгѓ•г‚„дє€е…†г‚’е‡єгЃ™гЃ‹")]
     [SerializeField] private float broomPreviewLeadTime = 1.0f;
 
-    // ‚µ‚б‚авґ‚МѓvѓЊѓrѓ…Ѓ[ЉJЋn‚р’К’m‚·‚йѓCѓxѓ“ѓg
+    // гЃ—г‚ѓг‚‚з®’гЃ®гѓ—гѓ¬гѓ“гѓҐгѓјй–‹е§‹г‚’йЂљзџҐгЃ™г‚‹г‚¤гѓ™гѓігѓ€
     public System.Action<bool> onBroomPreviewStarted;
 
     public System.Action onBroomEnded;
 
-    [Header("ЌUЊ‚Њг‚МЌd’ј")]
-    [Tooltip("ЌUЊ‚Њг‚МЌd’јЋћЉФ(•b)")]
+    [Header("ж”»ж’ѓеѕЊгЃ®зЎ¬з›ґ")]
+    [Tooltip("ж”»ж’ѓеѕЊгЃ®зЎ¬з›ґж™‚й–“(з§’)")]
     [SerializeField] float recoverTime = 1.0f;
 
-    [Header("•Д—±ЌUЊ‚")]
-    [Tooltip("‘_‚¤‘ЉЋи(ѓvѓЊѓCѓ„Ѓ[)")]
+    [Header("з±ізІ’ж”»ж’ѓ")]
+    [Tooltip("з‹™гЃ†з›ёж‰‹(гѓ—гѓ¬г‚¤гѓ¤гѓј)")]
     [SerializeField] Transform player;
-    [Tooltip("•Д—±‚МPrefab")]
+    [Tooltip("з±ізІ’гЃ®Prefab")]
     [SerializeField] GameObject ricePrefab;
-    [Tooltip("“ЄЏг‚ЙЏo‚·3‚В‚М€К’u(ѓ{ѓX‚©‚з‚МѓIѓtѓZѓbѓg)ЃBЌ¶ЃEђ^‚с’†ЃE‰E‚МЏ‡")]
+    [Tooltip("й ­дёЉгЃ«е‡єгЃ™3гЃ¤гЃ®дЅЌзЅ®(гѓњг‚№гЃ‹г‚‰гЃ®г‚Єгѓ•г‚»гѓѓгѓ€)гЂ‚е·¦гѓ»зњџг‚“дё­гѓ»еЏігЃ®й †")]
     [SerializeField]
     Vector3[] riceSpawnOffsets = {
         new Vector3(-1.5f, 2.5f, 0f),
         new Vector3(0f, 3f, 0f),
         new Vector3(1.5f, 2.5f, 0f)
     };
-    [Tooltip("•Д—±‚Є“ЄЏг‚ЙЏo‚Д‚©‚зЃA‘Е‚їЋn‚Я‚й‚Ь‚Е‚МЋћЉФ(•b)")]
+    [Tooltip("з±ізІ’гЃЊй ­дёЉгЃ«е‡єгЃ¦гЃ‹г‚‰гЂЃж‰“гЃЎе§‹г‚Ѓг‚‹гЃѕгЃ§гЃ®ж™‚й–“(з§’)")]
     [SerializeField] float riceAppearTime = 0.5f;
-    [Tooltip("‘Е‚В‘O‚ЙѓvѓЊѓCѓ„Ѓ[‚рЉm”F‚·‚йЋћЉФ(•b)")]
+    [Tooltip("ж‰“гЃ¤е‰ЌгЃ«гѓ—гѓ¬г‚¤гѓ¤гѓјг‚’зўєиЄЌгЃ™г‚‹ж™‚й–“(з§’)")]
     [SerializeField] float aimTime = 0.3f;
-    [Tooltip("1”­Њ‚‚Б‚Д‚©‚зЋџ‚рЉm”F‚·‚й‚Ь‚Е‚МЉФЉu(•b)")]
+    [Tooltip("1з™єж’ѓгЃЈгЃ¦гЃ‹г‚‰ж¬Ўг‚’зўєиЄЌгЃ™г‚‹гЃѕгЃ§гЃ®й–“йљ”(з§’)")]
     [SerializeField] float shotInterval = 0.5f;
-    [Tooltip("•Д—±‚М”т‚Ф‘¬‚і(ѓ†ѓjѓbѓg/•b)")]
+    [Tooltip("з±ізІ’гЃ®йЈ›гЃ¶йЂџгЃ•(гѓ¦гѓ‹гѓѓгѓ€/з§’)")]
     [SerializeField] float riceSpeed = 10f;
-    [Tooltip("•Д—±‚ЄЏБ‚¦‚й‚Ь‚Е‚МЋћЉФ(•b)")]
+    [Tooltip("з±ізІ’гЃЊж¶€гЃ€г‚‹гЃѕгЃ§гЃ®ж™‚й–“(з§’)")]
     [SerializeField] float riceLifeTime = 4f;
-    [Tooltip("•Д—±‚Мѓ_ѓЃЃ[ѓW—КЃBѓvѓЊѓCѓ„Ѓ[‚М TakeDamage(int) ‚Й“n‚і‚к‚Ь‚·")]
+    [Tooltip("з±ізІ’гЃ®гѓЂгѓЎгѓјг‚ёй‡ЏгЂ‚гѓ—гѓ¬г‚¤гѓ¤гѓјгЃ® TakeDamage(int) гЃ«жёЎгЃ•г‚ЊгЃѕгЃ™")]
     [SerializeField] int riceDamage = 1;
-    [Tooltip("ѓvѓЊѓCѓ„Ѓ[‚Й“–‚Ѕ‚Б‚Ѕ‚Ж”»’и‚·‚й‹——Ј(ѓ†ѓjѓbѓg)")]
+    [Tooltip("гѓ—гѓ¬г‚¤гѓ¤гѓјгЃ«еЅ“гЃџгЃЈгЃџгЃЁе€¤е®љгЃ™г‚‹и·ќй›ў(гѓ¦гѓ‹гѓѓгѓ€)")]
     [SerializeField] float riceHitRadius = 0.5f;
-    [Tooltip("‘Е‚В‘O‚ЙЃA•Д—±‚Є“G‚М•ыЊь‚Ц‰с“]‚·‚йЋћЉФ(•b)")]
+    [Tooltip("ж‰“гЃ¤е‰ЌгЃ«гЂЃз±ізІ’гЃЊж•µгЃ®ж–№еђ‘гЃёе›ћи»ўгЃ™г‚‹ж™‚й–“(з§’)")]
     [SerializeField] float rotateTime = 0.3f;
-    [Tooltip("‰с“]‚µЏI‚¦‚Д‚©‚з”­ЋЛ‚·‚й‚Ь‚Е‚МЌd’јЋћЉФ(•b)")]
+    [Tooltip("е›ћи»ўгЃ—зµ‚гЃ€гЃ¦гЃ‹г‚‰з™єе°„гЃ™г‚‹гЃѕгЃ§гЃ®зЎ¬з›ґж™‚й–“(з§’)")]
     [SerializeField] float fireStiffTime = 0.2f;
 
-    [Header("ѓsѓ{ѓbѓg")]
-    [Tooltip("‰с“]‚М’†ђSЃBѓ{ѓX‚МѓЌЃ[ѓJѓ‹ЌА•W‚ЕЋw’и‚µ‚Ь‚·(ѓXѓPЃ[ѓ‹‘O‚М’l)")]
+    [Header("гѓ”гѓњгѓѓгѓ€")]
+    [Tooltip("е›ћи»ўгЃ®дё­еїѓгЂ‚гѓњг‚№гЃ®гѓ­гѓјг‚«гѓ«еє§жЁ™гЃ§жЊ‡е®љгЃ—гЃѕгЃ™(г‚№г‚±гѓјгѓ«е‰ЌгЃ®еЂ¤)")]
     [SerializeField] Vector3 pivotOffset = new Vector3(0f, -1f, 0f);
     [SerializeField] bool showPivotGizmo = true;
 
-    [Header("ѓ‰ѓ“ѓ_ѓЂЌUЊ‚")]
-    [Tooltip("ON‚Й‚·‚й‚ЖЃA‚Ѕ‚ЯЌUЊ‚(Ќ¶ЃE‰E)ЃE‘|‚«ЌUЊ‚(Ќ¶ЃE‰E)ЃE•Д—±ЌUЊ‚‚М5Ћн—Ю‚рѓ‰ѓ“ѓ_ѓЂ‚ЙЊJ‚и•Ф‚µ‚Ь‚·")]
+    [Header("гѓ©гѓігѓЂгѓ ж”»ж’ѓ")]
+    [Tooltip("ONгЃ«гЃ™г‚‹гЃЁгЂЃе€‡г‚‹(гЃџг‚Ѓж”»ж’ѓ)гѓ»з®’(жЋѓгЃЌж”»ж’ѓ)гѓ»ејѕ(з±ізІ’ж”»ж’ѓ)г‚’гѓ©гѓігѓЂгѓ гЃ«з№°г‚Љиї”гЃ—гЃѕгЃ™гЂ‚з›ґе‰ЌгЃЁеђЊгЃзЁ®йЎћгЃЇе‡єгЃ—гЃѕгЃ›г‚“гЂ‚е€‡г‚‹гѓ»з®’гЃЇе·¦еЏіг‚‚гѓ©гѓігѓЂгѓ гЃ§гЃ™")]
     [SerializeField] bool autoRandomAttack = true;
-    [Tooltip("1‚В‚МЌUЊ‚‚ЄЏI‚н‚Б‚Д‚©‚зЋџ‚МЌUЊ‚‚рЏo‚·‚Ь‚Е‚МЉФЉu(•b)")]
+    [Tooltip("1гЃ¤гЃ®ж”»ж’ѓгЃЊзµ‚г‚ЏгЃЈгЃ¦гЃ‹г‚‰ж¬ЎгЃ®ж”»ж’ѓг‚’е‡єгЃ™гЃѕгЃ§гЃ®й–“йљ”(з§’)")]
     [SerializeField] float attackInterval = 2f;
 
-    [Header("ЌUЊ‚SE(ЉeЌUЊ‚‚І‚Ж‚Й•Ўђ”’З‰Б‚Е‚«‚Ь‚·)")]
-    [Tooltip("’@‚«•t‚Ї(Ќ¶)‚МЌUЊ‚‚Е–В‚з‚·SE")]
+    [Header("ж”»ж’ѓSE(еђ„ж”»ж’ѓгЃ”гЃЁгЃ«и¤‡ж•°иїЅеЉ гЃ§гЃЌгЃѕгЃ™)")]
+    [Tooltip("еЏ©гЃЌд»гЃ‘(е·¦)гЃ®ж”»ж’ѓгЃ§йіґг‚‰гЃ™SE")]
     public List<AttackSE> seSlamLeft = new List<AttackSE>();
-    [Tooltip("’@‚«•t‚Ї(‰E)‚МЌUЊ‚‚Е–В‚з‚·SE")]
+    [Tooltip("еЏ©гЃЌд»гЃ‘(еЏі)гЃ®ж”»ж’ѓгЃ§йіґг‚‰гЃ™SE")]
     public List<AttackSE> seSlamRight = new List<AttackSE>();
-    [Tooltip("‘|‚«ЌUЊ‚(Ќ¶‚©‚з‰E)‚Е–В‚з‚·SE")]
+    [Tooltip("жЋѓгЃЌж”»ж’ѓ(е·¦гЃ‹г‚‰еЏі)гЃ§йіґг‚‰гЃ™SE")]
     public List<AttackSE> seSweepLeftToRight = new List<AttackSE>();
-    [Tooltip("‘|‚«ЌUЊ‚(‰E‚©‚зЌ¶)‚Е–В‚з‚·SE")]
+    [Tooltip("жЋѓгЃЌж”»ж’ѓ(еЏігЃ‹г‚‰е·¦)гЃ§йіґг‚‰гЃ™SE")]
     public List<AttackSE> seSweepRightToLeft = new List<AttackSE>();
-    [Tooltip("•Д—±ЌUЊ‚‚Е–В‚з‚·SE")]
+    [Tooltip("з±ізІ’ж”»ж’ѓгЃ§йіґг‚‰гЃ™SE")]
     public List<AttackSE> seRice = new List<AttackSE>();
 
     [System.Serializable]
     public class AttackSE
     {
-        [Tooltip("–В‚з‚·SoundCue(‰№—КЃEѓsѓbѓ`ЃEѓ‹Ѓ[ѓv‚И‚З‚НSoundCue‚ЕђЭ’и‚µ‚Ь‚·)")] public SoundCue cue;
-        [Tooltip("ЌUЊ‚“®Ќм‚МЉJЋn‚©‚з‚МЌДђ¶ЉJЋnЋћЌЏ(•b)")] public float startTime = 0f;
-        [Tooltip("’вЋ~‚·‚йЋћЌЏ(•b)ЃBЉJЋn‚ж‚иЊг‚ЙђЭ’и‚µ‚И‚ўЏкЌ‡‚НЃAЌUЊ‚‚ЄЏI‚н‚Б‚Ѕ‚Ж‚«‚ЙЋ~‚Я‚Ь‚·")] public float endTime = 0f;
+        [Tooltip("йіґг‚‰гЃ™SoundCue(йџій‡Џгѓ»гѓ”гѓѓгѓЃгѓ»гѓ«гѓјгѓ—гЃЄгЃ©гЃЇSoundCueгЃ§иЁ­е®љгЃ—гЃѕгЃ™)")] public SoundCue cue;
+        [Tooltip("ж”»ж’ѓе‹•дЅњгЃ®й–‹е§‹гЃ‹г‚‰гЃ®е†Ќз”џй–‹е§‹ж™‚е€»(з§’)")] public float startTime = 0f;
+        [Tooltip("еЃњж­ўгЃ™г‚‹ж™‚е€»(з§’)гЂ‚й–‹е§‹г‚€г‚ЉеѕЊгЃ«иЁ­е®љгЃ—гЃЄгЃ„е ґеђ€гЃЇгЂЃж”»ж’ѓгЃЊзµ‚г‚ЏгЃЈгЃџгЃЁгЃЌгЃ«ж­ўг‚ЃгЃѕгЃ™")] public float endTime = 0f;
     }
 
-    [Header("ѓfѓoѓbѓO—pѓLЃ[")]
-    [Tooltip("ON‚Й‚·‚й‚Ж 1Ѓ`5 ѓLЃ[‚ЕЌUЊ‚‚р”­“®‚µ‚Ь‚·(1:’@‚«•t‚ЇЌ¶ 2:’@‚«•t‚Ї‰E 3:‘|‚«Ќ¶‚©‚з‰E 4:‘|‚«‰E‚©‚зЌ¶ 5:•Д—±)")]
+    [Header("гѓ‡гѓђгѓѓг‚°з”Ёг‚­гѓј")]
+    [Tooltip("ONгЃ«гЃ™г‚‹гЃЁ 1пЅћ5 г‚­гѓјгЃ§ж”»ж’ѓг‚’з™єе‹•гЃ—гЃѕгЃ™(1:еЏ©гЃЌд»гЃ‘е·¦ 2:еЏ©гЃЌд»гЃ‘еЏі 3:жЋѓгЃЌе·¦гЃ‹г‚‰еЏі 4:жЋѓгЃЌеЏігЃ‹г‚‰е·¦ 5:з±ізІ’)")]
     [SerializeField] bool debugAttackKeys = true;
 
     Vector3 originalScale;
     Quaternion originalRotation;
 
-    // ЉоЏЂ‚Ж‚И‚й‘М‚МЏу‘Ф(Љp“x0)
+    // еџєжє–гЃЁгЃЄг‚‹дЅ“гЃ®зЉ¶ж…‹(и§’еє¦0)
     Vector3 leanBasePos;
     Quaternion leanBaseRot;
     Vector3 leanBaseScale;
 
-    float currentLean;  // Њ»ЌЭ‚МЊX‚ЇЉp“x
-    float currentSink;  // Њ»ЌЭ‚М’ѕ‚Э—К
-    float currentRise;  // Њ»ЌЭ‚МЏгЏё—К
+    float currentLean;  // зЏѕењЁгЃ®е‚ѕгЃ‘и§’еє¦
+    float currentSink;  // зЏѕењЁгЃ®жІ€гЃїй‡Џ
+    float currentRise;  // зЏѕењЁгЃ®дёЉж‡й‡Џ
 
     public System.Action<int> onAttackIndexStarted;
 
@@ -166,7 +168,52 @@ public class Boss_AI : MonoBehaviour
 
     public bool IsAttacking { get; private set; }
 
-    // ===== ЌUЊ‚SE(SoundCue‚Е–В‚з‚·) =====
+    // StopAttacking() гЃ®еѕЊгЃЇгЂЃг‚‚гЃ†ж”»ж’ѓгЃ—гЃЄгЃ„пј€еЂ’гЃ•г‚ЊгЃџгѓ»гѓ—гѓ¬г‚¤гѓ¤гѓјгЃЊж­»г‚“гЃ гЃЁгЃЌпј‰
+    bool stopped;
+
+    // ж”»ж’ѓ(е€‡г‚‹гѓ»з®’)г‚’е§‹г‚ЃгЃџгЃЁгЃЌгЃ®дЅЌзЅ®гЂ‚ж”»ж’ѓг‚’йЂ”дё­гЃ§ж­ўг‚ЃгЃџгЃЁгЃЌгЃ«гЂЃгЃ“гЃ“гЃёж€»гЃ™
+    Vector3 attackStartPosition;
+    bool hasAttackStartPosition;
+
+    // з”»йќўгЃ«е‡єгЃ¦гЃ„г‚‹з±ізІ’пј€ж”»ж’ѓг‚’ж­ўг‚ЃгЃџгЃЁгЃЌгЃ«ж¶€гЃ™пј‰
+    readonly List<GameObject> activeRice = new List<GameObject>();
+
+    /// <summary>
+    /// ж”»ж’ѓг‚’гЃ™гЃ№гЃ¦ж­ўг‚Ѓг‚‹пј€еЂ’гЃ•г‚ЊгЃџгЃЁгЃЌгѓ»гѓ—гѓ¬г‚¤гѓ¤гѓјгЃЊж­»г‚“гЃ гЃЁгЃЌпј‰гЂ‚
+    /// е‡єгЃ¦гЃ„г‚‹з±ізІ’г‚’ж¶€гЃ—гЂЃж”»ж’ѓгЃ®еЉ№жћњйџіг‚’ж­ўг‚ЃгЂЃе§їе‹ўг‚’е…ѓгЃ«ж€»гЃ™гЂ‚гЃ“гЃ®еѕЊгЃЇг‚‚гЃ†ж”»ж’ѓгЃ—гЃЄгЃ„
+    /// </summary>
+    public void StopAttacking()
+    {
+        stopped = true;
+        StopAllCoroutines();
+
+        foreach (GameObject rice in activeRice)
+        {
+            if (rice != null) Destroy(rice);
+        }
+        activeRice.Clear();
+
+        foreach (var list in new[] { seSlamLeft, seSlamRight, seSweepLeftToRight, seSweepRightToLeft, seRice })
+        {
+            if (list == null) continue;
+            foreach (AttackSE se in list)
+            {
+                if (se != null && se.cue != null) Sound.Stop(se.cue);
+            }
+        }
+
+        // ж”»ж’ѓгЃ®йЂ”дё­гЃЄг‚‰гЂЃе…ѓгЃ®е¤§гЃЌгЃ•гѓ»еђ‘гЃЌгЃ«ж€»гЃ™пј€жЋѓгЃЌж”»ж’ѓгЃ§з”»йќўгЃ®е¤–гЃ«гЃ„г‚‹гЃЁгЃЌг‚‚ж€»гЃЈгЃ¦гЃЏг‚‹пј‰
+        if (IsAttacking)
+        {
+            transform.localScale = originalScale;
+            transform.localRotation = originalRotation;
+            if (hasAttackStartPosition) transform.localPosition = attackStartPosition;   // ж”»ж’ѓг‚’е§‹г‚Ѓг‚‹е‰ЌгЃ®дЅЌзЅ®(и†Ёг‚‰г‚“гЃ§дёЉгЃЊгЃЈгЃџе€†г‚‚ж€»гЃ™)
+        }
+        currentLean = currentSink = currentRise = 0f;
+        IsAttacking = false;
+    }
+
+    // ===== ж”»ж’ѓSE(SoundCueгЃ§йіґг‚‰гЃ™) =====
     void PlayAttackSEs(List<AttackSE> list)
     {
         if (list == null) return;
@@ -183,13 +230,13 @@ public class Boss_AI : MonoBehaviour
 
         if (se.endTime > se.startTime)
         {
-            // ЏI—№ЋћЌЏ‚ЕЋ~‚Я‚й
+            // зµ‚дє†ж™‚е€»гЃ§ж­ўг‚Ѓг‚‹
             yield return new WaitForSeconds(se.endTime - se.startTime);
             Sound.Stop(se.cue);
         }
         else
         {
-            // ЏI—№ЋћЌЏ‚Є‚И‚Ї‚к‚ОЃAЌUЊ‚‚ЄЏI‚н‚й‚Ь‚Е–В‚з‚µ‚ДЃAЏI‚н‚Б‚Ѕ‚зЋ~‚Я‚й
+            // зµ‚дє†ж™‚е€»гЃЊгЃЄгЃ‘г‚ЊгЃ°гЂЃж”»ж’ѓгЃЊзµ‚г‚Џг‚‹гЃѕгЃ§йіґг‚‰гЃ—гЃ¦гЂЃзµ‚г‚ЏгЃЈгЃџг‚‰ж­ўг‚Ѓг‚‹
             yield return new WaitUntil(() => !IsAttacking);
             Sound.Stop(se.cue);
         }
@@ -218,7 +265,7 @@ public class Boss_AI : MonoBehaviour
         if (autoRandomAttack) StartCoroutine(RandomAttackLoop());
     }
 
-    // ЌUЊ‚‚ЄЏI‚н‚Б‚Д‚©‚з attackInterval •b‘Т‚їЃAѓ‰ѓ“ѓ_ѓЂ‚ИЌUЊ‚‚р1‚ВЏo‚·‚±‚Ж‚рЊJ‚и•Ф‚·
+    // ж”»ж’ѓгЃЊзµ‚г‚ЏгЃЈгЃ¦гЃ‹г‚‰ attackInterval з§’еѕ…гЃЎгЂЃгѓ©гѓігѓЂгѓ гЃЄж”»ж’ѓг‚’1гЃ¤е‡єгЃ™гЃ“гЃЁг‚’з№°г‚Љиї”гЃ™
     IEnumerator RandomAttackLoop()
     {
         while (true)
@@ -229,85 +276,91 @@ public class Boss_AI : MonoBehaviour
         }
     }
 
-    // 5Ћн—Ю‚МЌUЊ‚‚©‚зѓ‰ѓ“ѓ_ѓЂ‚Й1‚ВЋАЌs‚·‚й
+    // ж”»ж’ѓгЃ®зЁ®йЎћгЂ‚з•ЄеЏ·гЃЇ JSON гЃ® attacks гЃ®дё¦гЃіпј€жЉЂеђЌгѓ»г‚»гѓЄгѓ•пј‰гЃЁеђЊгЃ
+    enum AttackKind
+    {
+        Slash = 0,   // гЃ—г‚ѓг‚‚е€‡г‚Љ(гЃџг‚Ѓж”»ж’ѓ)
+        Broom = 1,   // гЃ—г‚ѓг‚‚з®’(жЋѓгЃЌж”»ж’ѓ)
+        Rice = 2,    // з±ізІ’ејѕ
+    }
+
+    // жњЂеѕЊгЃ«е‡єгЃ—гЃџж”»ж’ѓгЃ®зЁ®йЎћгЂ‚жњЂе€ќгЃЇгЃѕгЃ е‡єгЃ—гЃ¦гЃ„гЃЄгЃ„
+    AttackKind? lastAttackKind;
+
+    // ж”»ж’ѓг‚’гѓ©гѓігѓЂгѓ гЃ«1гЃ¤е®џиЎЊгЃ™г‚‹
+    // 1. ејѕгѓ»е€‡г‚‹гѓ»з®’гЃ®3зЁ®йЎћгЃ‹г‚‰гЂЃжњЂеѕЊгЃ«е‡єгЃ—гЃџзЁ®йЎћг‚’жЉњгЃ„гЃџ2зЁ®йЎћг‚’гЂЃ2е€†гЃ®1гЃ§йЃёгЃ¶(жњЂе€ќгЃ®1е›ћгЃЇ3е€†гЃ®1)
+    // 2. е€‡г‚‹гѓ»з®’гЃЄг‚‰гЂЃе·¦еЏігЃ©гЃЎг‚‰гЃ‹г‚‰гЃ‹г‚’2е€†гЃ®1гЃ§йЃёгЃ¶
     void PlayRandomAttack()
     {
-        int attackType = 99;
-        // int attackType = Random.Range(0, 5);
+        var candidates = new List<AttackKind> { AttackKind.Slash, AttackKind.Broom, AttackKind.Rice };
+        if (lastAttackKind.HasValue) candidates.Remove(lastAttackKind.Value);
+        AttackKind kind = candidates[Random.Range(0, candidates.Count)];
+        bool fromRight = Random.Range(0, 2) == 0;
 
-        int jsonIndex = 0;
-
-        switch (attackType)
+        switch (kind)
         {
-            case 0:         // ‚Ѕ‚ЯЌUЊ‚(Ќ¶)
-                StartSlam();
-                jsonIndex = 0;
+            case AttackKind.Slash:
+                if (fromRight) StartSlamRightFirst();       // гЃџг‚Ѓж”»ж’ѓ(еЏі)
+                else StartSlam();                           // гЃџг‚Ѓж”»ж’ѓ(е·¦)
                 break;
 
-            case 1:         // ‚Ѕ‚ЯЌUЊ‚(‰E)
-                StartSlamRightFirst();
-                jsonIndex = 0;
+            case AttackKind.Broom:
+                if (fromRight) StartRiseSweepRightToLeft(); // жЋѓгЃЌж”»ж’ѓ(еЏігЃ‹г‚‰е·¦)
+                else StartRiseSweep();                      // жЋѓгЃЌж”»ж’ѓ(е·¦гЃ‹г‚‰еЏі)
                 break;
 
-            case 2:         // ‘|‚«ЌUЊ‚(Ќ¶‚©‚з‰E)
-                StartRiseSweep();
-                jsonIndex = 1;
-                break;
-
-            case 3:         // ‘|‚«ЌUЊ‚(‰E‚©‚зЌ¶)
-                StartRiseSweepRightToLeft();
-                jsonIndex = 1;
-                break;
-
-            default:        // •Д—±ЌUЊ‚
-                StartRiceAttack();
-                jsonIndex = 2;
+            default:
+                StartRiceAttack();                          // з±ізІ’ж”»ж’ѓ
                 break;
         }
 
-        // ЉO•”‚ЦJSOn‚р’К’m
-        onAttackIndexStarted?.Invoke(jsonIndex);
+        lastAttackKind = kind;
+
+        // е¤–йѓЁ(жЉЂеђЌгѓ»г‚»гѓЄгѓ•гЃ®иЎЁз¤є)гЃёгЂЃJSON гЃ®дЅ•з•Єз›®гЃ®ж”»ж’ѓгЃ‹г‚’йЂљзџҐ
+        onAttackIndexStarted?.Invoke((int)kind);
     }
 
-    // ===== ЉO•”(AI‘¤)‚©‚зЊД‚СЏo‚· =====
+    // ===== е¤–йѓЁ(AIеЃґ)гЃ‹г‚‰е‘јгЃіе‡єгЃ™ =====
 
-    // Ќ¶‚©‚з‘|‚­ЌUЊ‚(Џ]—€ЃE1‰с)
+    // е·¦гЃ‹г‚‰жЋѓгЃЏж”»ж’ѓ(еѕ“жќҐгѓ»1е›ћ)
     public void StartSlam()
     {
-        if (!IsAttacking) StartCoroutine(AttackRoutine(-1f, false));
+        if (!IsAttacking && !stopped) StartCoroutine(AttackRoutine(-1f, false));
     }
 
-    // ‰E‚©‚з‘|‚­ЌUЊ‚(Џ]—€ЃE1‰с)
+    // еЏігЃ‹г‚‰жЋѓгЃЏж”»ж’ѓ(еѕ“жќҐгѓ»1е›ћ)
     public void StartSlamRightFirst()
     {
-        if (!IsAttacking) StartCoroutine(AttackRoutine(1f, false));
+        if (!IsAttacking && !stopped) StartCoroutine(AttackRoutine(1f, false));
     }
 
-    // “®‰ж‚М“®‚«‚М‘|‚­ЌUЊ‚(Ќ¶‚©‚з‰E‚ЦЃE1‰с)
+    // е‹•з”»гЃ®е‹•гЃЌгЃ®жЋѓгЃЏж”»ж’ѓ(е·¦гЃ‹г‚‰еЏігЃёгѓ»1е›ћ)
     public void StartRiseSweep()
     {
-        if (!IsAttacking) StartCoroutine(AttackRoutine(0f, true, false));
+        if (!IsAttacking && !stopped) StartCoroutine(AttackRoutine(0f, true, false));
     }
 
-    // “®‰ж‚М“®‚«‚М‘|‚­ЌUЊ‚(‰E‚©‚зЌ¶‚ЦЃE1‰с)
+    // е‹•з”»гЃ®е‹•гЃЌгЃ®жЋѓгЃЏж”»ж’ѓ(еЏігЃ‹г‚‰е·¦гЃёгѓ»1е›ћ)
     public void StartRiseSweepRightToLeft()
     {
-        if (!IsAttacking) StartCoroutine(AttackRoutine(0f, true, true));
+        if (!IsAttacking && !stopped) StartCoroutine(AttackRoutine(0f, true, true));
     }
 
-    // ===== ЌUЊ‚‘S‘М =====
+    // ===== ж”»ж’ѓе…ЁдЅ“ =====
 
-    // side: -1 = Ќ¶‚©‚з‘|‚­ / +1 = ‰E‚©‚з‘|‚­(Џ]—€‚МЌUЊ‚‚М‚ЭЋg—p)
-    // video: true = “®‰ж‚М“®‚«‚МЌUЊ‚ / false = Џ]—€‚М‘|‚­ЌUЊ‚
-    // rightToLeft: “®‰ж‚М“®‚«‚МЌUЊ‚‚МЊь‚«(true=‰E‚©‚зЌ¶‚Ц / false=Ќ¶‚©‚з‰E‚Ц)
+    // side: -1 = е·¦гЃ‹г‚‰жЋѓгЃЏ / +1 = еЏігЃ‹г‚‰жЋѓгЃЏ(еѕ“жќҐгЃ®ж”»ж’ѓгЃ®гЃїдЅїз”Ё)
+    // video: true = е‹•з”»гЃ®е‹•гЃЌгЃ®ж”»ж’ѓ / false = еѕ“жќҐгЃ®жЋѓгЃЏж”»ж’ѓ
+    // rightToLeft: е‹•з”»гЃ®е‹•гЃЌгЃ®ж”»ж’ѓгЃ®еђ‘гЃЌ(true=еЏігЃ‹г‚‰е·¦гЃё / false=е·¦гЃ‹г‚‰еЏігЃё)
     IEnumerator AttackRoutine(float side, bool video, bool rightToLeft = false)
     {
         IsAttacking = true;
 
-        // 1. ’†‰›‚Ц€Ъ“®
+        // 1. дё­е¤®гЃёз§»е‹•
         yield return MoveToCenter();
+        attackStartPosition = transform.localPosition;
+        hasAttackStartPosition = true;
 
-        // ЌUЊ‚‚МЋн—Ю‚ЙЌ‡‚н‚№‚ЅSE‚рЃAЌUЊ‚“®Ќм‚МЉJЋnЋћЌЏ‚©‚з–В‚з‚·
+        // ж”»ж’ѓгЃ®зЁ®йЎћгЃ«еђ€г‚ЏгЃ›гЃџSEг‚’гЂЃж”»ж’ѓе‹•дЅњгЃ®й–‹е§‹ж™‚е€»гЃ‹г‚‰йіґг‚‰гЃ™
         if (video)
             PlayAttackSEs(rightToLeft ? seSweepRightToLeft : seSweepLeftToRight);
         else
@@ -317,55 +370,57 @@ public class Boss_AI : MonoBehaviour
         {
             yield return new WaitForSeconds(broomPreviewLeadTime);
 
-            // 2. ЉоЏЂ‚р•Ы‘¶(“®‰ж‚МЌUЊ‚‚Н–c’ЈЃE—­‚ЯЃE’вЋ~‚И‚µ)
+            // 2. еџєжє–г‚’дїќе­(е‹•з”»гЃ®ж”»ж’ѓгЃЇи†Ёејµгѓ»жєњг‚Ѓгѓ»еЃњж­ўгЃЄгЃ—)
             CaptureBase();
 
-            // 3. “®‰ж‚М“®‚«
+            // 3. е‹•з”»гЃ®е‹•гЃЌ
             yield return VideoSweep(rightToLeft);
         }
         else
         {
-            // 2. –c‚з‚Ю
+            // 2. и†Ёг‚‰гЃїгЃЄгЃЊг‚‰дёЉгЃЊг‚‹(дё‹г‚’гЃЏгЃђгЃЈгЃ¦йЂѓгЃ’г‚‰г‚Њг‚‹г‚€гЃ†гЃ«)
+            Vector3 restPosition = transform.localPosition;
             yield return Grow();
 
-            // 3. ЊX‚«‚МЉоЏЂ‚р•Ы‘¶
+            // 3. е‚ѕгЃЌгЃ®еџєжє–г‚’дїќе­
             CaptureBase();
 
-            // 4. —­‚Я(ЌUЊ‚‚·‚й‘¤‚Ц”Ѕ‘О‚ЙЊX‚Ї‚й)
+            // 4. жєњг‚Ѓ(ж”»ж’ѓгЃ™г‚‹еЃґгЃёеЏЌеЇѕгЃ«е‚ѕгЃ‘г‚‹)
             float charge = -side * chargeAngle;
             yield return Charge(charge);
 
-            // 5. ЌUЊ‚‘O‚ЙЏ­‚µЋ~‚Ь‚й
+            // 5. ж”»ж’ѓе‰ЌгЃ«е°‘гЃ—ж­ўгЃѕг‚‹
             yield return new WaitForSeconds(strikePauseTime);
 
-            // 6. ‘|‚­
+            // 6. жЋѓгЃЏ
             yield return Sweep(side, charge);
 
-            // 6-2. Њі‚М‘е‚«‚і‚Ь‚ЕЏk‚Я‚й(ѓpѓb‚Ж–Я‚і‚И‚ў)
-            yield return Shrink();
+            // 6-2. е…ѓгЃ®е¤§гЃЌгЃ•гЃѕгЃ§зё®г‚ЃгЃЄгЃЊг‚‰гЂЃе…ѓгЃ®й«гЃ•гЃёдё‹г‚Љг‚‹(гѓ‘гѓѓгЃЁж€»гЃ•гЃЄгЃ„)
+            yield return Shrink(restPosition);
+            leanBasePos = restPosition;
         }
 
-        // 7. Ќd’ј
+        // 7. зЎ¬з›ґ
         yield return new WaitForSeconds(recoverTime);
 
         ResetPose();
         IsAttacking = false;
     }
 
-    // ===== Џ]—€‚М‘|‚­ЌUЊ‚(QѓLЃ[ / EѓLЃ[) =====
+    // ===== еѕ“жќҐгЃ®жЋѓгЃЏж”»ж’ѓ(Qг‚­гѓј / Eг‚­гѓј) =====
     IEnumerator Sweep(float side, float fromAngle)
     {
         float d = sweepDistance;
-        float a = -side * leanDownAngle;   // ЌUЊ‚•ыЊь‚Ц“|‚к‚йЉp“x(Ќ¶=+ЃA‰E=-)
+        float a = -side * leanDownAngle;   // ж”»ж’ѓж–№еђ‘гЃёеЂ’г‚Њг‚‹и§’еє¦(е·¦=+гЂЃеЏі=-)
 
-        // “|‚к‚Д‘|‚­(‰є‚Ц’ѕ‚Э‚И‚Є‚з)
-        yield return SweepPass(0f, side * d, fromAngle, a, sinkDepth, sweepPassTime);
+        // еЂ’г‚ЊгЃ¦жЋѓгЃЏ(дё‹гЃёжІ€гЃїгЃЄгЃЊг‚‰)гЂ‚и†Ёг‚‰г‚ЂгЃЁгЃЌгЃ«дёЉгЃЊгЃЈгЃџе€†г‚‚жІ€г‚ЃгЃ¦гЂЃж”»ж’ѓгЃ®й«гЃ•г‚’е¤‰гЃ€гЃЄгЃ„
+        yield return SweepPass(0f, side * d, fromAngle, a, sinkDepth + growRise, sweepPassTime);
 
-        // ’[‚©‚з’†‰›‚Ц–Я‚й(Њі‚МЉp“x‚Ц)
+        // з«ЇгЃ‹г‚‰дё­е¤®гЃёж€»г‚‹(е…ѓгЃ®и§’еє¦гЃё)
         yield return SweepPass(side * d, 0f, a, 0f, 0f, sweepReturnTime);
     }
 
-    // Љp“xЃE€К’uЃE’ѕ‚Э—К‚р“ЇЋћ‚Й•вЉФ‚µ‚Д“®‚©‚·(Џ]—€)
+    // и§’еє¦гѓ»дЅЌзЅ®гѓ»жІ€гЃїй‡Џг‚’еђЊж™‚гЃ«иЈњй–“гЃ—гЃ¦е‹•гЃ‹гЃ™(еѕ“жќҐ)
     IEnumerator SweepPass(float fromX, float toX, float fromAngle, float toAngle,
                           float toSink, float duration)
     {
@@ -381,23 +436,24 @@ public class Boss_AI : MonoBehaviour
         }
     }
 
-    // ===== “®‰ж‚М“®‚«‚МЌUЊ‚(Ѓ—ѓLЃ[) =====
-    // Џг‚ЦЏг‚Є‚Б‚Д‰ж–КЉO ЃЁ ‹t‚і‚Ь‚ЕЏ°‚Ц—Ћ‚ї‚й ЃЁ Ќ¶‰E‚Й—h‚к‚И‚Є‚з‰Ў‚Цђi‚с‚Е‰ж–КЉO
-    // ЃЁ Џг‚©‚з–Я‚Б‚Д‚«‚ДЊі‚МЋpђЁ‚Ц
+    // ===== е‹•з”»гЃ®е‹•гЃЌгЃ®ж”»ж’ѓ(пј г‚­гѓј) =====
+    // дёЉгЃёдёЉгЃЊгЃЈгЃ¦з”»йќўе¤– в†’ йЂ†гЃ•гЃѕгЃ§еєЉгЃёиђЅгЃЎг‚‹ в†’ е·¦еЏігЃ«жЏєг‚ЊгЃЄгЃЊг‚‰жЁЄгЃёйЂІг‚“гЃ§з”»йќўе¤–
+    // в†’ дёЉгЃ‹г‚‰ж€»гЃЈгЃ¦гЃЌгЃ¦е…ѓгЃ®е§їе‹ўгЃё
     IEnumerator VideoSweep(bool rightToLeft)
     {
-        // ‰Ў€Ъ“®‚МЉJЋn€К’u‚ЖЏI—№€К’u(ѓCѓ“ѓXѓyѓNѓ^Ѓ[‚ЕЋw’и‚µ‚Ѕ’lЃB‰E‚©‚зЌ¶‚И‚з“ь‚к‘Ц‚¦‚й)
-        float startX = rightToLeft ? videoEndX : videoStartX;
-        float exitX = rightToLeft ? videoStartX : videoEndX;
+        // жЁЄз§»е‹•гЃ®й–‹е§‹дЅЌзЅ®гЃЁзµ‚дє†дЅЌзЅ®(г‚¤гѓіг‚№гѓљг‚Їг‚їгѓјгЃ®еЂ¤гЃЇе·¦гЃ‹г‚‰еЏігЃ®гЃЁгЃЌгЂ‚еЏігЃ‹г‚‰е·¦гЃЇе·¦еЏіеЏЌи»ўгЃ«гЃ™г‚‹)
+        // е…Ґг‚Њж›їгЃ€г‚‹гЃ гЃ‘гЃ гЃЁгЂЃй–‹е§‹гЃЁзµ‚дє†гЃ®еЂ¤гЃЊгЃЎгЃЊгЃ†гЃЁгЃЌ(дѕ‹пјљ-8.5 гЃЁ 10)гЂЃеЏігЃ‹г‚‰е·¦гЃ гЃ‘з”»йќўгЃ®е¤–гЃ§е§‹гЃѕгЃЈгЃ¦гЃ—гЃѕгЃ†гЃџг‚Ѓ
+        float startX = rightToLeft ? -videoStartX : videoStartX;
+        float exitX = rightToLeft ? -videoEndX : videoEndX;
 
-        // 1. Џг‚ЦЏг‚Є‚иЃA‰ж–К‚МЏг‚ЦЏБ‚¦‚й(ЋpђЁ‚Н•П‚¦‚И‚ў)
+        // 1. дёЉгЃёдёЉгЃЊг‚ЉгЂЃз”»йќўгЃ®дёЉгЃёж¶€гЃ€г‚‹(е§їе‹ўгЃЇе¤‰гЃ€гЃЄгЃ„)
         float liftTime = liftHeight / Mathf.Max(liftSpeed, 0.01f);
         yield return RisePass(0f, 0f, 0f, 0f, 0f, liftHeight, liftTime);
 
-        // 2. ‰ж–К‚МЉO‚Е‘Т‚В
+        // 2. з”»йќўгЃ®е¤–гЃ§еѕ…гЃ¤
         yield return new WaitForSeconds(hiddenTime);
 
-        // 3. ‰ж–К‚МЉO(Ќ¶)‚Е‹t‚і‚Ь‚Й‚И‚иЃAЏ°‚МЌ‚‚і‚Ь‚Е—Ћ‚ї‚й
+        // 3. з”»йќўгЃ®е¤–(е·¦)гЃ§йЂ†гЃ•гЃѕгЃ«гЃЄг‚ЉгЂЃеєЉгЃ®й«гЃ•гЃѕгЃ§иђЅгЃЎг‚‹
         currentRise = liftHeight;
         currentSink = 0f;
         SetLean(upsideDownAngle, startX);
@@ -405,21 +461,21 @@ public class Boss_AI : MonoBehaviour
         yield return RisePass(startX, startX, upsideDownAngle, upsideDownAngle,
                               videoSinkDepth, 0f, dropTime);
 
-        // 3-2. ‰є‚ЙЌ~‚и‚Ѕ‚Ь‚ЬЃAђ”•b‘Т‚В
+        // 3-2. дё‹гЃ«й™Ќг‚ЉгЃџгЃѕгЃѕгЂЃж•°з§’еѕ…гЃ¤
         yield return new WaitForSeconds(waitAfterDrop);
 
         onBroomPreviewStarted?.Invoke(rightToLeft);
 
-        // 4. Ќ¶‰E‚Й—h‚к‚И‚Є‚зЃA‰Ў‚Цђi‚с‚Е‰ж–К‚МЉO‚ЦЏo‚й
+        // 4. е·¦еЏігЃ«жЏєг‚ЊгЃЄгЃЊг‚‰гЂЃжЁЄгЃёйЂІг‚“гЃ§з”»йќўгЃ®е¤–гЃёе‡єг‚‹
         float swayTime = Mathf.Abs(exitX - startX) / Mathf.Max(sweepMoveSpeed, 0.01f);
         yield return SwayPass(startX, exitX, upsideDownAngle, swayTime);
 
         onBroomEnded?.Invoke();
 
-        // 5. ‰ж–К‚МЉO‚Е‘Т‚В
+        // 5. з”»йќўгЃ®е¤–гЃ§еѕ…гЃ¤
         yield return new WaitForSeconds(waitBeforeReturn);
 
-        // 6. Џг‚©‚з–Я‚Б‚Д‚«‚ДЃAЊі‚МЋpђЁ‚Ц(returnHeight‚МЌ‚‚і‚©‚зЌ~‚и‚Д‚­‚й)
+        // 6. дёЉгЃ‹г‚‰ж€»гЃЈгЃ¦гЃЌгЃ¦гЂЃе…ѓгЃ®е§їе‹ўгЃё(returnHeightгЃ®й«гЃ•гЃ‹г‚‰й™Ќг‚ЉгЃ¦гЃЏг‚‹)
         currentRise = returnHeight;
         currentSink = 0f;
         SetLean(upsideDownAngle, 0f);
@@ -427,7 +483,7 @@ public class Boss_AI : MonoBehaviour
         yield return RisePass(0f, 0f, upsideDownAngle, 0f, 0f, 0f, returnTime);
     }
 
-    // Љp“xЃE€К’uЃE’ѕ‚Э—КЃEЏгЏё—К‚р“ЇЋћ‚Й•вЉФ‚µ‚Д“®‚©‚·(“®‰ж‚М“®‚«—p)
+    // и§’еє¦гѓ»дЅЌзЅ®гѓ»жІ€гЃїй‡Џгѓ»дёЉж‡й‡Џг‚’еђЊж™‚гЃ«иЈњй–“гЃ—гЃ¦е‹•гЃ‹гЃ™(е‹•з”»гЃ®е‹•гЃЌз”Ё)
     IEnumerator RisePass(float fromX, float toX, float fromAngle, float toAngle,
                          float toSink, float toRise, float duration)
     {
@@ -441,7 +497,7 @@ public class Boss_AI : MonoBehaviour
         {
             timer += Time.deltaTime;
             float t = Mathf.Clamp01(timer / duration);
-            float e = Mathf.SmoothStep(0f, 1f, t);   // Ћn‚Я‚ЖЏI‚н‚и‚р‚д‚Б‚­‚и‚Й‚·‚й
+            float e = Mathf.SmoothStep(0f, 1f, t);   // е§‹г‚ЃгЃЁзµ‚г‚Џг‚Љг‚’г‚†гЃЈгЃЏг‚ЉгЃ«гЃ™г‚‹
 
             currentSink = Mathf.Lerp(startSink, toSink, e);
             currentRise = Mathf.Lerp(startRise, toRise, e);
@@ -449,13 +505,13 @@ public class Boss_AI : MonoBehaviour
             yield return null;
         }
 
-        // ЌЕЊг‚М€К’u‚рЉmЋА‚ЙЌ‡‚н‚№‚й
+        // жњЂеѕЊгЃ®дЅЌзЅ®г‚’зўєе®џгЃ«еђ€г‚ЏгЃ›г‚‹
         currentSink = toSink;
         currentRise = toRise;
         SetLean(toAngle, toX);
     }
 
-    // ‹t‚і‚Ь‚МЋpђЁ‚р•Ы‚Б‚Ѕ‚Ь‚ЬЃAЌ¶‰E‚Й—h‚к‚И‚Є‚з‰Ў‚Цђi‚Ю
+    // йЂ†гЃ•гЃѕгЃ®е§їе‹ўг‚’дїќгЃЈгЃџгЃѕгЃѕгЂЃе·¦еЏігЃ«жЏєг‚ЊгЃЄгЃЊг‚‰жЁЄгЃёйЂІг‚Ђ
     IEnumerator SwayPass(float fromX, float toX, float baseAngle, float duration)
     {
         duration = Mathf.Max(duration, 0.0001f);
@@ -466,7 +522,7 @@ public class Boss_AI : MonoBehaviour
             timer += Time.deltaTime;
             float t = Mathf.Clamp01(timer / duration);
 
-            // Ќ¶‰E‚М—h‚к(sin”g)‚рЃA‹t‚і‚Ь‚МЉp“x‚Й‘«‚·
+            // е·¦еЏігЃ®жЏєг‚Њ(sinжіў)г‚’гЂЃйЂ†гЃ•гЃѕгЃ®и§’еє¦гЃ«и¶ігЃ™
             float sway = swayAngle * Mathf.Sin(timer * swayFrequency * Mathf.PI * 2f);
             SetLean(baseAngle + sway, Mathf.Lerp(fromX, toX, t));
             yield return null;
@@ -475,15 +531,15 @@ public class Boss_AI : MonoBehaviour
         SetLean(baseAngle, toX);
     }
 
-    // ===== •Д—±ЌUЊ‚ =====
+    // ===== з±ізІ’ж”»ж’ѓ =====
 
-    // •Д—±ЌUЊ‚(1‰с)
+    // з±ізІ’ж”»ж’ѓ(1е›ћ)
     public void StartRiceAttack()
     {
-        if (!IsAttacking) StartCoroutine(RiceAttackRoutine());
+        if (!IsAttacking && !stopped) StartCoroutine(RiceAttackRoutine());
     }
 
-    // “ЄЏг‚Й3‚ВЏo‚· ЃЁ Ќ¶ЃEђ^‚с’†ЃE‰E‚МЏ‡‚ЙЃA‘Е‚ВЏuЉФ‚ЙѓvѓЊѓCѓ„Ѓ[‚р‘_‚Б‚Д”­ЋЛ
+    // й ­дёЉгЃ«3гЃ¤е‡єгЃ™ в†’ е·¦гѓ»зњџг‚“дё­гѓ»еЏігЃ®й †гЃ«гЂЃж‰“гЃ¤зћ¬й–“гЃ«гѓ—гѓ¬г‚¤гѓ¤гѓјг‚’з‹™гЃЈгЃ¦з™єе°„
     IEnumerator RiceAttackRoutine()
     {
 
@@ -493,28 +549,30 @@ public class Boss_AI : MonoBehaviour
 
         if (ricePrefab == null)
         {
-            Debug.LogWarning("ricePrefab ‚ЄђЭ’и‚і‚к‚Д‚ў‚Ь‚№‚с");
+            Debug.LogWarning("ricePrefab гЃЊиЁ­е®љгЃ•г‚ЊгЃ¦гЃ„гЃѕгЃ›г‚“");
             IsAttacking = false;
             yield break;
         }
 
-        // 1. “ЄЏг‚Й3‚ВЏo‚·
+        // 1. й ­дёЉгЃ«3гЃ¤е‡єгЃ™
         PlayAttackSEs(seRice);
 
+        activeRice.RemoveAll(r => r == null);   // г‚‚гЃ†ж¶€гЃ€гЃџз±ізІ’гЃЇдёЂи¦§гЃ‹г‚‰е¤–гЃ™
         GameObject[] rice = new GameObject[riceSpawnOffsets.Length];
         for (int i = 0; i < rice.Length; i++)
         {
             rice[i] = Instantiate(ricePrefab, transform.position + riceSpawnOffsets[i], Quaternion.identity);
+            activeRice.Add(rice[i]);
         }
         yield return new WaitForSeconds(riceAppearTime);
 
-        // 2. 1”­–Ъ Љm”FЃЁ”­ЋЛ / 2”­–Ъ Љm”FЃЁ”­ЋЛ / 3”­–Ъ Љm”FЃЁ”­ЋЛ
+        // 2. 1з™єз›® зўєиЄЌв†’з™єе°„ / 2з™єз›® зўєиЄЌв†’з™єе°„ / 3з™єз›® зўєиЄЌв†’з™єе°„
         for (int i = 0; i < rice.Length; i++)
         {
-            // Љm”F
+            // зўєиЄЌ
             yield return new WaitForSeconds(aimTime);
 
-            // ‰с“]: rotateTime ‚р‚©‚Ї‚ДЃA•Д—±‚МЃu‰єЃv‚р“G‚М•ыЊь‚ЦЊь‚Ї‚й
+            // е›ћи»ў: rotateTime г‚’гЃ‹гЃ‘гЃ¦гЂЃз±ізІ’гЃ®гЂЊдё‹гЂЌг‚’ж•µгЃ®ж–№еђ‘гЃёеђ‘гЃ‘г‚‹
             Quaternion startRot = rice[i].transform.rotation;
             float rotTimer = 0f;
             while (rotTimer < rotateTime)
@@ -527,10 +585,10 @@ public class Boss_AI : MonoBehaviour
                 yield return null;
             }
 
-            // Ќd’ј(‰с“]‚µЏI‚¦‚Д‚©‚з”­ЋЛ‚Ь‚ЕЋ~‚Ь‚й)
+            // зЎ¬з›ґ(е›ћи»ўгЃ—зµ‚гЃ€гЃ¦гЃ‹г‚‰з™єе°„гЃѕгЃ§ж­ўгЃѕг‚‹)
             yield return new WaitForSeconds(fireStiffTime);
 
-            // ”­ЋЛ(‚±‚МЏuЉФ‚МѓvѓЊѓCѓ„Ѓ[‚М•ыЊь‚Ц‚Ь‚Б‚·‚®”т‚О‚·)
+            // з™єе°„(гЃ“гЃ®зћ¬й–“гЃ®гѓ—гѓ¬г‚¤гѓ¤гѓјгЃ®ж–№еђ‘гЃёгЃѕгЃЈгЃ™гЃђйЈ›гЃ°гЃ™)
             Vector3 fireDir = DirToPlayer(rice[i].transform.position);
             StartCoroutine(FlyRice(rice[i], fireDir));
 
@@ -539,12 +597,12 @@ public class Boss_AI : MonoBehaviour
             yield return new WaitForSeconds(shotInterval);
         }
 
-        // 3. Ќd’ј
+        // 3. зЎ¬з›ґ
         yield return new WaitForSeconds(recoverTime);
         IsAttacking = false;
     }
 
-    // •Д—±‚М€К’u‚©‚зѓvѓЊѓCѓ„Ѓ[‚Ц‚М•ыЊь(2D)ЃBѓvѓЊѓCѓ„Ѓ[‚Є‚ў‚И‚Ї‚к‚О‰єЊь‚«
+    // з±ізІ’гЃ®дЅЌзЅ®гЃ‹г‚‰гѓ—гѓ¬г‚¤гѓ¤гѓјгЃёгЃ®ж–№еђ‘(2D)гЂ‚гѓ—гѓ¬г‚¤гѓ¤гѓјгЃЊгЃ„гЃЄгЃ‘г‚ЊгЃ°дё‹еђ‘гЃЌ
     Vector3 DirToPlayer(Vector3 from)
     {
         if (player == null) return Vector3.down;
@@ -553,14 +611,14 @@ public class Boss_AI : MonoBehaviour
         return dir.sqrMagnitude > 0.0001f ? dir.normalized : Vector3.down;
     }
 
-    // •Д—±‚МЃu‰єЃv‚Є dir ‚рЊь‚­‚Ѕ‚Я‚М‰с“]Љp(“x)
+    // з±ізІ’гЃ®гЂЊдё‹гЂЌгЃЊ dir г‚’еђ‘гЃЏгЃџг‚ЃгЃ®е›ћи»ўи§’(еє¦)
     float AngleForDir(Vector3 dir) => Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg + 90f;
 
-    // •Д—±‚рЋw’и•ыЊь‚Ц”т‚О‚·ЃBѓvѓЊѓCѓ„Ѓ[‚Й“–‚Ѕ‚Б‚Ѕ‚зѓ_ѓЃЃ[ѓW‚р—^‚¦‚ДЏБ‚¦‚й
+    // з±ізІ’г‚’жЊ‡е®љж–№еђ‘гЃёйЈ›гЃ°гЃ™гЂ‚гѓ—гѓ¬г‚¤гѓ¤гѓјгЃ«еЅ“гЃџгЃЈгЃџг‚‰гѓЂгѓЎгѓјг‚ёг‚’дёЋгЃ€гЃ¦ж¶€гЃ€г‚‹
     IEnumerator FlyRice(GameObject rice, Vector3 dir)
     {
-        // •Д—±‚МЃu‰єЃv(-Y)‚ЄѓvѓЊѓCѓ„Ѓ[‚М•ыЊь‚рЊь‚­‚ж‚¤‚Й‰с“]‚і‚№‚й
-        // (-Y ‚р dir ‚ЦЊь‚Ї‚й‚Й‚НЃAdir ‚МЉp“x‚Й +90 “x‚·‚к‚О‚ж‚ў)
+        // з±ізІ’гЃ®гЂЊдё‹гЂЌ(-Y)гЃЊгѓ—гѓ¬г‚¤гѓ¤гѓјгЃ®ж–№еђ‘г‚’еђ‘гЃЏг‚€гЃ†гЃ«е›ћи»ўгЃ•гЃ›г‚‹
+        // (-Y г‚’ dir гЃёеђ‘гЃ‘г‚‹гЃ«гЃЇгЂЃdir гЃ®и§’еє¦гЃ« +90 еє¦гЃ™г‚ЊгЃ°г‚€гЃ„)
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg + 90f;
         rice.transform.rotation = Quaternion.Euler(0f, 0f, angle);
 
@@ -570,10 +628,10 @@ public class Boss_AI : MonoBehaviour
             timer += Time.deltaTime;
             rice.transform.position += dir * riceSpeed * Time.deltaTime;
 
-            // “–‚Ѕ‚и”»’и(ѓvѓЊѓCѓ„Ѓ[‚Ж‚М‹——Ј‚Е”»’и)
+            // еЅ“гЃџг‚Ље€¤е®љ(гѓ—гѓ¬г‚¤гѓ¤гѓјгЃЁгЃ®и·ќй›ўгЃ§е€¤е®љ)
             if (player != null && Vector3.Distance(rice.transform.position, player.position) <= riceHitRadius)
             {
-                // ѓvѓЊѓCѓ„Ѓ[‚Мѓ_ѓЃЃ[ѓWЏ€—ќ‚рЊД‚Ф(–і“G’†ЃEHP0‚МЋћ‚Н PlayerController ‘¤‚Е–іЊш)
+                // гѓ—гѓ¬г‚¤гѓ¤гѓјгЃ®гѓЂгѓЎгѓјг‚ёе‡¦зђ†г‚’е‘јгЃ¶(з„Ўж•µдё­гѓ»HP0гЃ®ж™‚гЃЇ PlayerController еЃґгЃ§з„ЎеЉ№)
                 PlayerController pc = player.GetComponent<PlayerController>();
                 if (pc != null) pc.TakeDamage(riceDamage);
                 Destroy(rice);
@@ -586,7 +644,7 @@ public class Boss_AI : MonoBehaviour
         if (rice != null) Destroy(rice);
     }
 
-    // ===== ‹¤’К‚М“®‚« =====
+    // ===== е…±йЂљгЃ®е‹•гЃЌ =====
 
     IEnumerator MoveToCenter()
     {
@@ -603,10 +661,12 @@ public class Boss_AI : MonoBehaviour
         }
     }
 
-    // –c‚з‚с‚ѕ‘е‚«‚і‚©‚зЊі‚М‘е‚«‚і‚Ь‚ЕЉЉ‚з‚©‚ЙЏk‚Я‚й(ЋћЉФ‚Н growTime ‚Ж“Ї‚¶)
-    IEnumerator Shrink()
+    // и†Ёг‚‰г‚“гЃ е¤§гЃЌгЃ•гЃ‹г‚‰е…ѓгЃ®е¤§гЃЌгЃ•гЃѕгЃ§ж»‘г‚‰гЃ‹гЃ«зё®г‚Ѓг‚‹(ж™‚й–“гЃЇ growTime гЃЁеђЊгЃ)
+    // зё®г‚ЃгЃЄгЃЊг‚‰гЂЃrestPosition(и†Ёг‚‰г‚Ђе‰ЌгЃ®дЅЌзЅ®)гЃёдё‹г‚Љг‚‹
+    IEnumerator Shrink(Vector3 restPosition)
     {
         Vector3 startScale = transform.localScale;
+        Vector3 startPosition = transform.localPosition;
         float timer = 0f;
 
         while (timer < growTime)
@@ -614,27 +674,35 @@ public class Boss_AI : MonoBehaviour
             timer += Time.deltaTime;
             float t = Mathf.Clamp01(timer / growTime);
             transform.localScale = Vector3.Lerp(startScale, originalScale, t);
+            transform.localPosition = Vector3.Lerp(startPosition, restPosition, t);
             yield return null;
         }
 
         transform.localScale = originalScale;
+        transform.localPosition = restPosition;
     }
 
+    // и†Ёг‚‰гЃїгЃЄгЃЊг‚‰ growRise гЃ гЃ‘дёЉгЃЊг‚‹
     IEnumerator Grow()
     {
         float timer = 0f;
         Vector3 targetScale = originalScale * growScale;
+        Vector3 startPosition = transform.localPosition;
+        Vector3 targetPosition = startPosition + Vector3.up * growRise;
 
         while (timer < growTime)
         {
             timer += Time.deltaTime;
             float t = Mathf.Clamp01(timer / growTime);
             transform.localScale = Vector3.Lerp(originalScale, targetScale, t);
+            transform.localPosition = Vector3.Lerp(startPosition, targetPosition, t);
             yield return null;
         }
+        transform.localScale = targetScale;
+        transform.localPosition = targetPosition;
     }
 
-    // 0“x ЃЁ targetAngle ‚ЦЊX‚Ї‚й(ЌUЊ‚‚·‚йЋћ)
+    // 0еє¦ в†’ targetAngle гЃёе‚ѕгЃ‘г‚‹(ж”»ж’ѓгЃ™г‚‹ж™‚)
     IEnumerator Charge(float targetAngle)
     {
         currentSink = 0f;
@@ -650,7 +718,7 @@ public class Boss_AI : MonoBehaviour
         }
     }
 
-    // ЉоЏЂ‚Ж‚И‚й‘М‚МЏу‘Ф‚р•Ы‘¶
+    // еџєжє–гЃЁгЃЄг‚‹дЅ“гЃ®зЉ¶ж…‹г‚’дїќе­
     void CaptureBase()
     {
         leanBasePos = transform.localPosition;
@@ -658,7 +726,7 @@ public class Boss_AI : MonoBehaviour
         leanBaseScale = transform.localScale;
     }
 
-    // ‘М‚М‘е‚«‚іЃE€К’uЃEЊь‚«‚рЊі‚Й–Я‚·
+    // дЅ“гЃ®е¤§гЃЌгЃ•гѓ»дЅЌзЅ®гѓ»еђ‘гЃЌг‚’е…ѓгЃ«ж€»гЃ™
     void ResetPose()
     {
         transform.localScale = originalScale;
@@ -669,18 +737,18 @@ public class Boss_AI : MonoBehaviour
         currentRise = 0f;
     }
 
-    // pivotOffset ‚р’†ђS‚Й‘М‚р‰с“]‚і‚№ЃA‰Ў‚Й‚ё‚з‚µЃA’ѕ‚ЭЃEЏгЏё‚р”Ѕ‰f‚·‚й
+    // pivotOffset г‚’дё­еїѓгЃ«дЅ“г‚’е›ћи»ўгЃ•гЃ›гЂЃжЁЄгЃ«гЃљг‚‰гЃ—гЂЃжІ€гЃїгѓ»дёЉж‡г‚’еЏЌж гЃ™г‚‹
     void SetLean(float angle, float offsetX = 0f)
     {
         currentLean = angle;
 
-        Quaternion delta = Quaternion.Euler(0f, 0f, angle); // ‰с“]ЋІ‚НZ(2D‚М‘z’и)
+        Quaternion delta = Quaternion.Euler(0f, 0f, angle); // е›ћи»ўи»ёгЃЇZ(2DгЃ®жѓіе®љ)
         Vector3 pivotLocal = Vector3.Scale(pivotOffset, leanBaseScale);
 
-        // ‰с“]’†ђS‚М€К’u(ђe‹уЉФ)
+        // е›ћи»ўдё­еїѓгЃ®дЅЌзЅ®(и¦Єз©єй–“)
         Vector3 pivotParent = leanBasePos + leanBaseRot * pivotLocal;
 
-        // ‰с“]’†ђS‚МЋь‚и‚Й€К’u‚рЊ€‚Я‚й
+        // е›ћи»ўдё­еїѓгЃ®е‘Ёг‚ЉгЃ«дЅЌзЅ®г‚’ж±єг‚Ѓг‚‹
         Vector3 pos = pivotParent + delta * (leanBasePos - pivotParent);
         pos.x += offsetX;
         pos.y += currentRise - currentSink;
@@ -693,7 +761,7 @@ public class Boss_AI : MonoBehaviour
     {
         if (!showPivotGizmo) return;
 
-        // ЌДђ¶’†‚НЉоЏЂ’lЃA’вЋ~’†‚НЊ»ЌЭ‚МЏу‘Ф‚©‚зЊvЋZ‚µ‚Ѕ€К’u‚р•\Ћ¦
+        // е†Ќз”џдё­гЃЇеџєжє–еЂ¤гЂЃеЃњж­ўдё­гЃЇзЏѕењЁгЃ®зЉ¶ж…‹гЃ‹г‚‰иЁ€з®—гЃ—гЃџдЅЌзЅ®г‚’иЎЁз¤є
         Vector3 basePos = Application.isPlaying ? leanBasePos : transform.localPosition;
         Quaternion baseRot = Application.isPlaying ? leanBaseRot : transform.localRotation;
         Vector3 baseScale = Application.isPlaying ? leanBaseScale : transform.localScale;

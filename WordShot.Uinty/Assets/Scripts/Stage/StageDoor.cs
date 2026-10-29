@@ -14,6 +14,7 @@ namespace WordShot.Stages
     /// プレイヤーは「タグが Player」で見分ける。プレイヤーには Rigidbody2D と当たり判定が必要。
     /// 見た目を変えるとき：body の SpriteRenderer の画像を差し替える（テクスチャを貼る）。
     /// ロック中は、その画像の色を暗くする。ロック中だけ別の画像にしたいときは lockedSprite に入れる。
+    /// ステージデータで「近日公開」を ON にしたステージは入れない（条件を満たすと「近日公開！」と出る）。
     /// </remarks>
     [RequireComponent(typeof(Collider2D))]
     public class StageDoor : MonoBehaviour
@@ -156,6 +157,8 @@ namespace WordShot.Stages
             if (stage == null) return "(no stage)";
 
             string name = stage.Boss?.DisplayName ?? Localization.TranslateOrSame(stage.DisplayName);
+            // まだ作っていないステージは、解放の条件を満たしたら「近日公開！」と出す（解放はしない）
+            if (stage.ComingSoon && StageProgress.MeetsRequirements(stage)) return $"{name}\n{Localization.TranslateOrSame("近日公開！")}";
             if (!unlocked) return $"{name}\n{Localization.TranslateOrSame("ロック中")}";
             // クリアした一番むずかしい難易度を出す（例：しゃもじ猫 / クリア：ふつう）
             Difficulty? best = StageProgress.BestCleared(stage);
