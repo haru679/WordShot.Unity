@@ -7,6 +7,7 @@ namespace WordShot.Stages
     /// <summary>
     /// ステージセレクトの開発用キー。エディタと開発用ビルドでだけ動く。
     /// F5：クリア状況をリセット（最初の状態に戻す）　F6：置いてある扉のステージと難易度を全部解放する
+    /// （セーブデータごと消すときは F11。どの画面でも使える：SaveDebugKeys）
     /// </summary>
     public class StageSelectDebugKeys : MonoBehaviour
     {
