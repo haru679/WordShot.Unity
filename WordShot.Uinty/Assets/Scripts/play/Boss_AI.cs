@@ -1,5 +1,9 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using WordShot.Flow;
+using WordShot.Sounds;
 
 public class Boss_AI : MonoBehaviour
 {
@@ -120,6 +124,30 @@ public class Boss_AI : MonoBehaviour
     [Tooltip("1つの攻撃が終わってから次の攻撃を出すまでの間隔(秒)")]
     [SerializeField] float attackInterval = 2f;
 
+    [Header("攻撃SE(各攻撃ごとに複数追加できます)")]
+    [Tooltip("叩き付け(左)の攻撃で鳴らすSE")]
+    public List<AttackSE> seSlamLeft = new List<AttackSE>();
+    [Tooltip("叩き付け(右)の攻撃で鳴らすSE")]
+    public List<AttackSE> seSlamRight = new List<AttackSE>();
+    [Tooltip("掃き攻撃(左から右)で鳴らすSE")]
+    public List<AttackSE> seSweepLeftToRight = new List<AttackSE>();
+    [Tooltip("掃き攻撃(右から左)で鳴らすSE")]
+    public List<AttackSE> seSweepRightToLeft = new List<AttackSE>();
+    [Tooltip("米粒攻撃で鳴らすSE")]
+    public List<AttackSE> seRice = new List<AttackSE>();
+
+    [System.Serializable]
+    public class AttackSE
+    {
+        [Tooltip("鳴らすSoundCue(音量・ピッチ・ループなどはSoundCueで設定します)")] public SoundCue cue;
+        [Tooltip("攻撃動作の開始からの再生開始時刻(秒)")] public float startTime = 0f;
+        [Tooltip("停止する時刻(秒)。開始より後に設定しない場合は、攻撃が終わったときに止めます")] public float endTime = 0f;
+    }
+
+    [Header("デバッグ用キー")]
+    [Tooltip("ONにすると 1～5 キーで攻撃を発動します(1:叩き付け左 2:叩き付け右 3:掃き左から右 4:掃き右から左 5:米粒)")]
+    [SerializeField] bool debugAttackKeys = true;
+
     Vector3 originalScale;
     Quaternion originalRotation;
 
@@ -138,10 +166,51 @@ public class Boss_AI : MonoBehaviour
 
     public bool IsAttacking { get; private set; }
 
+    // ===== 攻撃SE(SoundCueで鳴らす) =====
+    void PlayAttackSEs(List<AttackSE> list)
+    {
+        if (list == null) return;
+        foreach (AttackSE se in list)
+        {
+            if (se != null && se.cue != null) StartCoroutine(PlayAttackSE(se));
+        }
+    }
+
+    IEnumerator PlayAttackSE(AttackSE se)
+    {
+        if (se.startTime > 0f) yield return new WaitForSeconds(se.startTime);
+        Sound.Play(se.cue);
+
+        if (se.endTime > se.startTime)
+        {
+            // 終了時刻で止める
+            yield return new WaitForSeconds(se.endTime - se.startTime);
+            Sound.Stop(se.cue);
+        }
+        else
+        {
+            // 終了時刻がなければ、攻撃が終わるまで鳴らして、終わったら止める
+            yield return new WaitUntil(() => !IsAttacking);
+            Sound.Stop(se.cue);
+        }
+    }
+
     void Awake()
     {
         originalScale = transform.localScale;
         originalRotation = transform.localRotation;
+    }
+
+    void Update()
+    {
+        if (!debugAttackKeys || Keyboard.current == null) return;
+        if (GameFlow.Instance != null && !GameFlow.Instance.IsPlaying) return;
+
+        if (Keyboard.current.digit1Key.wasPressedThisFrame) StartSlam();
+        if (Keyboard.current.digit2Key.wasPressedThisFrame) StartSlamRightFirst();
+        if (Keyboard.current.digit3Key.wasPressedThisFrame) StartRiseSweep();
+        if (Keyboard.current.digit4Key.wasPressedThisFrame) StartRiseSweepRightToLeft();
+        if (Keyboard.current.digit5Key.wasPressedThisFrame) StartRiceAttack();
     }
 
     void Start()
@@ -237,6 +306,12 @@ public class Boss_AI : MonoBehaviour
 
         // 1. 中央へ移動
         yield return MoveToCenter();
+
+        // 攻撃の種類に合わせたSEを、攻撃動作の開始時刻から鳴らす
+        if (video)
+            PlayAttackSEs(rightToLeft ? seSweepRightToLeft : seSweepLeftToRight);
+        else
+            PlayAttackSEs(side < 0f ? seSlamLeft : seSlamRight);
 
         if (video)
         {
@@ -424,6 +499,8 @@ public class Boss_AI : MonoBehaviour
         }
 
         // 1. 頭上に3つ出す
+        PlayAttackSEs(seRice);
+
         GameObject[] rice = new GameObject[riceSpawnOffsets.Length];
         for (int i = 0; i < rice.Length; i++)
         {

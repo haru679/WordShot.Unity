@@ -76,6 +76,9 @@ namespace WordShot.Stages
             Save();
         }
 
+        /// <summary>セーブデータを消したあとなどに呼ぶ。扉などの見た目を、今のセーブデータに合わせ直す</summary>
+        public static void Refresh() => Changed?.Invoke();
+
         static void Save()
         {
             SaveSystem.RequestSave();

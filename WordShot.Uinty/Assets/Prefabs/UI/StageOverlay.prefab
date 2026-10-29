@@ -233,6 +233,7 @@ MonoBehaviour:
   gameOverRoot: {fileID: 179741825761061010}
   retryHint: {fileID: 7163908871415929002}
   clearRoot: {fileID: 367244840105301128}
+  gameOverImage: {fileID: 7611342515684761092, guid: 3f4ac3eadc1e9014a870f3db25b03e3d, type: 3}
   gameOverSound: {fileID: 0}
   clearSound: {fileID: 0}
 --- !u!1 &4824615592869298028

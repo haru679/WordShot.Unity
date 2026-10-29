@@ -33,7 +33,7 @@ namespace WordShot.Saves.EditorTools
             Debug.Log("[Save] セーブデータを消しました");
         }
 
-        // 遊んでいる途中に消すと、画面の表示とずれるので、再生していないときだけ
+        // 遊んでいる途中に消すと、画面の表示とずれるので、再生していないときだけ（再生中は F11 で消せる）
         [MenuItem("WordShot/セーブデータ/消す（最初から遊ぶ）", true)]
         static bool CanDelete() => !EditorApplication.isPlaying;
     }

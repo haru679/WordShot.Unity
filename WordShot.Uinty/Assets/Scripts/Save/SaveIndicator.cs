@@ -11,12 +11,14 @@ namespace WordShot.Saves
     /// <remarks>
     /// セーブがすぐ終わっても、セーブしたことが伝わるように、最低 MinShowTime 秒は出しておく。
     /// セーブに失敗したときは「セーブに失敗しました」を出す。
+    /// 開発用のキー（F11）でセーブデータを消したときは「セーブデータを消しました」を出す。
     /// 時間が止まっている（ポーズ・ゲームオーバー）ときも動くよう、unscaledTime で動かす。
     /// </remarks>
     public class SaveIndicator : MonoBehaviour
     {
         const float MinShowTime = 1f;       // 出し切ってから、最低これだけは出しておく（秒）
         const float FailedShowTime = 3f;    // 失敗したときに出しておく時間（秒）
+        const float DeletedShowTime = 2f;   // 開発用：セーブデータを消したときに出しておく時間（秒）
         const float FadeTime = 0.15f;
         const float DotInterval = 0.3f;
         const float SpinSpeed = 270f;       // 回るマークの速さ（度/秒）
@@ -34,7 +36,8 @@ namespace WordShot.Saves
         RectTransform spinner;
 
         bool showing;
-        bool failed;
+        bool showingMessage;    // 「セーブ中...」ではなく、失敗などの知らせを出しているか
+        float messageTime;      // 知らせを出しておく時間（秒）
         float shownAt;          // 出し始めた時刻
         float fullyShownAt;     // 出し切った（濃さが最大になった）時刻。ここから MinShowTime 秒は出しておく
         string baseText;
@@ -57,17 +60,19 @@ namespace WordShot.Saves
         {
             SaveSystem.SaveStarted += OnSaveStarted;
             SaveSystem.SaveFinished += OnSaveFinished;
+            SaveSystem.Deleted += OnDeleted;
         }
 
         void OnDisable()
         {
             SaveSystem.SaveStarted -= OnSaveStarted;
             SaveSystem.SaveFinished -= OnSaveFinished;
+            SaveSystem.Deleted -= OnDeleted;
         }
 
         void OnSaveStarted()
         {
-            failed = false;
+            showingMessage = false;
             baseText = Localization.TranslateOrSame("セーブ中");
             label.color = NormalColor;
             spinner.gameObject.SetActive(true);
@@ -83,14 +88,23 @@ namespace WordShot.Saves
 
         void OnSaveFinished(bool succeeded)
         {
-            if (succeeded) return;
+            if (!succeeded) ShowMessage(Localization.TranslateOrSame("セーブに失敗しました"), FailedColor, FailedShowTime);
+        }
 
-            failed = true;
+        // 開発用のキーでセーブデータを消したとき（開発中だけなので翻訳しない）
+        void OnDeleted() => ShowMessage("セーブデータを消しました", NormalColor, DeletedShowTime);
+
+        // 回るマークなしで、文字だけをしばらく出す
+        void ShowMessage(string text, Color color, float seconds)
+        {
+            showing = true;
+            showingMessage = true;
             shownAt = Time.unscaledTime;
-            label.text = Localization.TranslateOrSame("セーブに失敗しました");
-            label.color = FailedColor;
+            messageTime = seconds;
+            label.text = text;
+            label.color = color;
             spinner.gameObject.SetActive(false);
-            FitPanel(label.text, Padding);
+            FitPanel(text, Padding);
         }
 
         // 帯の幅を文字に合わせる（言語によって文字の長さが違うので）
@@ -105,8 +119,8 @@ namespace WordShot.Saves
         {
             if (showing && group.alpha >= 1f)
             {
-                bool done = failed ? Time.unscaledTime - shownAt >= FailedShowTime
-                                   : !SaveSystem.IsSaving && Time.unscaledTime - fullyShownAt >= MinShowTime;
+                bool done = showingMessage ? Time.unscaledTime - shownAt >= messageTime
+                                           : !SaveSystem.IsSaving && Time.unscaledTime - fullyShownAt >= MinShowTime;
                 if (done) showing = false;
             }
 
@@ -115,7 +129,7 @@ namespace WordShot.Saves
             if (before < 1f && group.alpha >= 1f) fullyShownAt = Time.unscaledTime;
             if (group.alpha <= 0f) return;
 
-            if (!failed)
+            if (!showingMessage)
             {
                 // 「セーブ中.」「..」「...」と点を増やし、マークを回して、止まっていないことを見せる
                 int dots = 1 + (int)(Time.unscaledTime / DotInterval) % 3;
