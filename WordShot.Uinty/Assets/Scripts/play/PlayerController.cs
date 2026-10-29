@@ -71,6 +71,9 @@ public class PlayerController : MonoBehaviour
     private Renderer[] renderers;
     private Coroutine blinkRoutine;
 
+    // 向きを変える画像（子オブジェクトの SpriteRenderer をすべて対象にする）。画像は右向きを想定
+    private SpriteRenderer[] spriteRenderers;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -83,6 +86,9 @@ public class PlayerController : MonoBehaviour
 
         // 点滅対象（子オブジェクトを含むすべての Renderer）
         renderers = GetComponentsInChildren<Renderer>();
+
+        // 向き反転の対象（子オブジェクトを含むすべての SpriteRenderer）
+        spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
     }
 
     // インスペクターで値を変更したときに呼ばれる
@@ -118,6 +124,8 @@ public class PlayerController : MonoBehaviour
         if (Keyboard.current.leftArrowKey.isPressed) moveInput -= 1f;
         if (Keyboard.current.rightArrowKey.isPressed) moveInput += 1f;
 
+        // 向きを変える：初期は右向きの画像なので、左に進むときだけ反転する（止まったら最後の向きのまま）
+        if (moveInput != 0f) SetFacingLeft(moveInput < 0f);
 
         // ジャンプ入力の取得
         if (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.upArrowKey.wasPressedThisFrame)
@@ -186,6 +194,17 @@ public class PlayerController : MonoBehaviour
         }
 
         rb.linearVelocity = new Vector2(moveInput * speed, vy);
+    }
+
+    // 画像を左右に反転する（右向きの画像を基準にする）
+    void SetFacingLeft(bool left)
+    {
+        if (spriteRenderers == null) return;
+
+        foreach (var sr in spriteRenderers)
+        {
+            if (sr != null) sr.flipX = left;
+        }
     }
 
     // ジャンプ開始処理
