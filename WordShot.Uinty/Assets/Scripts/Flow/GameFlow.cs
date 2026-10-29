@@ -21,7 +21,7 @@ namespace WordShot.Flow
         Playing,
         /// <summary>ポーズ中。時間が止まっている</summary>
         Paused,
-        /// <summary>やられた。時間が止まり、Shift キーでやり直す</summary>
+        /// <summary>やられた。時間が止まり、Shift キーでやり直す、Ctrl キーでステージセレクトへ戻る</summary>
         GameOver,
         /// <summary>ボスを倒した。少し待ってからステージセレクトへ戻る</summary>
         Cleared,
@@ -272,11 +272,19 @@ namespace WordShot.Flow
             var keyboard = Keyboard.current;
             if (keyboard == null || IsTransitioning) return;
 
-            // ゲームオーバー中は Shift キーでやり直す
-            if (State == PlayState.GameOver && keyboard.shiftKey.wasPressedThisFrame)
+            // ゲームオーバー中は Shift キーでやり直し、Ctrl キーでステージセレクトへ戻る
+            if (State == PlayState.GameOver)
             {
-                RetryStage();
-                return;
+                if (keyboard.shiftKey.wasPressedThisFrame)
+                {
+                    RetryStage();
+                    return;
+                }
+                if (keyboard.ctrlKey.wasPressedThisFrame)
+                {
+                    GoToStageSelect();
+                    return;
+                }
             }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD

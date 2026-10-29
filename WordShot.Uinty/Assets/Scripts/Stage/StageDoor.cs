@@ -26,6 +26,8 @@ namespace WordShot.Stages
         [SerializeField, Range(0f, 1f)] float lockedBrightness = 0.55f;
         [Tooltip("ロック中だけ別の画像にしたいときに入れる（空なら同じ画像を暗くする）")]
         [SerializeField] Sprite lockedSprite;
+        [Tooltip("クリアした後に出す画像（クリア前は、シーンに置いた元の画像のまま）。空なら変わらない")]
+        [SerializeField] Sprite clearedSprite;
         [Tooltip("ステージ名と LOCKED / CLEAR を出す文字")]
         [SerializeField] TMP_Text label;
         [Tooltip("プレイヤーが触れているときに出す案内（Enter）")]
@@ -131,13 +133,21 @@ namespace WordShot.Stages
         {
             bool unlocked = IsUnlocked;
 
-            body.sprite = !unlocked && lockedSprite != null ? lockedSprite : baseSprite;
+            body.sprite = ChooseSprite(unlocked);
             body.color = unlocked
                 ? baseColor
                 : new Color(baseColor.r * lockedBrightness, baseColor.g * lockedBrightness, baseColor.b * lockedBrightness, baseColor.a);
 
             if (label != null) label.text = LabelText(unlocked);
             UpdatePrompt();
+        }
+
+        // 画像の選び方：ロック中 → ロック中の画像、クリア後 → クリア後の画像、それ以外（クリア前）→ 元の画像
+        Sprite ChooseSprite(bool unlocked)
+        {
+            if (!unlocked) return lockedSprite != null ? lockedSprite : baseSprite;
+            if (clearedSprite != null && StageProgress.IsCleared(stage)) return clearedSprite;
+            return baseSprite;
         }
 
         // ボスが決まっているステージは、ボスの名前を出す（今の言語で）
