@@ -65,6 +65,15 @@ public class Boss_AI : MonoBehaviour
     [Tooltip("最後に上から戻ってくる時の開始高さ(ユニット)。liftHeightの1.5倍が目安")]
     [SerializeField] float returnHeight = 9f;
 
+    [Header("しゃも箒の予兆設定")]
+    [Tooltip("しゃも箒が動き始める何秒前にセリフや予兆を出すか")]
+    [SerializeField] private float broomPreviewLeadTime = 1.0f;
+
+    // しゃも箒のプレビュー開始を通知するイベント
+    public System.Action<bool> onBroomPreviewStarted;
+
+    public System.Action onBroomEnded;
+
     [Header("攻撃後の硬直")]
     [Tooltip("攻撃後の硬直時間(秒)")]
     [SerializeField] float recoverTime = 1.0f;
@@ -123,6 +132,10 @@ public class Boss_AI : MonoBehaviour
     float currentSink;  // 現在の沈み量
     float currentRise;  // 現在の上昇量
 
+    public System.Action<int> onAttackIndexStarted;
+
+    public System.Action onRiceShotFired;
+
     public bool IsAttacking { get; private set; }
 
     void Awake()
@@ -150,14 +163,41 @@ public class Boss_AI : MonoBehaviour
     // 5種類の攻撃からランダムに1つ実行する
     void PlayRandomAttack()
     {
-        switch (Random.Range(0, 5))
+        int attackType = 99;
+        // int attackType = Random.Range(0, 5);
+
+        int jsonIndex = 0;
+
+        switch (attackType)
         {
-            case 0: StartSlam(); break;                  // ため攻撃(左)
-            case 1: StartSlamRightFirst(); break;        // ため攻撃(右)
-            case 2: StartRiseSweep(); break;             // 掃き攻撃(左から右)
-            case 3: StartRiseSweepRightToLeft(); break;  // 掃き攻撃(右から左)
-            default: StartRiceAttack(); break;           // 米粒攻撃
+            case 0:         // ため攻撃(左)
+                StartSlam();
+                jsonIndex = 0;
+                break;
+
+            case 1:         // ため攻撃(右)
+                StartSlamRightFirst();
+                jsonIndex = 0;
+                break;
+
+            case 2:         // 掃き攻撃(左から右)
+                StartRiseSweep();
+                jsonIndex = 1;
+                break;
+
+            case 3:         // 掃き攻撃(右から左)
+                StartRiseSweepRightToLeft();
+                jsonIndex = 1;
+                break;
+
+            default:        // 米粒攻撃
+                StartRiceAttack();
+                jsonIndex = 2;
+                break;
         }
+
+        // 外部へJSOnを通知
+        onAttackIndexStarted?.Invoke(jsonIndex);
     }
 
     // ===== 外部(AI側)から呼び出す =====
@@ -200,6 +240,8 @@ public class Boss_AI : MonoBehaviour
 
         if (video)
         {
+            yield return new WaitForSeconds(broomPreviewLeadTime);
+
             // 2. 基準を保存(動画の攻撃は膨張・溜め・停止なし)
             CaptureBase();
 
@@ -291,9 +333,13 @@ public class Boss_AI : MonoBehaviour
         // 3-2. 下に降りたまま、数秒待つ
         yield return new WaitForSeconds(waitAfterDrop);
 
+        onBroomPreviewStarted?.Invoke(rightToLeft);
+
         // 4. 左右に揺れながら、横へ進んで画面の外へ出る
         float swayTime = Mathf.Abs(exitX - startX) / Mathf.Max(sweepMoveSpeed, 0.01f);
         yield return SwayPass(startX, exitX, upsideDownAngle, swayTime);
+
+        onBroomEnded?.Invoke();
 
         // 5. 画面の外で待つ
         yield return new WaitForSeconds(waitBeforeReturn);
@@ -365,13 +411,17 @@ public class Boss_AI : MonoBehaviour
     // 頭上に3つ出す → 左・真ん中・右の順に、打つ瞬間にプレイヤーを狙って発射
     IEnumerator RiceAttackRoutine()
     {
+
+        IsAttacking = true;
+
+        yield return MoveToCenter();
+
         if (ricePrefab == null)
         {
             Debug.LogWarning("ricePrefab が設定されていません");
+            IsAttacking = false;
             yield break;
         }
-
-        IsAttacking = true;
 
         // 1. 頭上に3つ出す
         GameObject[] rice = new GameObject[riceSpawnOffsets.Length];
@@ -406,6 +456,8 @@ public class Boss_AI : MonoBehaviour
             // 発射(この瞬間のプレイヤーの方向へまっすぐ飛ばす)
             Vector3 fireDir = DirToPlayer(rice[i].transform.position);
             StartCoroutine(FlyRice(rice[i], fireDir));
+
+            onRiceShotFired?.Invoke();
 
             yield return new WaitForSeconds(shotInterval);
         }
